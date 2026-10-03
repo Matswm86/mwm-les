@@ -728,8 +728,8 @@ MVP decodable word list (o = /u/ only, no names, no doubles): `is, sa, si, la, l
 | Story / Hysj lines | ~20 | |
 | **Total** | **~255** | about 2-3 hours of studio time with retakes (my estimate) |
 
-**Voice (Q2 partly resolved):**
-- **Placeholder voice: Microsoft Finn (nb-NO) via edge-tts**, generated as audio files **at build time** by a script in the repo. The app itself never calls a TTS service and keeps no INTERNET permission; only the build step needs a network.
+**Voice (Q2 resolved 2026-10-03: the owner picked Microsoft Finn, male, nb-NO):**
+- **Voice: Microsoft Finn (nb-NO) via edge-tts, chosen by the owner**, generated as audio files **at build time** by a script in the repo. The app itself never calls a TTS service and keeps no INTERNET permission; only the build step needs a network.
 - **Isolated sounds are cut from carrier words/sentences**, because TTS adds vowels to bare phonemes and clips stops. For each phoneme generate 2-3 carriers with the sound next to a vowel or at a word edge (for /s/: `is`, `sol`; for /m/: `lam`, `mus`), cut at zero crossings with 10 ms fades. Continuants: the sustained 2.0 s clip loops a steady 150-250 ms middle section. Stops: keep the burst, no following vowel ("t", not "tə").
 - **Final voice:** the owner picks it from a listening page that plays the same lines (instructions, praise, words, blends, isolated sounds) in each candidate voice. Until then every file is listed in `content/nb_reading/audio_manifest.json` with `voice` and `status: "placeholder" | "final"`; game-qa blocks a store release while any entry is `placeholder`.
 - Output spec **[design]**: 48 kHz mono, -18 LUFS integrated, peaks ≤ -1 dBFS, Ogg Vorbis q5. One voice for Pip, a different one for Hysj. If the final voice is a human recording: a quiet room and the same mic distance throughout.
@@ -753,8 +753,8 @@ MVP decodable word list (o = /u/ only, no names, no doubles): `is, sa, si, la, l
 9. **Profiles:** one child per device in v1, or do siblings need 2-3 profiles from the start?
 10. **Language: resolved.** Bokmål only.
 11. **Store:** is this a sideload/family app first, or aimed at Google Play (Families program, Teacher Approved) from the start?
-12. **Grown-up step wording:** is "Voksen: Hørt!" (hold 1.5 s) the right adult button, and should the parent script be shown before the very first session or only in the parent area?
-13. **Teacher acceptance:** RESEARCH.md notes teachers will accept a screen app only if it is short, play-based and points children to offline reading. Do you want a Norwegian teacher to read 10.1-10.4 before the builder starts on the parent area?
+12. **Grown-up step wording (resolved):** keep "Voksen: Hørt!" with a 1.5 s hold; the parent script shows once before the first session and stays in the parent area.
+13. **Teacher acceptance (resolved):** the owner reviews the pedagogy and parent sections himself.
 
 ---
 
