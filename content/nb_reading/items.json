@@ -1,0 +1,519 @@
+{
+ "pack": "nb_reading",
+ "items": [
+  {
+   "id": "g_a",
+   "kind": "grapheme",
+   "text": "a",
+   "skills": [
+    "gp_a"
+   ],
+   "audio": "ph_a",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_s",
+   "kind": "grapheme",
+   "text": "s",
+   "skills": [
+    "gp_s"
+   ],
+   "audio": "ph_s",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_i",
+   "kind": "grapheme",
+   "text": "i",
+   "skills": [
+    "gp_i"
+   ],
+   "audio": "ph_i",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_l",
+   "kind": "grapheme",
+   "text": "l",
+   "skills": [
+    "gp_l"
+   ],
+   "audio": "ph_l",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_o",
+   "kind": "grapheme",
+   "text": "o",
+   "skills": [
+    "gp_o"
+   ],
+   "audio": "ph_o",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_m",
+   "kind": "grapheme",
+   "text": "m",
+   "skills": [
+    "gp_m"
+   ],
+   "audio": "ph_m",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "w_is",
+   "kind": "word",
+   "text": "is",
+   "graphemes": [
+    "i",
+    "s"
+   ],
+   "skills": [
+    "gp_i",
+    "gp_s"
+   ],
+   "tests": [
+    "gp_i",
+    "gp_s"
+   ],
+   "audio": "w_is",
+   "activities": [],
+   "picture": "ice"
+  },
+  {
+   "id": "w_sa",
+   "kind": "word",
+   "text": "sa",
+   "graphemes": [
+    "s",
+    "a"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_a"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_a"
+   ],
+   "audio": "w_sa",
+   "activities": []
+  },
+  {
+   "id": "w_si",
+   "kind": "word",
+   "text": "si",
+   "graphemes": [
+    "s",
+    "i"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_i"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_i"
+   ],
+   "audio": "w_si",
+   "activities": []
+  },
+  {
+   "id": "w_la",
+   "kind": "word",
+   "text": "la",
+   "graphemes": [
+    "l",
+    "a"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_a"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_a"
+   ],
+   "audio": "w_la",
+   "activities": []
+  },
+  {
+   "id": "w_li",
+   "kind": "word",
+   "text": "li",
+   "graphemes": [
+    "l",
+    "i"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_i"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_i"
+   ],
+   "audio": "w_li",
+   "activities": []
+  },
+  {
+   "id": "w_lo",
+   "kind": "word",
+   "text": "lo",
+   "graphemes": [
+    "l",
+    "o"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_o"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_o"
+   ],
+   "audio": "w_lo",
+   "activities": []
+  },
+  {
+   "id": "w_sal",
+   "kind": "word",
+   "text": "sal",
+   "graphemes": [
+    "s",
+    "a",
+    "l"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_a",
+    "gp_l"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_a",
+    "gp_l"
+   ],
+   "audio": "w_sal",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_sil",
+   "kind": "word",
+   "text": "sil",
+   "graphemes": [
+    "s",
+    "i",
+    "l"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_i",
+    "gp_l"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_i",
+    "gp_l"
+   ],
+   "audio": "w_sil",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_lim",
+   "kind": "word",
+   "text": "lim",
+   "graphemes": [
+    "l",
+    "i",
+    "m"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_i",
+    "gp_m"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_i",
+    "gp_m"
+   ],
+   "audio": "w_lim",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_mil",
+   "kind": "word",
+   "text": "mil",
+   "graphemes": [
+    "m",
+    "i",
+    "l"
+   ],
+   "skills": [
+    "gp_m",
+    "gp_i",
+    "gp_l"
+   ],
+   "tests": [
+    "gp_m",
+    "gp_i",
+    "gp_l"
+   ],
+   "audio": "w_mil",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_mos",
+   "kind": "word",
+   "text": "mos",
+   "graphemes": [
+    "m",
+    "o",
+    "s"
+   ],
+   "skills": [
+    "gp_m",
+    "gp_o",
+    "gp_s"
+   ],
+   "tests": [
+    "gp_m",
+    "gp_o",
+    "gp_s"
+   ],
+   "audio": "w_mos",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_los",
+   "kind": "word",
+   "text": "los",
+   "graphemes": [
+    "l",
+    "o",
+    "s"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_o",
+    "gp_s"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_o",
+    "gp_s"
+   ],
+   "audio": "w_los",
+   "activities": [
+    "ordbro"
+   ]
+  },
+  {
+   "id": "w_lam",
+   "kind": "word",
+   "text": "lam",
+   "graphemes": [
+    "l",
+    "a",
+    "m"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_a",
+    "gp_m"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_a",
+    "gp_m"
+   ],
+   "audio": "w_lam",
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "lamb"
+  },
+  {
+   "id": "w_sol",
+   "kind": "word",
+   "text": "sol",
+   "graphemes": [
+    "s",
+    "o",
+    "l"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_o",
+    "gp_l"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_o",
+    "gp_l"
+   ],
+   "audio": "w_sol",
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "sun"
+  },
+  {
+   "id": "w_slim",
+   "kind": "word",
+   "text": "slim",
+   "graphemes": [
+    "s",
+    "l",
+    "i",
+    "m"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_l",
+    "gp_i",
+    "gp_m"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_l",
+    "gp_i",
+    "gp_m"
+   ],
+   "audio": "w_slim",
+   "activities": []
+  },
+  {
+   "id": "w_sola",
+   "kind": "word",
+   "text": "sola",
+   "graphemes": [
+    "s",
+    "o",
+    "l",
+    "a"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_o",
+    "gp_l",
+    "gp_a"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_o",
+    "gp_l",
+    "gp_a"
+   ],
+   "audio": "w_sola",
+   "activities": []
+  },
+  {
+   "id": "w_silo",
+   "kind": "word",
+   "text": "silo",
+   "graphemes": [
+    "s",
+    "i",
+    "l",
+    "o"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_i",
+    "gp_l",
+    "gp_o"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_i",
+    "gp_l",
+    "gp_o"
+   ],
+   "audio": "w_silo",
+   "activities": []
+  },
+  {
+   "id": "w_lama",
+   "kind": "word",
+   "text": "lama",
+   "graphemes": [
+    "l",
+    "a",
+    "m",
+    "a"
+   ],
+   "skills": [
+    "gp_l",
+    "gp_a",
+    "gp_m"
+   ],
+   "tests": [
+    "gp_l",
+    "gp_a",
+    "gp_m"
+   ],
+   "audio": "w_lama",
+   "activities": []
+  },
+  {
+   "id": "w_salami",
+   "kind": "word",
+   "text": "salami",
+   "graphemes": [
+    "s",
+    "a",
+    "l",
+    "a",
+    "m",
+    "i"
+   ],
+   "skills": [
+    "gp_s",
+    "gp_a",
+    "gp_l",
+    "gp_m",
+    "gp_i"
+   ],
+   "tests": [
+    "gp_s",
+    "gp_a",
+    "gp_l",
+    "gp_m",
+    "gp_i"
+   ],
+   "audio": "w_salami",
+   "activities": []
+  }
+ ]
+}
