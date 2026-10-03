@@ -92,3 +92,20 @@ Each source is marked VERIFIED (citation confirmed online on 2026-10-03; "[metad
 ## 5. Not checked
 
 The current Udir curriculum NOR01-07; the EDUFI pre-primary curriculum; full texts of the EEF report and the dyslexia study; replies by Dweck and Yeager to Li & Bates; Finnish literature on causes of the PISA decline.
+
+## 6. Owner's Norwegian sources and Poio (added 2026-10-03)
+
+All five pages were fetched on 2026-10-03.
+
+| Source | Key recommendation | Effect on the GDD |
+|---|---|---|
+| [Utdanningsforskning.no 2019](https://utdanningsforskning.no/artikler/2019/sann-hjelper-du-barna-a-knekke-lesekoden/) (Sigmundsson et al., 356 children aged 5-6, correlational) | Learn letters and sounds as early as possible; children needed on average 19 letters to crack the code | Agrees. Use about 19-20 graphemes as the "code cracked" milestone (end of World 3) |
+| [Lesesenteret, 7 tips for parents](https://www.uis.no/nb/nasjonalt-lesesenter/forskning/slik-far-du-barn-i-gang-med-lesing-7-enkle-tips-for-foresatte) | Many repetitions; "ha lave skuldre"; let the child write simple words; older siblings read to younger ones; letter hunts | Agrees; adds whole-word writing, sibling as listener, letter hunts offline |
+| [Lesesenteret, Begynneropplæring i lesing](https://www.uis.no/nb/nasjonalt-lesesenter/forskning/begynneropplaering-i-lesing-hva-sier-forskningen) (Grønli 2026) | **"Si både bokstavnavnet og lyden"**; order S-I-L-O-R-E-M-A-F; b and d apart; connected blending /ssssoool/; a fast letter pace (Sunde et al. 2020); daily read-aloud with vocabulary talk | **Changes 4.2**: say the letter name once as a label when a letter is introduced, keep blending sound-only. Backed by Piasta & Wagner 2010 ([PMC2978809](https://pmc.ncbi.nlm.nih.gov/articles/PMC2978809), 58 preschoolers, English). Adds an adult read-aloud strand |
+| [forskning.no](https://www.forskning.no/barn-og-ungdom-lesing-partner/slik-bor-foreldre-og-laerere-ga-fram-for-a-sikre-at-barna-blir-gode-lesere/2708446) | Paid for by the University of Stavanger; restates Grønli's work; build a word, swap one letter, read the new word | Counts as the same source as the row above. Adds a word-chain variant (sol → mol → mal) |
+| [Udir, forskning om leseopplæring](https://www.udir.no/laring-og-trivsel/rad-kunnskap-lesing/forskning-leseopplaering/) (updated 2025-05-28) | Parents as reading role models; reading comprehension is weaker for long texts on screen | Agrees with short screen text and offline follow-ups |
+
+**Kahoot! Learn to Read by Poio.** A Norwegian app (founded 2012, bought by Kahoot in 2019), with Norwegian bokmål among its languages. A troll stole the storybook of the Readlings, letter creatures; the child unlocks letters, builds words and the words fill the storybook, which the child then reads to family. It uses coins, collectable cards and a subscription, and is marketed as needing no parental support. No independent study of its effect was found (search 2026-10-03). Sources: [Kahoot 2019](https://kahoot.com/blog/2019/05/15/poio-joins-kahoot-family-innovative-learn-to-read-app/), [Common Sense Media](https://www.commonsensemedia.org/app-reviews/poio-by-kahoot-learn-to-read).
+
+- **Borrowed:** the child's own words build the final storybook; letters as creatures with their own voice; freeing captured sounds as the story premise; no negative feedback; a demo on first use of every activity.
+- **Avoided:** coins and decoration shops, the "learns alone" pitch, cages and a dark tone, subscriptions and in-app purchases, countdowns, points for speed and leaderboards.
