@@ -1,0 +1,527 @@
+{
+ "pack": "nb_reading",
+ "clips": [
+  {
+   "id": "ph_a",
+   "file": "res://assets/audio/tts_ph_a.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er aaa.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ph_s",
+   "file": "res://assets/audio/tts_ph_s.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er sss.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ph_i",
+   "file": "res://assets/audio/tts_ph_i.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er iii.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "review",
+   "note": "cut letter sound may be unclear; owner to check by ear"
+  },
+  {
+   "id": "ph_l",
+   "file": "res://assets/audio/tts_ph_l.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er lll.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ph_o",
+   "file": "res://assets/audio/tts_ph_o.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er ooo.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "review",
+   "note": "cut letter sound may be unclear; owner to check by ear"
+  },
+  {
+   "id": "ph_m",
+   "file": "res://assets/audio/tts_ph_m.mp3",
+   "mode": "phoneme",
+   "text": "Lyden er mmm.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "pip_hello",
+   "file": "res://assets/audio/tts_pip_hello.mp3",
+   "mode": "say",
+   "text": "Hei! Jeg er Pip.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "pip_island",
+   "file": "res://assets/audio/tts_pip_island.mp3",
+   "mode": "say",
+   "text": "Øya har mistet fargene. Trykk på et lys!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "find_prompt",
+   "file": "res://assets/audio/tts_find_prompt.mp3",
+   "mode": "say",
+   "text": "Vis meg",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "den_sa",
+   "file": "res://assets/audio/tts_den_sa.mp3",
+   "mode": "say",
+   "text": "Den sa",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "vi_leter",
+   "file": "res://assets/audio/tts_vi_leter.mp3",
+   "mode": "say",
+   "text": "Vi leter etter",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "found",
+   "file": "res://assets/audio/tts_found.mp3",
+   "mode": "say",
+   "text": "Du fant den!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "watch",
+   "file": "res://assets/audio/tts_watch.mp3",
+   "mode": "say",
+   "text": "Se på meg.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "watch_first",
+   "file": "res://assets/audio/tts_watch_first.mp3",
+   "mode": "say",
+   "text": "Se på meg først!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "your_turn",
+   "file": "res://assets/audio/tts_your_turn.mp3",
+   "mode": "say",
+   "text": "Nå du! Skriv",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "som_i",
+   "file": "res://assets/audio/tts_som_i.mp3",
+   "mode": "say",
+   "text": "som i",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "write_again",
+   "file": "res://assets/audio/tts_write_again.mp3",
+   "mode": "say",
+   "text": "Se en gang til.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "write_done",
+   "file": "res://assets/audio/tts_write_done.mp3",
+   "mode": "say",
+   "text": "Du skrev",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "bridge_prompt",
+   "file": "res://assets/audio/tts_bridge_prompt.mp3",
+   "mode": "say",
+   "text": "Bygg ordet",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "bridge_done",
+   "file": "res://assets/audio/tts_bridge_done.mp3",
+   "mode": "say",
+   "text": "Du bygde",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "restore",
+   "file": "res://assets/audio/tts_restore.mp3",
+   "mode": "say",
+   "text": "Se! Fargene kommer tilbake!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "break",
+   "file": "res://assets/audio/tts_break.mp3",
+   "mode": "say",
+   "text": "Oi, skal vi ta en pust?",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "grownup_read",
+   "file": "res://assets/audio/tts_grownup_read.mp3",
+   "mode": "say",
+   "text": "Les ordene for en voksen!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "grownup_thanks",
+   "file": "res://assets/audio/tts_grownup_thanks.mp3",
+   "mode": "say",
+   "text": "Takk for at du hørte på!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "grownup_later",
+   "file": "res://assets/audio/tts_grownup_later.mp3",
+   "mode": "say",
+   "text": "Da leser vi dem for en voksen neste gang!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "grownups_only",
+   "file": "res://assets/audio/tts_grownups_only.mp3",
+   "mode": "say",
+   "text": "Dette er for voksne.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "yawn",
+   "file": "res://assets/audio/tts_yawn.mp3",
+   "mode": "say",
+   "text": "Jeg blir så søvnig.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_ape",
+   "file": "res://assets/audio/tts_ex_ape.mp3",
+   "mode": "say",
+   "text": "ape.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_sol",
+   "file": "res://assets/audio/tts_ex_sol.mp3",
+   "mode": "say",
+   "text": "sol.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_is",
+   "file": "res://assets/audio/tts_ex_is.mp3",
+   "mode": "say",
+   "text": "is.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_lam",
+   "file": "res://assets/audio/tts_ex_lam.mp3",
+   "mode": "say",
+   "text": "lam.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_ost",
+   "file": "res://assets/audio/tts_ex_ost.mp3",
+   "mode": "say",
+   "text": "ost.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "ex_mus",
+   "file": "res://assets/audio/tts_ex_mus.mp3",
+   "mode": "say",
+   "text": "mus.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_is",
+   "file": "res://assets/audio/tts_w_is.mp3",
+   "mode": "say",
+   "text": "is.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_sa",
+   "file": "res://assets/audio/tts_w_sa.mp3",
+   "mode": "say",
+   "text": "sa.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_si",
+   "file": "res://assets/audio/tts_w_si.mp3",
+   "mode": "say",
+   "text": "si.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_la",
+   "file": "res://assets/audio/tts_w_la.mp3",
+   "mode": "say",
+   "text": "la.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_li",
+   "file": "res://assets/audio/tts_w_li.mp3",
+   "mode": "say",
+   "text": "li.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_lo",
+   "file": "res://assets/audio/tts_w_lo.mp3",
+   "mode": "say",
+   "text": "lo.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_sal",
+   "file": "res://assets/audio/tts_w_sal.mp3",
+   "mode": "say",
+   "text": "sal.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_sil",
+   "file": "res://assets/audio/tts_w_sil.mp3",
+   "mode": "say",
+   "text": "sil.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_lim",
+   "file": "res://assets/audio/tts_w_lim.mp3",
+   "mode": "say",
+   "text": "lim.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_mil",
+   "file": "res://assets/audio/tts_w_mil.mp3",
+   "mode": "say",
+   "text": "mil.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_mos",
+   "file": "res://assets/audio/tts_w_mos.mp3",
+   "mode": "say",
+   "text": "mos.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_los",
+   "file": "res://assets/audio/tts_w_los.mp3",
+   "mode": "say",
+   "text": "los.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_lam",
+   "file": "res://assets/audio/tts_w_lam.mp3",
+   "mode": "say",
+   "text": "lam.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_sol",
+   "file": "res://assets/audio/tts_w_sol.mp3",
+   "mode": "say",
+   "text": "sol.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_slim",
+   "file": "res://assets/audio/tts_w_slim.mp3",
+   "mode": "say",
+   "text": "slim.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_sola",
+   "file": "res://assets/audio/tts_w_sola.mp3",
+   "mode": "say",
+   "text": "sola.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_silo",
+   "file": "res://assets/audio/tts_w_silo.mp3",
+   "mode": "say",
+   "text": "silo.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_lama",
+   "file": "res://assets/audio/tts_w_lama.mp3",
+   "mode": "say",
+   "text": "lama.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "w_salami",
+   "file": "res://assets/audio/tts_w_salami.mp3",
+   "mode": "say",
+   "text": "salami.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_find",
+   "file": "res://assets/audio/tts_off_find.mp3",
+   "mode": "say",
+   "text": "Finn tre ting hjemme som begynner med",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_write",
+   "file": "res://assets/audio/tts_off_write.mp3",
+   "mode": "say",
+   "text": "Skriv",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_write_dugg",
+   "file": "res://assets/audio/tts_off_write_dugg.mp3",
+   "mode": "say",
+   "text": "med fingeren på dugg i vinduet!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_say",
+   "file": "res://assets/audio/tts_off_say.mp3",
+   "mode": "say",
+   "text": "Si",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_say_long",
+   "file": "res://assets/audio/tts_off_say_long.mp3",
+   "mode": "say",
+   "text": "så lenge du klarer, sammen med en voksen!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_snake",
+   "file": "res://assets/audio/tts_off_snake.mp3",
+   "mode": "say",
+   "text": "Lag en slange av et tau. Den sier",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_stretch",
+   "file": "res://assets/audio/tts_off_stretch.mp3",
+   "mode": "say",
+   "text": "Strekk armene høyt opp, som en",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_back",
+   "file": "res://assets/audio/tts_off_back.mp3",
+   "mode": "say",
+   "text": "på ryggen til en voksen!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_ring",
+   "file": "res://assets/audio/tts_off_ring.mp3",
+   "mode": "say",
+   "text": "Lag en ring med armene og si",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_food",
+   "file": "res://assets/audio/tts_off_food.mp3",
+   "mode": "say",
+   "text": "når maten smaker godt i dag!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_gen1",
+   "file": "res://assets/audio/tts_off_gen1.mp3",
+   "mode": "say",
+   "text": "Klapp navnet ditt i stavelser!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_gen2",
+   "file": "res://assets/audio/tts_off_gen2.mp3",
+   "mode": "say",
+   "text": "Lytt etter lyder på tur ute i dag!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "off_gen3",
+   "file": "res://assets/audio/tts_off_gen3.mp3",
+   "mode": "say",
+   "text": "Les ordene dine for en voksen igjen i kveld!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  }
+ ]
+}

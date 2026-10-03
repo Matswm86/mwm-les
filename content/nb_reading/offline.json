@@ -1,0 +1,201 @@
+{
+ "pack": "nb_reading",
+ "note": "GDD 10.1: one spoken off-screen idea per session, linked to the sound practised most today. 'audio' is a clip sequence; /x/ in text = the sound, never the letter name.",
+ "lines": [
+  {
+   "id": "off_a1",
+   "skill": "gp_a",
+   "text": "Finn tre ting hjemme som begynner med /a/!",
+   "audio": [
+    "off_find",
+    "ph_a"
+   ]
+  },
+  {
+   "id": "off_a2",
+   "skill": "gp_a",
+   "text": "Skriv /a/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_a",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_a3",
+   "skill": "gp_a",
+   "text": "Si /a/ så lenge du klarer, sammen med en voksen!",
+   "audio": [
+    "off_say",
+    "ph_a",
+    "off_say_long"
+   ]
+  },
+  {
+   "id": "off_s1",
+   "skill": "gp_s",
+   "text": "Finn tre ting hjemme som begynner med /s/!",
+   "audio": [
+    "off_find",
+    "ph_s"
+   ]
+  },
+  {
+   "id": "off_s2",
+   "skill": "gp_s",
+   "text": "Skriv /s/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_s",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_s3",
+   "skill": "gp_s",
+   "text": "Lag en slange av et tau. Den sier /s/!",
+   "audio": [
+    "off_snake",
+    "ph_s"
+   ]
+  },
+  {
+   "id": "off_i1",
+   "skill": "gp_i",
+   "text": "Finn tre ting hjemme som begynner med /i/!",
+   "audio": [
+    "off_find",
+    "ph_i"
+   ]
+  },
+  {
+   "id": "off_i2",
+   "skill": "gp_i",
+   "text": "Skriv /i/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_i",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_i3",
+   "skill": "gp_i",
+   "text": "Strekk armene høyt opp, som en /i/!",
+   "audio": [
+    "off_stretch",
+    "ph_i"
+   ]
+  },
+  {
+   "id": "off_l1",
+   "skill": "gp_l",
+   "text": "Finn tre ting hjemme som begynner med /l/!",
+   "audio": [
+    "off_find",
+    "ph_l"
+   ]
+  },
+  {
+   "id": "off_l2",
+   "skill": "gp_l",
+   "text": "Skriv /l/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_l",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_l3",
+   "skill": "gp_l",
+   "text": "Skriv /l/ på ryggen til en voksen!",
+   "audio": [
+    "off_write",
+    "ph_l",
+    "off_back"
+   ]
+  },
+  {
+   "id": "off_o1",
+   "skill": "gp_o",
+   "text": "Finn tre ting hjemme som begynner med /o/!",
+   "audio": [
+    "off_find",
+    "ph_o"
+   ]
+  },
+  {
+   "id": "off_o2",
+   "skill": "gp_o",
+   "text": "Skriv /o/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_o",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_o3",
+   "skill": "gp_o",
+   "text": "Lag en ring med armene og si /o/!",
+   "audio": [
+    "off_ring",
+    "ph_o"
+   ]
+  },
+  {
+   "id": "off_m1",
+   "skill": "gp_m",
+   "text": "Finn tre ting hjemme som begynner med /m/!",
+   "audio": [
+    "off_find",
+    "ph_m"
+   ]
+  },
+  {
+   "id": "off_m2",
+   "skill": "gp_m",
+   "text": "Skriv /m/ med fingeren på dugg i vinduet!",
+   "audio": [
+    "off_write",
+    "ph_m",
+    "off_write_dugg"
+   ]
+  },
+  {
+   "id": "off_m3",
+   "skill": "gp_m",
+   "text": "Si /m/ når maten smaker godt i dag!",
+   "audio": [
+    "off_say",
+    "ph_m",
+    "off_food"
+   ]
+  },
+  {
+   "id": "off_gen1",
+   "skill": "",
+   "text": "Klapp navnet ditt i stavelser!",
+   "audio": [
+    "off_gen1"
+   ]
+  },
+  {
+   "id": "off_gen2",
+   "skill": "",
+   "text": "Lytt etter lyder på tur ute i dag!",
+   "audio": [
+    "off_gen2"
+   ]
+  },
+  {
+   "id": "off_gen3",
+   "skill": "",
+   "text": "Les ordene dine for en voksen igjen i kveld!",
+   "audio": [
+    "off_gen3"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+# id	mode	text
+# mode say = whole line; mode phoneme = carrier sentence, the LAST word is cut out
+# as the isolated sound (TTS spells a bare "sss"). Longer lines that contain a
+# sound are clip sequences (see content/nb_reading/offline.json).
+ph_a	phoneme	Lyden er aaa.
+ph_s	phoneme	Lyden er sss.
+ph_i	phoneme	Lyden er iii.
+ph_l	phoneme	Lyden er lll.
+ph_o	phoneme	Lyden er ooo.
+ph_m	phoneme	Lyden er mmm.
+pip_hello	say	Hei! Jeg er Pip.
+pip_island	say	Øya har mistet fargene. Trykk på et lys!
+find_prompt	say	Vis meg
+den_sa	say	Den sa
+vi_leter	say	Vi leter etter
+found	say	Du fant den!
+watch	say	Se på meg.
+watch_first	say	Se på meg først!
+your_turn	say	Nå du! Skriv
+som_i	say	som i
+write_again	say	Se en gang til.
+write_done	say	Du skrev
+bridge_prompt	say	Bygg ordet
+bridge_done	say	Du bygde
+restore	say	Se! Fargene kommer tilbake!
+break	say	Oi, skal vi ta en pust?
+grownup_read	say	Les ordene for en voksen!
+grownup_thanks	say	Takk for at du hørte på!
+grownup_later	say	Da leser vi dem for en voksen neste gang!
+grownups_only	say	Dette er for voksne.
+yawn	say	Jeg blir så søvnig.
+ex_ape	say	ape.
+ex_sol	say	sol.
+ex_is	say	is.
+ex_lam	say	lam.
+ex_ost	say	ost.
+ex_mus	say	mus.
+w_is	say	is.
+w_sa	say	sa.
+w_si	say	si.
+w_la	say	la.
+w_li	say	li.
+w_lo	say	lo.
+w_sal	say	sal.
+w_sil	say	sil.
+w_lim	say	lim.
+w_mil	say	mil.
+w_mos	say	mos.
+w_los	say	los.
+w_lam	say	lam.
+w_sol	say	sol.
+w_slim	say	slim.
+w_sola	say	sola.
+w_silo	say	silo.
+w_lama	say	lama.
+w_salami	say	salami.
+off_find	say	Finn tre ting hjemme som begynner med
+off_write	say	Skriv
+off_write_dugg	say	med fingeren på dugg i vinduet!
+off_say	say	Si
+off_say_long	say	så lenge du klarer, sammen med en voksen!
+off_snake	say	Lag en slange av et tau. Den sier
+off_stretch	say	Strekk armene høyt opp, som en
+off_back	say	på ryggen til en voksen!
+off_ring	say	Lag en ring med armene og si
+off_food	say	når maten smaker godt i dag!
+off_gen1	say	Klapp navnet ditt i stavelser!
+off_gen2	say	Lytt etter lyder på tur ute i dag!
+off_gen3	say	Les ordene dine for en voksen igjen i kveld!
