@@ -1,6 +1,14 @@
 # MWM Les / MWM Learn: Game Design Doc
 
-Version 0.2, 2026-10-03. Status: second draft for the owner to review. Owner: game-designer. Next: graphic-designer (`docs/DESIGN.md`), then godot-android-dev.
+Version 0.3, 2026-10-03. Status: third draft for the owner to review. Owner: game-designer. Next: graphic-designer (`docs/DESIGN.md`), then godot-android-dev.
+
+**Changelog 0.2 → 0.3** (applies section 6 of `docs/RESEARCH.md`):
+1. Letter name once as a label at introduction ("Denne heter ess. Den sier sss."), sounds only for everything else, blending included (4.1, 4.2, 4.5, 6.1); replaces "sounds only until World 4".
+2. "Kodeknekker" (Code cracked) story beat at 19 mastered graphemes, end of World 3, no reward items (9.1); word-chain variant of Ordbroa (6.6); whole-word writing in the sand after a letter is mastered (6.1).
+3. Adult read-aloud strand in the parent script, older sibling allowed as the "Hørt!" listener (10.4); Hysj's storybook is filled with the child's own built words and read to an adult in World 6 (9.2).
+4. From Poio: letter creatures (6.0), a ghost-finger demo on first use of every activity (6.0), sleeping sounds in jars, never cages (9); Kahoot-style energy without clocks: colour + shape answer tiles, a bright reveal, an island music loop that builds (6.0, 11).
+5. Pacing: faster letter pace is better (Sunde et al. 2020), so 1 new sound per session stays, daily sessions allowed, no further slowing (4.3.1, 5.6).
+6. Mirrored letters: orientation check for s, b, d, p, q, j, z; a mirrored letter gets "Se, den snur andre veien" plus a re-model, not a fail (6.1, constants in 5.7).
 
 **Changelog 0.1 → 0.2** (applies section 4 of `docs/RESEARCH.md`):
 1. Tracing replaced by "watch then write" (6.1); adult co-play is now core: a daily "read to a grown-up" step, a parent script and a paper handwriting prompt (10.4, 10.3).
@@ -81,7 +89,10 @@ Every claim carries an evidence-strength tag (legend at the top). Full citations
 |---|---|---|---|
 | Systematic, explicit phonics beats non-systematic or no phonics for beginners; effects are larger when started early. | Ehri, Nunes, Stahl & Willows 2001 (66 comparisons, d = 0.41), via National Reading Panel 2000 **[src]** | meta-analysis | A fixed, planned order of grapheme-phoneme pairs (4.3). No guessing words from pictures. |
 | Phonemic awareness training works best **with letters**, on 1-2 skills, in short total doses (5-18 hours). | Ehri, Nunes, Willows et al. 2001 (52 studies, d = 0.53 on reading) **[src]**; Språkløyper: oral-only blending is "lite hensiktsmessig" **[src]** | meta-analysis + guidance | World 0 (pure sound play) is short (1-2 episodes, shortened in 0.2). Letters appear from episode 2. |
-| Letter sounds, not letter names, when blending. | Lesesenteret, Språkløyper **[src]** | guidance | Sounds only until World 4 (4.2). |
+| Teach the letter name **and** the sound, but blend with sounds only ("Si både bokstavnavnet og lyden"; "Bruk bokstavenes lyd og ikke bokstavnavnet" when reading words). | Lesesenteret, Begynneropplæring i lesing (Grønli 2026) **[src]**; Språkløyper **[src]**; Piasta & Wagner 2010 (58 English-speaking preschoolers) **[src]** | guidance + small trial (one English preschool study) | The name is said once as a label in period 1 of each new letter; everything else, blending above all, uses sounds only (4.2, 4.5). |
+| A fast letter pace works better than a slow one. | Sunde et al. 2020, via Grønli 2026 **[src]** | guidance (the study itself not read) | Keep 1 new sound per session, allow daily sessions, do not slow the pace further (4.3.1, 5.6). |
+| Children needed on average about 19 letters to crack the reading code. | Sigmundsson et al., Utdanningsforskning.no 2019 (356 children aged 5-6) **[src]** | correlational | "Kodeknekker" story beat at 19 mastered graphemes (9.1). A milestone, not a promise. |
+| Listening comprehension plus decoding explained 96% of the variance in early reading comprehension; daily read-aloud with vocabulary talk. | Lervåg et al. 2018 **[src]**; Grønli 2026 **[src]** | correlational + guidance | Adult read-aloud strand in the parent script (10.4); the app does not try to replace it. |
 | Word reading develops in phases: pre-alphabetic → partial → full → consolidated alphabetic. | Ehri 1995; Ehri 2005 **[src]** | theory | Worlds map onto phases (4.4). |
 | Each successful decode of a new word helps store its spelling (self-teaching). | Share 1995 **[src]** | theory | Words are always decodable from known sounds. |
 | Norwegian is fairly transparent, but has complex syllables (clusters, closed syllables, sk/skj/kj, ng). Finnish is alone in the simplest group, so Finnish pacing will not transfer fully. | Seymour, Aro & Erskine 2003 **[src]** | extrapolated (my inference from the paper's classification) | Explicit cluster and multi-letter content (4.3.1); Norwegian pacing planned slower than Finnish practice. The English pack later needs its own, slower design. |
@@ -113,7 +124,7 @@ Norwegian (bokmål, spoken East Norwegian as the reference voice) has a fairly r
 
 | Trap | Examples | Rule in the game |
 |---|---|---|
-| **Letter names are not sounds.** `ess` ≠ /s/, `te` ≠ /t/. Saying names when blending gives "te-a-ka" instead of `tak`. | t, k, p, s, m | Montessori rule: **sounds only** until World 4. Pip never says a consonant letter name before then. Vowel names equal their sounds, so they are no problem. |
+| **Letter names are not sounds.** `ess` ≠ /s/, `te` ≠ /t/. Saying names when blending gives "te-a-ka" instead of `tak`. | t, k, p, s, m | **Name once, then sounds (new in 0.3).** When a letter is introduced (three-period lesson, period 1, 4.5), Pip says its name once as a label, then its sound: "Denne heter ess. Den sier sss." After that line, every prompt, hint, praise line, blend and slide uses the **sound only**. The name is not repeated in reviews, not scored, and never used in blending. Vowel names equal their sounds ("Denne heter a. Den sier aaa."). Basis: Grønli 2026 (Lesesenteret, **guidance**) and Piasta & Wagner 2010 (**small trial**: one English preschool study, n = 58); a Norwegian trial of this exact routine was not found. |
 | **o has two sounds**: /uː/ as in `sol`, `bok`, `mor`; /ɔ/ as in `topp`, `og`, `som`. | sol vs som | World 1 teaches o = /u/ only ("o som i sol"). The /ɔ/ value gets its own explicit station in World 3, "To o-er" (4.3.1), together with double consonants (`kopp`, `topp`), as "o's second sound". MVP word lists avoid o = /ɔ/. |
 | **e has three faces**: /eː/ `se`, /æ/ before r `er`, `her`, and unstressed /ə/ at word ends `jente`, `gate`. | se, er, jente | World 2 teaches /eː/. /ə/ endings appear in World 3 words only after the child reads CVC words reliably. `er` is a sight word in World 6. |
 | **Double consonant = short vowel.** | tak/takk, mat/matt, fin/finn | World 3 mini-game uses minimal pairs (`tak` roof vs `takk` thanks). |
@@ -167,6 +178,7 @@ Rules:
 - **A multi-letter grapheme is one stone** with 2-3 letters printed on it (like the diphthongs in World 4), plays one sound and fills one Ordbroa slot. A cluster is **two** stones that blend.
 - Each grapheme or cluster above is a skill in the engine and goes through the same new-skill gate (at most 1 new per session, 5.6).
 - **Norwegian pacing is slower than Finnish:** Worlds 3 and 5 get 4 more episodes each than the 0.1 draft (World 3: 16-19, World 5: 16-19). No content is skipped to keep a Finnish-style pace.
+- **The letter pace itself is not slowed (new in 0.3).** The extra episodes are for cluster and multi-letter content, not for single letters. A faster letter pace worked better (Sunde et al. 2020, via Grønli 2026, **guidance**), so the cap stays at 1 new sound per session and sessions may be daily (5.6). Do not lower the pace below this.
 
 ### 4.4 Stages → worlds → Ehri phases
 
@@ -184,7 +196,7 @@ Rules:
 
 | Period | Montessori phrasing | In-game (Norwegian line) | Scored? |
 |---|---|---|---|
-| 1 Naming | "This is..." | Pip writes the letter in the sand with his horn, stroke by stroke, saying the sound: "Dette er /sss/. Som i sssol." The model fades and the child writes it from memory (6.1). 2-3 sounds on the table at once (the new one plus 1-2 known ones as contrast). | No |
+| 1 Naming | "This is..." | Pip writes the letter in the sand with his horn, stroke by stroke, saying the sound, then labels it once with its name: "Denne heter ess. Den sier sss. Som i sssol." (The only time the name is spoken, 4.2.) The model fades and the child writes it from memory (6.1). 2-3 sounds on the table at once (the new one plus 1-2 known ones as contrast). | No |
 | 2 Recognition | "Show me..." | "Vis meg /sss/!" The child taps the right stone among 2-4 (6.2). This is the longest period and mostly happens through games. | Yes |
 | 3 Recall | "What is this?" | Pip holds up a stone: "Hva sier denne?" The child says it out loud (unscored, no microphone), and after 2.0 s Pip says it: "/sss/! Som i sol." The scored recall proxy is letter → picture: "Hvilken begynner med denne lyden?" (6.3). | Speaking: no. Proxy: yes. |
 
@@ -330,7 +342,7 @@ Each pick:
 
 ### 5.6 Session planner, new-skill gate, review
 
-- **New skill gate:** a new sound unlocks when every sound already introduced has P(L) ≥ 0.80 **and** at most 1 new sound has been introduced this session (exception: the first pair, a + s, comes together for the three-period contrast).
+- **New skill gate:** a new sound unlocks when every sound already introduced has P(L) ≥ 0.80 **and** at most 1 new sound has been introduced this session (exception: the first pair, a + s, comes together for the three-period contrast). There is no wait between sessions: a child who plays daily can meet a new sound daily (Sunde et al. 2020 via Grønli 2026: faster letter pace better, **guidance**). Do not add a per-day or per-week cap.
 - **Mastered:** P(L) ≥ 0.95 **and** a correct, unhinted first attempt in at least 2 different sessions (retention, not just a streak).
 - **Review (Leitner boxes [design]):** mastered skills come back after 1, 2, 4, 8, 16 sessions. A miss sends the skill back to box 1 and sets P(L) to 0.80 (practice, not relearning).
 - **Prior knowledge fast lane (test-out):** before a "meet" lesson, the engine offers 1 item at 4 choices with no hint. If the child gets 3 out of 3 in a row, P(L) = 0.90 and the meet lesson is skipped (watch-then-write is kept, but shortened to 1 pass). A 7-year-old who already knows letters reaches blending in their first session.
@@ -396,6 +408,23 @@ const WRITE_HINT_REMODEL: int = 2            # hint level 2: Pip models again
 const WRITE_HINT_TRACE: int = 3              # hint level 3 (last): full trace overlay
 const TRACE_TOLERANCE: float = 0.22          # corridor half-width, only for the hint-3 trace overlay
 const TRACE_COVERAGE_DONE: float = 0.90
+# Orientation check (6.1, new in 0.3). Starting values [design]; tune on the fixture set in 6.1.
+const ORIENT_CHECK_LETTERS: Array[StringName] = [&"s", &"b", &"d", &"p", &"q", &"j", &"z"]
+const ORIENT_DIST_MARGIN: float = 0.03       # mirrored if d_mirror beats d_model by this much (fraction of letter height)
+const ORIENT_ANGLE_MARGIN_DEG: float = 15.0  # ...or if a_mirror beats a_model by this many degrees
+const ORIENT_TANGENT_SPAN: int = 2           # resampled points on each side used for a point's tangent
+# Whole-word writing (6.1, new in 0.3)
+const WORD_WRITE_LETTER_HEIGHT_FRAC: float = 0.40
+const WORD_WRITE_MAX_LETTERS: int = 4
+# Letter name label (4.2, new in 0.3)
+const LETTER_NAME_SAID_PER_INTRO: int = 1    # once, period 1 only; never in reviews or blending
+# Milestones (9.1, new in 0.3)
+const CODE_CRACKED_GRAPHEMES: int = 19       # mastered grapheme_phoneme skills
+# Activity extras (6.0, 6.6, new in 0.3)
+const GHOST_DEMO_FIRST_USE: bool = true
+const GHOST_FINGER_MOVE_SEC: float = 1.2     # ghost finger travel to the target
+const ANSWER_REVEAL_SEC: float = 0.6
+const CHAIN_WORDS: int = 3                   # word-chain: start word + 2 single-stone swaps
 # Drag and drop
 const SNAP_RADIUS_PX: float = 90.0
 const MIN_TOUCH_PX: float = 130.0
@@ -407,12 +436,27 @@ const MIN_TOUCH_PX: float = 130.0
 
 Every activity: 3-6 items, 1-3 minutes, spoken prompt only, no timer, ends on a success. **No speed timers anywhere** (8.3).
 
+### 6.0 Shared rules for all activities (new in 0.3, borrowed from Poio and Kahoot, without their rewards)
+- **Letter creatures [design].** Every letter-object (stone, shell, plank, buoy) is a small creature that wakes when touched: eyes open, a mouth that moves while it says **its sound**. The phoneme is always the clean reference clip (never pitch-shifted, so the sound stays exact); the creature's own personality is a 0.3 s non-speech giggle or chirp **after** the phoneme and its idle animation. No creature ever says its letter name (only Pip, once, in period 1, 4.2).
+- **Ghost-finger demo on first use.** The first time a child opens each activity template, Pip says "Se!" and a translucent ghost finger does one item (travel 1.2 s, then the action, then the world reaction). Then Pip: "Nå du!" and the real first item starts. Not scored, never shown again for that template (stored in the learner file). The parent "reset progress" brings the demos back.
+- **Answer tiles: colour + shape.** In every choice activity (Hør og finn, Første lyd, Les og velg, Lydseiling gates) each option sits on a tile with a fixed identity of **both** a colour and a shape: red triangle, blue diamond, yellow circle, green square (2 choices = the first two, and so on). The identity only helps the child and adult talk about the options ("den gule sirkelen"); it never means right or wrong (colour-blind safe, 4.6).
+- **Bright reveal after each answer (0.6 s).** The chosen tile's creature reacts; if right, it flares, the others dim to 50% and slide down 20 px; if wrong, the chosen one says its own sound and wobbles (4.6). No red X, no score, no clock.
+- **Music builds with the island, not with speed.** Each activity plays the island loop with as many layers as stems restored so far (8.2), min 1. The tempo never changes within an activity and nothing counts down.
+- **Avoided from Poio/Kahoot:** coins, card collections, shops, subscriptions, countdowns, points for speed, leaderboards, "learns alone" claims.
+
 ### 6.1 Sandskriving (Watch then write), replaces sand tracing in 0.2
 Evidence: writing from memory, not tracing, recruited the reading circuit in 5-year-olds (James & Engelhardt 2012, **small trial**; Longcamp et al. 2005, **small trial**). Sandpaper letters are the design inspiration only (Montessori, **theory**).
 - **Setting:** wet sand on the beach; Pip writes with his glowing horn.
-- **Step 1, watch:** the writing area fills 60% of screen height. Pip writes the letter stroke by stroke from the stroke model (`strokes_s.json`: polylines in a 0-1 box, stroke order, start point per stroke). While each stroke is drawn (0.9 s) the letter's sound plays: continuants sustained for the whole stroke (`ssss`), stops once at the end of the stroke. After the last stroke the full letter stays 1.0 s, Pip says "/s/, som i sol", then the model fades to empty sand over 1.2 s. The child cannot touch the sand during step 1 (touches make Pip say "Se på meg først!").
+- **Step 1, watch:** the writing area fills 60% of screen height. Pip writes the letter stroke by stroke from the stroke model (`strokes_s.json`: polylines in a 0-1 box, stroke order, start point per stroke). While each stroke is drawn (0.9 s) the letter's sound plays: continuants sustained for the whole stroke (`ssss`), stops once at the end of the stroke. After the last stroke the full letter stays 1.0 s, Pip says "Denne heter ess. Den sier sss. Som i sol." (name only on the very first meeting of the letter, pass 1; every later model says only "/s/, som i sol", 4.2), then the model fades to empty sand over 1.2 s. The child cannot touch the sand during step 1 (touches make Pip say "Se på meg først!").
 - **Step 2, write from memory:** empty sand, no dots, no arrows. Pip: "Nå du! Skriv /s/." The child writes with one finger; the sand glows where the finger has been and the sustained sound plays while the finger moves. The letter is finished when the finger has been up for 1.5 s (or the child taps the "Ferdig" shell).
 - **Check (lenient, not scored):** resample all the child's ink to 48 points, scale it uniformly into the model's box (centred), and compute the mean symmetric nearest-point distance to the model as a fraction of letter height. Accept if ≤ 0.18 (+0.02 per hint level used) and the ink length ≥ 50% of the model's arc length. Stroke order and direction are **not** checked (4-year-olds).
+- **Orientation check (new in 0.3).** Why: the check above is blind to mirroring; the builder measured a mirrored `s` at 0.046 against the 0.18 limit, so it passed. For letters where a mirror image is a different or wrong letter, `ORIENT_CHECK_LETTERS` = s, b, d, p, q, j, z (b↔d and p↔q mirror into each other; a mirrored s, j or z is no letter). n vs u is a rotation, not a mirror, and is not part of this check. For those letters only, after the shape check:
+  1. Build the mirrored model: flip the model's x coordinates about the centre of its box (x' = 1 - x).
+  2. `d_model`, `d_mirror` = mean symmetric nearest-point distance of the child's ink to the model and to the mirrored model (the same measure as the shape check).
+  3. `a_model`, `a_mirror` = mean, over the 48 child points, of the unsigned angle (0-90°) between the child's local tangent (points i ± `ORIENT_TANGENT_SPAN`) and the tangent at the nearest point of the model / mirrored model. Order- and direction-free, so stroke order still does not matter. Mirroring flips diagonals (the spine of s, the tail of j, the slash of z), which the point distance misses.
+  4. **Mirrored** if `d_mirror` ≤ the shape limit **and** (`d_model - d_mirror` ≥ `ORIENT_DIST_MARGIN` **or** `a_model - a_mirror` ≥ `ORIENT_ANGLE_MARGIN_DEG`). Mirrored overrides "accepted".
+  - **Response, not a fail:** the child's letter stays in the sand at 40% opacity. Pip: "Se, den snur andre veien." He draws the correct letter beside it with the horn (the step 1 model, sound only), both stay visible 1.5 s, the sand smooths, and the child tries again with hint level 2 (start point). No "feil", no wobble, no "hmm" sound. A second mirrored attempt goes to hint level 3 (trace). The evidence log records `mirrored: true`; it does not touch BKT (writing is not scored).
+  - **Fixture test for the builder:** for each letter in the list, a clean model, the model mirrored, and 5 sloppy-but-correct child samples. Pass = every mirrored sample flags, no correct sample flags. Tune the two margins until this holds; report the tuned values back into 5.7.
 - **Accepted:** the model fades in on top in a second colour for 0.8 s (compare), then the child's letter lifts out of the sand as a stone and says its sound plus the example word.
 - **Not accepted → hint ladder for writing** (the sand is smoothed, 0.4 s, and the child tries again):
 
@@ -427,6 +471,12 @@ Evidence: writing from memory, not tracing, recruited the reading circuit in 5-y
 - **Control of error:** the compare overlay; no reset, no fail, no "feil".
 - **Tests:** not scored in BKT (the engine logs the highest hint level used). Feeds period 1.
 - **Off screen:** the parent area gives a paper handwriting prompt for each newly met letter (10.3).
+- **Whole-word writing (new in 0.3).** Lesesenteret's parent tips say to let the child write simple words (**guidance**). Once a letter is mastered (P(L) ≥ 0.95), Sandskriving can also ask for a short whole word built only from mastered letters: `is`, `sol`, `lam` in World 1; 4-letter words such as `melk` (cluster lk) only after the clusters in World 3 (4.3.1). Max 4 letters.
+  - Pip says the word, then stretched: "Skriv sol. Sssooolll." No model first: the child encodes from memory.
+  - The sand shows one empty box per letter, left to right, letter height 0.40 of the screen. The child writes the first letter; when the finger is up 1.5 s it is checked (shape + orientation, same rules and limits as above) and either lifts as a stone or gets its hint; then the next box lights up.
+  - Hints per letter: level 1 = Pip says that letter's sound stretched ("...ooo..."); level 2 = Pip models that letter in its box; level 3 = trace overlay for that letter. A word never fails; it always ends with all stones lifted.
+  - When the word is complete the stones slide together and the word plays once while each letter lights up (as Ordbroa's walk-across). The word goes into the day's read-to-a-grown-up card (10.4) and Hysj's storybook (9.2).
+  - At most 1 word-writing item per session, offered in the 20% "easy" mix (5.3). Not scored in BKT (logs the highest hint per letter). The parent area adds a matching paper card: "Si ordet. Barnet skriver det på papir."
 
 ### 6.2 Hør og finn (Listen and find), three-period lesson, period 2
 - **Setting:** shells on the beach / lanterns in the tower / coins in a chest, by world.
@@ -455,6 +505,14 @@ Evidence: writing from memory, not tracing, recruited the reading circuit in 5-y
 - **Rule:** Pip says "`sol`". 3 empty plank slots; 4-6 letter-stones (the right letters plus 1-3 distractors) in a basket. The child drags a stone into a slot; every stone plays its sound when touched. A right stone becomes a plank. A wrong stone plays its sound, wobbles and returns (control of error). When the bridge is complete the child walks across and the word is read aloud while each plank lights up left to right.
 - **Montessori point:** encoding (building) a word before reading it.
 - **Scored:** per slot, grapheme skill; the whole bridge for `spell_*`.
+- **Word-chain variant, Ordkjeden (new in 0.3).** Build a word, swap one stone, read the new word (forskning.no / Grønli, **guidance**; the source's example is `sol → mol → mal`).
+  1. The first word is built as a normal bridge.
+  2. Pip: "Nå bytter vi én stein!" One plank's creature hops back into the basket, leaving an empty slot that glows; the basket holds 3 stones (the right one + 2 distractors). Pip says the new word: "Lag sal."
+  3. The child drops a stone into the slot (scored per slot as above; a wrong stone says its sound and returns).
+  4. The child reads the new word: the planks light left to right with connected sounds, then 3 pictures appear, always including the **previous** word's picture as a distractor. Picking the new picture is scored as `blend_*`.
+  5. One more swap (`CHAIN_WORDS` = 3 words per chain), then the bridge is walked as usual.
+  - Every word in a chain must be a real word made only of introduced graphemes, and every word that needs a picture must be picturable. Example World 1 chains from the MVP list (each step changes exactly one stone): `sil → sal → sol`, `mil → sil → sal`. The builder takes chains only from `content/nb_reading/chains.json`, written by the designer and checked by a teacher (Q3). `mol` from the source example is not in the MVP list (not picturable for a 4-year-old), so it is not used in World 1.
+  - Unlocks when 3-slot Ordbroa has been done once (World 1, after episode 11).
 
 ### 6.7 Lydseiling (Sound sailing), embodied listening, phone tilt
 - **Rule:** the boat sails forward slowly and **stops in front of the gates and waits** as long as the child needs (no speed pressure, no timeout). Pip says a sound; 3 buoy-gates show letters. The child tilts the device to steer into the matching gate, or taps the gate (lanes are 33% of the screen width each). Right gate: a dolphin jump and the sound. Wrong gate: the buoy plays its sound and the boat circles back for another pass (no loss).
@@ -493,7 +551,7 @@ Evidence: writing from memory, not tracing, recruited the reading circuit in 5-y
 | I do | Period 1 of each new sound | Writes the letter in the sand stroke by stroke first (6.1), says the sound slowly, shows the mouth (a close-up of his mouth shape for /m/ (lips closed), /a/ (wide open)). |
 | We do | First 3-5 items of a new skill | Hint start level 2. Pip slides down Lydsklia with the child and says the sounds along. |
 | You do | P(L) ≥ 0.6 | Pip sits to the side and only reacts. Hints only on idle or error (ladder from level 0). |
-| You teach | From World 5, 1 item per session; World 6 throughout | Pip "forgets": "Hmm, hva sa den nå igjen?" The child taps the right stone to teach Pip (scored like Hør og finn). In World 6 the child reads to Kaptein Hysj (protégé effect). |
+| You teach | From World 5, 1 item per session; World 6 throughout | Pip "forgets": "Hmm, hva sa den nå igjen?" The child taps the right stone to teach Pip (scored like Hør og finn). Pip says the **sound** when he "remembers", never the name. In World 6 the child reads to Kaptein Hysj (protégé effect). |
 
 Pip's language rules **[design]**:
 - Every line ≤ 8 words for prompts, ≤ 12 for story. One instruction per line.
@@ -545,7 +603,9 @@ Pip's language rules **[design]**:
 
 ## 9. Story and worlds
 
-**Premise:** Kaptein Hysj (Captain Shush), a grumpy but not scary pirate, hates noise. She sailed the Sound Sea and put every letter sound into her big jar, so the islands went grey and silent. Pip the narwhal and the child sail out to free the sounds. Each sound freed goes back to its island. In the last world we learn why Hysj did it: she never learned to read, the letters on her treasure maps were just noise to her, and she was ashamed. The child teaches her to read, and she becomes a friend. No battles, no defeats: the "boss" in each world is a puzzle she left (a locked gate with a word on it).
+**Premise:** Kaptein Hysj (Captain Shush), a grumpy but not scary pirate, hates noise. She sailed the Sound Sea and put every letter sound into her big jar, where they fell asleep, so the islands went grey and silent. Pip the narwhal and the child sail out to free the sounds. Each sound freed goes back to its island. In the last world we learn why Hysj did it: she never learned to read, the letters on her treasure maps were just noise to her, and she was ashamed. The child teaches her to read, and she becomes a friend. No battles, no defeats: the "boss" in each world is a puzzle she left (a locked gate with a word on it).
+
+**Tone rule (new in 0.3) [design]:** the sounds are **asleep in jars**, never caged, chained, crying or hurt. Freeing a sound means waking it: the jar lid pops, the letter creature (6.0) yawns, stretches, says its sound and flies home. No bars, locks on creatures, dark dungeons or scared faces anywhere (Poio's cages are what we avoid).
 
 Avatar: one child hero, chosen from 3 looks at the start (superhero, pirate, unicorn rider). Gender-neutral, no name typing; Pip calls the child "kaptein" or "venn".
 
@@ -557,7 +617,21 @@ Avatar: one child hero, chosen from 3 looks at the start (superhero, pirate, uni
 | 3 | **Sprett-tårnet** / Bounce Tower (superheroes) | A cloud city with a tower of superhero kids who lost their powers; their powers are the "bouncy" stop sounds | t p k h j b d g; o as /ɔ/; double consonants | Each hero's power returns when the child reads the power word (`hopp!`, `klapp!`) and does it |
 | 4 | **Nordlysøya** / Northern Lights Isle | Snow, fjords, northern lights, puffins, reindeer, a sauna hut | y æ ø å, ei øy au | The northern lights return in one colour per vowel |
 | 5 | **Sjørøverskjærene** / Pirate Skerries | Pirate coves, Hysj's crew of friendly, clumsy pirates, treasure maps | sj skj kj ng gj, silent letters as stowaways (`blindpassasjerer`) | `skip` vs `skatt`; finding the stowaway `d` hiding in `god` |
-| 6 | **Kaptein Hysjs fort** / Captain Shush's Fort | Hysj's sea fort with the big sound jar | sight words, sentences, short stories | The child reads a 6-page story to Hysj; the jar opens and all the sounds fly home |
+| 6 | **Kaptein Hysjs fort** / Captain Shush's Fort | Hysj's sea fort with the big sound jar | sight words, sentences, short stories | The child reads a 6-page story, **filled with their own words** (9.2), to Hysj and then to a grown-up; the jar opens and all the sounds fly home |
+
+### 9.1 "Kodeknekker" milestone (Code cracked, new in 0.3)
+
+Children needed on average about 19 letters to crack the reading code (Sigmundsson et al., 356 children aged 5-6, **correlational**, Utdanningsforskning.no 2019). The game marks this point with a story beat. **[design]**
+- **Trigger:** the first time the number of mastered `grapheme_phoneme` skills (5.6) reaches `CODE_CRACKED_GRAPHEMES` = 19. With the order in 4.3 that is typically near the end of World 3 (World 1: 6 + World 2: 6 + World 3: 8 graphemes incl. o /ɔ/ = 20). Fires once per profile; it starts after the current task finishes, never mid-task.
+- **The beat (about 25 s, tap to skip after 5 s):** Hysj's big jar on the horizon gets a crack of light. Every restored island plays its music together for the first time. Pip: "Du har knekt lesekoden!" Then Pip holds up 3 words the child has read before (from different worlds) and the child reads them in a row on one card, as proof ("Se, du kan lese alt dette!").
+- **No reward items:** no badge, trophy, coin, unlock, sticker or new avatar. The only lasting trace is a Lydboka page "Lesekoden knekt" with the date and the 3 words, and a line in the parent area: "Barnet kan nå 19 lyder. Mange barn begynner å lese på egen hånd rundt her." (Many children start reading on their own around here.) No promise that the child now reads.
+
+### 9.2 Hysj's storybook, filled with the child's words (new in 0.3, borrowed from Poio)
+
+- Hysj's storybook opens in World 1 with empty pages. Every word the child builds correctly in Ordbroa or writes in whole-word writing (6.1) for the first time drops into the book as a glowing word on the page of the world where it was made. The child can open the book from the boat (next to Lydboka); tapping a word plays it.
+- **World 6 story:** the 6-page story is a template with marked slots (for example `Mia har en ___.`, `Hun ser en ___ på ___.`). Each slot has a word category (animal, thing, place, food) and is filled with a word **from the child's own book** that fits the category and uses only mastered graphemes. If no own word fits, a default word from the template fills the slot. The pictures for each slot come from the word's picture.
+- The child reads the story to Hysj (scored per page as `read_sentence`), and that session's read-to-a-grown-up card (10.4) is the whole story instead of 3-5 words.
+- Story templates and the category of every word live in `content/nb_reading/story_templates.json`; the categories need a teacher check (Q3).
 
 Total: about 45 skill groups (incl. the cluster and multi-letter skills in 4.3.1), about 90 episodes (Worlds 3 and 5 each +4 over 0.1) ≈ 30-35 sessions of 12 min at a typical pace (my estimate, it depends entirely on the child). Norwegian is planned slower than Finnish practice on purpose (4.3.1).
 
@@ -603,7 +677,7 @@ Language on first launch: Norwegian bokmål, whatever the device language (the o
 - **Parent area contents:**
   - Progress: one row per sound, status `ikke startet / øver / sikker` (not started / practising / secure), last practised, and a plain-language line ("Mia kan lese ord med s, a, i, l, o, m."). No percentages, no grades.
   - **Parent script** (10.4), shown on the first parent-area visit and always one tap away.
-  - **Paper handwriting prompt:** one card per newly met letter. It shows the lowercase letter with stroke order (start dot, numbered arrows) for the adult and these steps: "1. Skriv bokstaven på papir mens du sier lyden (/s/, ikke 'ess'). 2. Dekk den til. 3. Barnet skriver den fra hukommelsen. 4. Se på begge sammen." (Write it while saying the sound; cover it; the child writes it from memory; compare.) Basis: writing from memory, not tracing (James & Engelhardt 2012, **small trial**).
+  - **Paper handwriting prompt:** one card per newly met letter. It shows the lowercase letter with stroke order (start dot, numbered arrows) for the adult and these steps: "1. Skriv bokstaven på papir mens du sier lyden. Si navnet én gang som merkelapp ('Denne heter ess. Den sier sss.'), deretter bare lyden. 2. Dekk den til. 3. Barnet skriver den fra hukommelsen. 4. Se på begge sammen." (Write it while saying the sound; say the name once as a label, then only the sound; cover it; the child writes it from memory; compare.) Basis: writing from memory, not tracing (James & Engelhardt 2012, **small trial**).
   - **I dag:** today's offline follow-up (10.1) and the words read to a grown-up.
   - Settings: session length 10/15/20 min; motion controls on/off; sound volume and Pip voice volume; written text Auto / On / Off (10.5); language (when packs exist).
   - "Read together" tips: 3 more offline activities per world (draw letters in sand, sound-hunt at dinner: "find something that starts with /m/").
@@ -616,19 +690,27 @@ Language on first launch: Norwegian bokmål, whatever the device language (the o
 **Why it is core:** the GraphoGame meta-analysis found no overall effect on word reading (McTigue, Solheim, Zimmer & Uppstad 2020, 19 studies, g = -0.02, **meta-analysis**); in studies with high adult interaction the effect was g = 0.48. An English trial with 398 pupils found no effect (EEF/NFER, **RCT**) and a French trial with N = 921 found small effects of 0.18-0.27 (Lassault et al. 2022, **RCT**). **Expected effect of this app: small.** The adult step is the design's best bet for a real effect, not a proven one. No store or parent text may promise more.
 
 **The step (every session, at the session cap, 5.6):**
-1. Pip: "Les ordene for en voksen!" ("Read the words to a grown-up!")
+1. Pip: "Les ordene for en voksen eller et storesøsken!" ("Read the words to a grown-up or a big brother or sister!") **Listener (new in 0.3):** an older sibling who can read may be the listener and press "Hørt!" (Lesesenteret parent tips: older siblings read with younger ones, **guidance**). The button label stays "Voksen: Hørt!" (Q12); the parent script says siblings count.
 2. A big card shows 3-5 words the child built or read **this session** (Ordbroa and Lydsklia items answered correctly, first-attempt-correct ones first; if fewer than 3, top up with mastered words). Words are large, lowercase and never hyphenated. In World 0 (no letters yet) the card shows 3 pictures and the child claps their syllables for the adult.
 3. The child reads each word aloud. Tapping a word plays it (allowed, it is a help, not a fail). No microphone, no scoring.
 4. **Adult button:** bottom right, text-labelled "Voksen: Hørt!", press and hold 1.5 s (a ring fills). A 4-5 year old cannot read the label; an older child pressing it costs nothing. On release: Pip: "Takk for at du hørte på!", a soft fanfare (1.2 s), and the words go into the Lydboka page "Lest for en voksen" with the date.
 5. **No adult present:** a big picture button (a sleeping sun) "Ingen voksen nå". Pip: "Da leser vi dem for en voksen neste gang!" The words carry over to the next card. No penalty, no streak, no count of missed days anywhere.
 6. Then the yawn, the offline follow-up and the sunset (10.1).
 
-**Parent script** (parent area, Norwegian with the English meaning; 5 lines, readable in 20 s):
+**Parent script** (parent area, Norwegian with the English meaning; 6 lines, readable in 25 s):
 1. "Sitt sammen med barnet de siste minuttene." (Sit with your child for the last minutes.)
 2. "La barnet lese selv. Vent, ikke si ordet først." (Let the child read. Wait, do not say the word first.)
-3. "Står barnet fast: si den første lyden, ikke bokstavnavnet (/s/, ikke 'ess')." (If stuck: say the first sound, not the letter name.)
+3. "Står barnet fast: si den første lyden, ikke bokstavnavnet (/s/, ikke 'ess'). Navnet bruker vi bare når vi presenterer en ny bokstav." (If stuck: say the first sound, not the letter name. The name is only used when a new letter is introduced.)
 4. "Si hva barnet gjorde: 'Du trakk sammen s-o-l til sol!'" (Say what the child did.)
 5. "Gjør dagens forslag uten skjerm sammen." (Do today's off-screen idea together.)
+6. "Et storesøsken som kan lese, kan også høre på." (An older sibling who can read can also be the listener.) *(new in 0.3)*
+
+**Read-aloud strand (new in 0.3), under the script as its own card "Les høyt hver dag":**
+- "Les en kort fortelling høyt for barnet hver dag, gjerne 10 minutter." (Read a short story aloud to your child every day, about 10 minutes.)
+- "Stopp ved ett eller to nye ord og snakk om dem: Hva betyr det? Hvor har vi sett det?" (Stop at one or two new words and talk about them.)
+- "Spør etterpå: Hva skjedde? Hvorfor tror du hun gjorde det?" (Ask afterwards what happened and why.)
+- One plain line on why: "Å forstå det man hører er like viktig for leseforståelse som å kunne lese ordene." (Understanding what you hear matters as much for reading comprehension as decoding the words.) Basis: Lervåg et al. 2018 (**correlational**: listening comprehension plus decoding explained 96% of early reading comprehension); Grønli 2026 (**guidance**: daily read-aloud with vocabulary talk).
+- The app does not track, count or remind about the read-aloud; it is advice only. The 10-minute figure is **[design]**, not from the sources.
 
 Below the script, one plain sentence on expected effects: "Samlet viser studier liten eller ingen effekt av slike spill, og større effekt når en voksen er tett med." (Overall, studies show little or no effect from games like this, and a larger effect when an adult is closely involved.)
 
@@ -660,6 +742,12 @@ Audio stays the main channel throughout. Text is added gradually, and only text 
 | Child writes in the sand | sustained phoneme + sand hiss while the finger moves | sand glow trail, 8 sparkle particles/s | while moving | none |
 | Letter accepted | phoneme + example word | model fades in on top in a second colour (0.8 s), then the letter rises out of the sand as a stone, spin 360° | 2.0 s | 40 ms |
 | Letter not accepted | Pip "hmm" (no buzzer) | sand smooths over | 0.4 s | none |
+| Letter mirrored (6.1) | Pip "Se, den snur andre veien." (no "hmm") | child's letter stays at 40%, Pip draws the right one beside it, both visible, then sand smooths | 0.9 s per stroke + 1.5 s + 0.4 s | none |
+| Letter creature touched (6.0) | phoneme, then 0.3 s chirp | eyes open, mouth moves with the phoneme | phoneme + 0.3 s | 15 ms |
+| Ghost-finger demo (6.0) | Pip "Se!" ... "Nå du!" | translucent finger travels and acts | 1.2 s travel + action | none |
+| Answer reveal (6.0) | object's sound | right tile flares, others dim to 50% and slide down 20 px | 0.6 s | 30 ms (right only) |
+| Kodeknekker beat (9.1) | all island stems together + Pip "Du har knekt lesekoden!" | jar on the horizon cracks with light, 3-word card | about 25 s, skippable after 5 s | 80 ms |
+| Word-chain swap (6.6) | the leaving creature's sound | one plank creature hops back to the basket, slot glows | 0.5 s | 15 ms |
 | Read-to-a-grown-up "Hørt!" hold | soft fanfare + Pip "Takk for at du hørte på!" | ring fills during the 1.5 s hold, words fly into Lydboka | 1.5 s hold + 1.2 s | 50 ms |
 | Right answer | object's own sound + soft chime (pentatonic, pitch rises within an activity) | object comes alive (creature pops out, plank forms), 12 particles | 0.6 s | 30 ms |
 | Wrong answer | the chosen object's own sound, then a soft wooden "tok" | wobble ±6° x 3, slide back | 0.4 s | none (no punishment through the hand) |
@@ -706,6 +794,7 @@ MVP decodable word list (o = /u/ only, no names, no doubles): `is, sa, si, la, l
 
 **In:**
 - Hub ship + World 0 lite (2 activities) + World 1 Enhjørningenga (one island, 6 sounds a s i l o m, 13 episodes + review loop).
+- Shared activity rules (6.0): letter creatures, ghost-finger demo, colour + shape tiles, reveal, island music loop. Orientation check for s in World 1 (6.1). Whole-word writing for `is`, `sol`, `lam` and the Ordkjeden variant (6.6) are in; Hysj's storybook collects words (9.2), the World 6 story and the Kodeknekker beat are deferred with their worlds.
 - Activities: Sandskriving (watch then write), Hør og finn, Første lyd, Lydsklia, Ordbroa, Lydkonserten, body-letter ritual, movement break. (Lydseiling and Elkonin are optional stretch goals.)
 - `learn_core/` engine complete (BKT, selector, hint ladder, planner, local save) with headless unit tests that replay scripted answer sequences and check P(L), hint starts and step-down, mirroring the simulation numbers in 5.2.
 - Pip with 4 animations (idle, talk, giggle-spin, yawn) + horn-writing (stroke-by-stroke model).
@@ -721,12 +810,14 @@ MVP decodable word list (o = /u/ only, no names, no doubles): `is, sa, si, la, l
 | Isolated phonemes, short | 6 | ~300-450 ms each. Stops later: no schwa ("t", not "tə"). |
 | Phonemes, sustained loopable | 6 | 2.0 s, steady pitch, loop points marked (continuants only) |
 | Alternate takes | 12 | 2 extra of each short phoneme, for natural variation |
+| Letter-name labels (new in 0.3) | 6 | "Denne heter ess. Den sier sss." per letter, one line each |
+| Creature chirps (new in 0.3) | 6 | non-speech, 0.3 s, one per letter creature |
 | Decodable words, normal | 19 | list in 12 |
 | Decodable words, stretched (connected) | 19 | `sssooolll` style, ~2.5 s |
 | Picture words, first sound stretched | ~24 | `sssel` |
 | Pip lines | ~150 | prompts, praise, hints, story |
 | Story / Hysj lines | ~20 | |
-| **Total** | **~255** | about 2-3 hours of studio time with retakes (my estimate) |
+| **Total** | **~267** | about 2-3 hours of studio time with retakes (my estimate) |
 
 **Voice (Q2 resolved 2026-10-03: the owner picked Microsoft Finn, male, nb-NO):**
 - **Voice: Microsoft Finn (nb-NO) via edge-tts, chosen by the owner**, generated as audio files **at build time** by a script in the repo. The app itself never calls a TTS service and keeps no INTERNET permission; only the build step needs a network.
@@ -755,6 +846,10 @@ MVP decodable word list (o = /u/ only, no names, no doubles): `is, sa, si, la, l
 11. **Store:** is this a sideload/family app first, or aimed at Google Play (Families program, Teacher Approved) from the start?
 12. **Grown-up step wording (resolved):** keep "Voksen: Hørt!" with a 1.5 s hold; the parent script shows once before the first session and stays in the parent area.
 13. **Teacher acceptance (resolved):** the owner reviews the pedagogy and parent sections himself.
+14. **Orientation check scope (decided 2026-10-03):** all lowercase letters whose mirror image looks wrong get the check (s, b, d, p, q, j, z, a, e, f, g, k, r, y, æ, ø). Capitals are deferred with uppercase.
+15. **Kodeknekker trigger (decided):** count mastered graphemes (19).
+16. **Letter creature voice (decided):** the creature says its sound in the Finn voice and adds a non-speech chirp.
+17. **Ordkjeden word lists (decided):** use only picturable words; the owner checks the chain lists when playing the build.
 
 ---
 
@@ -800,6 +895,15 @@ Full evidence review, verification status of every citation and what was not che
 - Udir, læreplan i norsk (NOR01-06; NOR01-07 not read).
 - Lesekommisjonen, mandate ("mindre skjerm, mer lek").
 - Kristiansund kommune, "Lese- og skriveopplæring 1. trinn".
+- Lesesenteret (University of Stavanger), "Begynneropplæring i lesing: hva sier forskningen" (Grønli 2026), and "Slik får du barn i gang med lesing: 7 enkle tips for foresatte". forskning.no's piece on the same work is counted as the same source.
+- Utdanningsforskning.no 2019, "Slik hjelper du barna å knekke lesekoden" (Sigmundsson et al., 356 children, correlational).
+- Udir, "Forskning om leseopplæring" (updated 2025-05-28).
+- Piasta & Wagner 2010, letter names and sounds in preschoolers (n = 58, English), PMC2978809.
+- Sunde et al. 2020 (faster letter pace), cited via Grønli 2026; not read directly.
+- Lervåg et al. 2018, *Child Development*, doi:10.1111/cdev.12861.
+
+**Apps compared (design borrowings, no effect evidence)**
+- Kahoot! Learn to Read by Poio: Kahoot 2019 announcement; Common Sense Media review. No independent effect study found (2026-10-03).
 
 **Store and privacy**
 - Google Play Families policy (checked 2026-10-03).
