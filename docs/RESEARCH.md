@@ -109,3 +109,15 @@ All five pages were fetched on 2026-10-03.
 
 - **Borrowed:** the child's own words build the final storybook; letters as creatures with their own voice; freeing captured sounds as the story premise; no negative feedback; a demo on first use of every activity.
 - **Avoided:** coins and decoration shops, the "learns alone" pitch, cages and a dark tone, subscriptions and in-app purchases, countdowns, points for speed and leaderboards.
+
+## 7. Capital or small letters first (added 2026-10-03)
+
+No randomised trial tests which case to teach first. The evidence is correlational plus one small experiment:
+
+- Children know capitals earlier (Worden & Boettcher 1990, n = 188, doi:10.1080/10862969009547711, abstract only).
+- A child is more than 16 times as likely to know a small letter if they know its capital (Turnbull, Bowles, Skibbe, Justice & Wiggins 2010, n = 461, doi:10.1044/1092-4388(2010/09-0093), abstract read 2026-10-03). Letters that look alike in both cases (o/O, s/S) are easier than a/A or g/G.
+- Teaching capitals first did not speed up learning the small letters (Park & Piasta 2026, n = 36, *Annals of Dyslexia*, doi:10.1007/s11881-025-00360-z, abstract read 2026-10-03).
+- Small letters b/d/p/q are mirror images of other letters and need their own practice (Fischer & Luxembourger 2021, doi:10.3389/fcomm.2021.719652).
+- Practice: Norwegian schools teach "store og små bokstaver parallelt" (Holen skole, Bergen); Finland's education agency OPH says learn both at the same time; one Finnish primer starts with capitals. Udir LK20 does not say. Montessori sandpaper letters are lowercase (practitioner source only).
+
+**Decision:** every letter is introduced as a pair (capital and small letter together, "Store S og lille s"). All reading, writing and word tasks use small letters, because running bokmål text is almost all lowercase. Capitals are used for real purposes: the child's name, names, and the start of a sentence. b/d/p/q get separate discrimination practice and are introduced far apart.
