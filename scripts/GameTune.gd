@@ -1,0 +1,106 @@
+class_name GameTune
+extends RefCounted
+## Presentation and layout numbers for the game (palette from DESIGN.md 2,
+## camera from 7.5, layout, tweens). Learning numbers live in LearnBalance.
+
+# --- Palette: UI chrome
+const UI_BG: Color = Color(1.00, 0.96, 0.90)
+const UI_PANEL: Color = Color(1.00, 1.00, 1.00)
+const INK: Color = Color(0.11, 0.17, 0.27)
+const GO: Color = Color(0.12, 0.50, 0.23)
+const SEA_BTN: Color = Color(0.11, 0.39, 0.72)
+const GOLD: Color = Color(1.00, 0.76, 0.10)
+const CORAL: Color = Color(0.79, 0.27, 0.12)
+# --- Palette: world
+const SKY_TOP: Color = Color(0.36, 0.71, 0.94)
+const SKY_HORIZON: Color = Color(0.85, 0.95, 1.00)
+const SEA_DEEP: Color = Color(0.12, 0.44, 0.85)
+const SEA_SHALLOW: Color = Color(0.25, 0.72, 0.91)
+const FOAM: Color = Color(0.96, 0.98, 1.00)
+const SAND: Color = Color(0.96, 0.84, 0.55)
+const SAND_WET: Color = Color(0.80, 0.64, 0.40)
+const GRASS: Color = Color(0.42, 0.76, 0.29)
+const GRASS_SHADE: Color = Color(0.24, 0.56, 0.23)
+const ROCK: Color = Color(0.55, 0.48, 0.42)
+const HERO_RED: Color = Color(0.91, 0.25, 0.17)
+const UNICORN_PINK: Color = Color(1.00, 0.56, 0.75)
+const SHADOW_TINT: Color = Color(0.16, 0.21, 0.31)
+const WOOD: Color = Color(0.62, 0.40, 0.22)
+const WOOD_LIGHT: Color = Color(0.80, 0.58, 0.34)
+const LEAF: Color = Color(0.36, 0.72, 0.30)
+const LEAF_DARK: Color = Color(0.27, 0.62, 0.27)
+const PIP_BACK: Color = Color(0.52, 0.74, 0.96)
+const PIP_BELLY: Color = Color(0.99, 0.96, 0.88)
+const PIP_SPOT: Color = Color(0.36, 0.55, 0.86)
+const PIP_CHEEK: Color = Color(1.00, 0.62, 0.70)
+const PIP_HORN: Color = Color(1.00, 0.90, 0.60)
+const EYE: Color = Color(0.08, 0.10, 0.16)
+const FLOWER_COLORS: Array[Color] = [
+	Color(1.00, 0.56, 0.75),
+	Color(1.00, 0.90, 0.30),
+	Color(1.00, 1.00, 1.00),
+	Color(0.95, 0.42, 0.30),
+	Color(0.62, 0.78, 1.00),
+]
+# --- Lighting
+const SUN_ENERGY: float = 0.85
+const AMBIENT_ENERGY: float = 0.32
+const SUN_PITCH_DEG: float = -52.0
+const SUN_YAW_DEG: float = -35.0
+const SHADOW_MAX_DISTANCE: float = 60.0
+# --- Island layout (world metres; angle 0 = +x, 90 = +z toward the camera)
+const ISLAND_RADIUS: float = 12.5
+const ISLET_CENTER: Vector3 = Vector3(18.6, 0.0, 1.0)
+const ISLET_RADIUS: float = 3.4
+const ZONE_RADIUS: float = 9.0
+const ZONE_A_ANGLE: float = 118.0  # Hør og finn, south-west beach
+const ZONE_B_ANGLE: float = 66.0  # Sandskriving, south beach
+const ZONE_C_ANGLE: float = 8.0  # Ordbroa, east shore facing the islet
+const STATION_INSET: float = 0.86  # fraction of the coast radius where a station stands
+const LETTER_SPACING: float = 2.6
+# --- Camera (DESIGN 7.5)
+const CAM_FOV: float = 50.0
+const CAM_PITCH_DEG: float = 38.0
+const CAM_HUB_TARGET: Vector3 = Vector3(3.5, 0.0, 0.5)
+const CAM_HUB_DISTANCE: float = 33.0
+const CAM_HUB_PITCH_DEG: float = 20.0  # story shot: lower than 38 so sky and clouds show
+const CAM_STATION_DISTANCE: float = 7.6
+const CAM_WRITE_PITCH_DEG: float = 64.0
+const CAM_WRITE_DISTANCE: float = 7.5
+const CAM_BRIDGE_DISTANCE: float = 11.5
+const CAM_FLY_SEC: float = 1.8
+const CAM_INTRO_SEC: float = 3.2
+# --- Pip
+const PIP_SCREEN_OFFSET: Vector3 = Vector3(-2.85, -1.15, -5.0)  # camera-local home spot
+const PIP_FOLLOW_RATE: float = 4.0
+const PIP_BOB_HEIGHT: float = 0.12
+const PIP_BOB_HZ: float = 0.55
+# --- Letters (DESIGN 7.3)
+const LETTER_HEIGHT_M: float = 1.6
+const LETTER_BOB_M: float = 0.15
+const LETTER_BOB_HZ: float = 0.6
+const LETTER_SWAY_DEG: float = 20.0
+const HALO_PULSE_HZ: float = 0.8
+const HINT_PULSE_PERIOD_SEC: float = 1.2
+# --- Activities
+const ITEMS_PER_VISIT: Dictionary = {"hor_og_finn": 4, "skriv": 2, "ordbro": 2}
+const MAX_CHOICES: Dictionary = {"hor_og_finn": 3, "skriv": 1, "ordbro": 4}
+const PRAISE_EVERY_N_CORRECT: int = 3
+const TAP_RADIUS_MIN_PX: float = 120.0  # 1.5x the visual (DESIGN 4)
+const WRONG_WOBBLE_DEG: float = 6.0
+const WRONG_WOBBLE_SEC: float = 0.4
+const FREEZE_AFTER_RANDOM_TAPS_SEC: float = 1.5
+const BRIDGE_LIGHT_STEP_SEC: float = 0.35
+const ZONE_RESTORE_SEC: float = 2.5
+const PLANT_STAGGER_SEC: float = 0.05
+# Slice: all six sounds are open from the start so every station has content.
+# The real gate (two sounds, then one per session) is in the engine and tested.
+const SLICE_OPEN_ALL_SOUNDS: bool = true
+# --- UI sizes (DESIGN 4, px at 1080 tall)
+const BTN_PRIMARY_PX: float = 260.0
+const BTN_SECONDARY_PX: float = 200.0
+const BTN_MIN_PX: float = 176.0
+const SAFE_MARGIN_PX: float = 64.0
+const PARENT_HOLD_SEC: float = 3.0
+const PARENT_WRONG_LIMIT: int = 3
+const PARENT_LOCK_SEC: float = 60.0
