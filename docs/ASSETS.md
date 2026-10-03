@@ -65,7 +65,7 @@ From the Godot 4 docs (https://docs.godotengine.org/en/stable/tutorials/assets_p
 ## 7. Files in this repo
 | Path | Source | Licence |
 |---|---|---|
-| assets/_candidates/kaykit_adventurers/Knight.glb, Mage.glb, *_texture.png, LICENSE.txt | KayKit GitHub mirror, Adventurers 1.0 | CC0 |
+| assets/characters/knight/Knight.glb, Mage.glb, *_texture.png, LICENSE.txt | KayKit GitHub mirror, Adventurers 1.0 | CC0 |
 | assets/_candidates/kaykit_adventurers/preview_knight_mage.png | my Blender render (Cheer + Idle) | ours |
 | assets/_candidates/quaternius_polypizza/PirateCaptain.glb, WhiteHorse.glb, Horse_D3h.glb, LICENSE_SOURCE.txt | Poly Pizza, Quaternius account | CC0 1.0 |
 | assets/_candidates/quaternius_polypizza/preview_horse_pirate.png, preview_unicorn_from_whitehorse.png, preview_unicorn_from_horse.png | my Blender renders | ours |
