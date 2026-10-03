@@ -157,6 +157,11 @@ func record_disengaged(item_id: String) -> void:
 	_log({"t": "disengaged", "item": item_id})
 
 
+## Unscored events (e.g. the highest hint used while writing) go to the log only.
+func log_event(entry: Dictionary) -> void:
+	_log(entry)
+
+
 func finish_item() -> int:
 	return hints.finish()
 
