@@ -67,3 +67,41 @@ off_food	say	når maten smaker godt i dag!
 off_gen1	say	Klapp navnet ditt i stavelser!
 off_gen2	say	Lytt etter lyder på tur ute i dag!
 off_gen3	say	Les ordene dine for en voksen igjen i kveld!
+find_where	say	Hvor er
+find_tap	say	Trykk på
+intro_a	say	Denne heter a. Store A og lille a.
+intro_s	say	Denne heter ess. Store S og lille s.
+intro_i	say	Denne heter i. Store I og lille i.
+intro_l	say	Denne heter ell. Store L og lille l.
+intro_o	say	Denne heter o. Store O og lille o.
+intro_m	say	Denne heter em. Store M og lille m.
+de_sier	say	De sier
+tap_small	say	Trykk på den lille!
+mirror	say	Se, den snur andre veien.
+bridge_listen	say	Hør!
+bridge_drag	say	Dra steinen til hullet!
+story_find_1	say	Lyden
+story_find_2	say	sover i en blomst. Finn den, så våkner blomsten!
+story_write	say	Havet har vasket bort bokstaven. Skriv den i sanden, så øya husker den!
+stuck_is	say	Isen står fast på den lille øya.
+stuck_sol	say	Sola står fast på den lille øya.
+stuck_lam	say	Lammet står fast på den lille øya.
+stuck_lama	say	Lamaen står fast på den lille øya.
+stuck_slim	say	Slimet står fast på den lille øya.
+stuck_lim	say	Limet står fast på den lille øya.
+stuck_salami	say	Salamien står fast på den lille øya.
+build_det	say	Bygg en ordbro, så det kan komme hjem!
+build_den	say	Bygg en ordbro, så den kan komme hjem!
+home_det	say	Hurra! Nå er det hjemme!
+home_den	say	Hurra! Nå er den hjemme!
+payoff_find	say	Se, blomsten våknet!
+payoff_write	say	Se, enhjørningen fikk en farge!
+next_find	say	Se, blomstene sover. Kom!
+next_write	say	Se, enhjørningen mangler fargene sine. Kom!
+next_bridge	say	Se, noen står fast på den lille øya. Kom!
+hysj_shush	hysj	Hysj! For mye bråk!
+hysj_jar	hysj	Alle lydene skal sove i krukka mi.
+story_pip_1	say	Hei, venn! Jeg er Pip.
+story_pip_2	say	Kaptein Hysj har tatt lydene, og nå er øya grå.
+story_pip_3	say	Vil du hjelpe meg å vekke lydene?
+tap_me	say	Trykk på meg!

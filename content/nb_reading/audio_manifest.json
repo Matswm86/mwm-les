@@ -522,6 +522,310 @@
    "text": "Les ordene dine for en voksen igjen i kveld!",
    "voice": "nb-NO-FinnNeural (edge-tts)",
    "status": "final"
+  },
+  {
+   "id": "find_where",
+   "file": "res://assets/audio/tts_find_where.mp3",
+   "mode": "say",
+   "text": "Hvor er",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "find_tap",
+   "file": "res://assets/audio/tts_find_tap.mp3",
+   "mode": "say",
+   "text": "Trykk på",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_a",
+   "file": "res://assets/audio/tts_intro_a.mp3",
+   "mode": "say",
+   "text": "Denne heter a. Store A og lille a.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_s",
+   "file": "res://assets/audio/tts_intro_s.mp3",
+   "mode": "say",
+   "text": "Denne heter ess. Store S og lille s.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_i",
+   "file": "res://assets/audio/tts_intro_i.mp3",
+   "mode": "say",
+   "text": "Denne heter i. Store I og lille i.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_l",
+   "file": "res://assets/audio/tts_intro_l.mp3",
+   "mode": "say",
+   "text": "Denne heter ell. Store L og lille l.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_o",
+   "file": "res://assets/audio/tts_intro_o.mp3",
+   "mode": "say",
+   "text": "Denne heter o. Store O og lille o.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "intro_m",
+   "file": "res://assets/audio/tts_intro_m.mp3",
+   "mode": "say",
+   "text": "Denne heter em. Store M og lille m.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "de_sier",
+   "file": "res://assets/audio/tts_de_sier.mp3",
+   "mode": "say",
+   "text": "De sier",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "tap_small",
+   "file": "res://assets/audio/tts_tap_small.mp3",
+   "mode": "say",
+   "text": "Trykk på den lille!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "mirror",
+   "file": "res://assets/audio/tts_mirror.mp3",
+   "mode": "say",
+   "text": "Se, den snur andre veien.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "bridge_listen",
+   "file": "res://assets/audio/tts_bridge_listen.mp3",
+   "mode": "say",
+   "text": "Hør!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "bridge_drag",
+   "file": "res://assets/audio/tts_bridge_drag.mp3",
+   "mode": "say",
+   "text": "Dra steinen til hullet!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_find_1",
+   "file": "res://assets/audio/tts_story_find_1.mp3",
+   "mode": "say",
+   "text": "Lyden",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_find_2",
+   "file": "res://assets/audio/tts_story_find_2.mp3",
+   "mode": "say",
+   "text": "sover i en blomst. Finn den, så våkner blomsten!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_write",
+   "file": "res://assets/audio/tts_story_write.mp3",
+   "mode": "say",
+   "text": "Havet har vasket bort bokstaven. Skriv den i sanden, så øya husker den!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_is",
+   "file": "res://assets/audio/tts_stuck_is.mp3",
+   "mode": "say",
+   "text": "Isen står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_sol",
+   "file": "res://assets/audio/tts_stuck_sol.mp3",
+   "mode": "say",
+   "text": "Sola står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_lam",
+   "file": "res://assets/audio/tts_stuck_lam.mp3",
+   "mode": "say",
+   "text": "Lammet står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_lama",
+   "file": "res://assets/audio/tts_stuck_lama.mp3",
+   "mode": "say",
+   "text": "Lamaen står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_slim",
+   "file": "res://assets/audio/tts_stuck_slim.mp3",
+   "mode": "say",
+   "text": "Slimet står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_lim",
+   "file": "res://assets/audio/tts_stuck_lim.mp3",
+   "mode": "say",
+   "text": "Limet står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "stuck_salami",
+   "file": "res://assets/audio/tts_stuck_salami.mp3",
+   "mode": "say",
+   "text": "Salamien står fast på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "build_det",
+   "file": "res://assets/audio/tts_build_det.mp3",
+   "mode": "say",
+   "text": "Bygg en ordbro, så det kan komme hjem!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "build_den",
+   "file": "res://assets/audio/tts_build_den.mp3",
+   "mode": "say",
+   "text": "Bygg en ordbro, så den kan komme hjem!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "home_det",
+   "file": "res://assets/audio/tts_home_det.mp3",
+   "mode": "say",
+   "text": "Hurra! Nå er det hjemme!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "home_den",
+   "file": "res://assets/audio/tts_home_den.mp3",
+   "mode": "say",
+   "text": "Hurra! Nå er den hjemme!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "payoff_find",
+   "file": "res://assets/audio/tts_payoff_find.mp3",
+   "mode": "say",
+   "text": "Se, blomsten våknet!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "payoff_write",
+   "file": "res://assets/audio/tts_payoff_write.mp3",
+   "mode": "say",
+   "text": "Se, enhjørningen fikk en farge!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "next_find",
+   "file": "res://assets/audio/tts_next_find.mp3",
+   "mode": "say",
+   "text": "Se, blomstene sover. Kom!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "next_write",
+   "file": "res://assets/audio/tts_next_write.mp3",
+   "mode": "say",
+   "text": "Se, enhjørningen mangler fargene sine. Kom!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "next_bridge",
+   "file": "res://assets/audio/tts_next_bridge.mp3",
+   "mode": "say",
+   "text": "Se, noen står fast på den lille øya. Kom!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "hysj_shush",
+   "file": "res://assets/audio/tts_hysj_shush.mp3",
+   "mode": "hysj",
+   "text": "Hysj! For mye bråk!",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "hysj_jar",
+   "file": "res://assets/audio/tts_hysj_jar.mp3",
+   "mode": "hysj",
+   "text": "Alle lydene skal sove i krukka mi.",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_pip_1",
+   "file": "res://assets/audio/tts_story_pip_1.mp3",
+   "mode": "say",
+   "text": "Hei, venn! Jeg er Pip.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_pip_2",
+   "file": "res://assets/audio/tts_story_pip_2.mp3",
+   "mode": "say",
+   "text": "Kaptein Hysj har tatt lydene, og nå er øya grå.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "story_pip_3",
+   "file": "res://assets/audio/tts_story_pip_3.mp3",
+   "mode": "say",
+   "text": "Vil du hjelpe meg å vekke lydene?",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
+  },
+  {
+   "id": "tap_me",
+   "file": "res://assets/audio/tts_tap_me.mp3",
+   "mode": "say",
+   "text": "Trykk på meg!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "final"
   }
  ]
 }

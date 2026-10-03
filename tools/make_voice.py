@@ -10,6 +10,7 @@ or "review".
 
 Modes in the lines file:
   say      the whole text, edge-tts, voice VOICE at rate RATE
+  hysj     the whole text in Kaptein Hysj's voice HYSJ_VOICE at rate RATE
   phoneme  a carrier sentence at PHONEME_RATE; the last word is located with
            faster-whisper word timestamps and cut out, silence trimmed,
            stretched 2x (atempo=0.5) and loudness-normalised. A bare "sss"
@@ -38,6 +39,8 @@ LINES = ROOT / "tools" / "voice_lines.tsv"
 OUT_DIR = ROOT / "assets" / "audio"
 MANIFEST = ROOT / "content" / "nb_reading" / "audio_manifest.json"
 VOICE = os.environ.get("MWM_LES_VOICE", "nb-NO-FinnNeural")
+# Kaptein Hysj speaks with a different voice than Pip (GDD 13).
+HYSJ_VOICE = os.environ.get("MWM_LES_HYSJ_VOICE", "nb-NO-PernilleNeural")
 RATE = "-15%"
 PHONEME_RATE = "-30%"
 EDGE_TTS = os.environ.get("EDGE_TTS", "edge-tts")
@@ -47,6 +50,13 @@ REVIEW = {
     "ph_i": "cut letter sound may be unclear; owner to check by ear",
     "ph_o": "cut letter sound may be unclear; owner to check by ear",
 }
+# Spoken lines are chained into prompts ("Hvor er" + sss + "Trykk på" + sss),
+# so the TTS lead-in and the ~1 s tail of silence are trimmed to a short pad.
+TRIM_FILTER = (
+    "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+    "silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+    "adelay=60,apad=pad_dur=0.15"
+)
 CUT_FILTER = (
     "silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
     "silenceremove=start_periods=1:start_threshold=-40dB,areverse,"
@@ -64,11 +74,21 @@ def read_lines() -> list[tuple[str, str, str]]:
     return rows
 
 
-def tts(text: str, rate: str, out: Path) -> None:
+def tts(text: str, rate: str, out: Path, voice: str = VOICE) -> None:
     subprocess.run(
-        [EDGE_TTS, "--voice", VOICE, f"--rate={rate}", "--text", text, "--write-media", str(out)],
+        [EDGE_TTS, "--voice", voice, f"--rate={rate}", "--text", text, "--write-media", str(out)],
         check=True,
     )
+
+
+def tts_trimmed(text: str, rate: str, out: Path, voice: str) -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        raw = Path(tmp) / "raw.mp3"
+        tts(text, rate, raw, voice)
+        subprocess.run(
+            [FFMPEG, "-v", "quiet", "-y", "-i", str(raw), "-af", TRIM_FILTER, str(out)],
+            check=True,
+        )
 
 
 def cut_last_word(carrier: Path, out: Path, model: object) -> None:
@@ -116,7 +136,9 @@ def main() -> int:
         if wanted and (args.force or not out.exists()):
             print(f"make {out.name}: {text}")
             if mode == "say":
-                tts(text, RATE, out)
+                tts_trimmed(text, RATE, out, VOICE)
+            elif mode == "hysj":
+                tts_trimmed(text, RATE, out, HYSJ_VOICE)
             elif mode == "phoneme":
                 if model is None:
                     from faster_whisper import WhisperModel  # noqa: PLC0415
@@ -134,7 +156,7 @@ def main() -> int:
             "file": f"res://assets/audio/{out.name}",
             "mode": mode,
             "text": text,
-            "voice": f"{VOICE} (edge-tts)",
+            "voice": f"{HYSJ_VOICE if mode == 'hysj' else VOICE} (edge-tts)",
             "status": "final",
         }
         if clip_id in REVIEW:
