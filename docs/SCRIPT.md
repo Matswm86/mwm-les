@@ -1,6 +1,6 @@
 # MWM Les: voice script, island 1 (Enhjørningenga)
 
-Status: **draft for teacher approval. Nothing is recorded yet.** Replaces every line in `tools/voice_lines.tsv` once approved.
+Status: **approved by the owner 2026-10-04 (see "Open questions"). No final recording yet:** `tools/voice_lines.tsv` uses these ids with placeholder clips (docs/ASSETS.md section 8).
 Written 2026-10-04 against `docs/SPEECH_RULES.md` (R1-R12 below = its rule numbers) and the code that plays each line (`scripts/Main.gd`, `scripts/OpeningStory.gd`, `scripts/activities/HorOgFinn.gd`, `Sandskriving.gd`, `OrdBro.gd`, `scripts/ui/ParentGate.gd`, `GrownupCard.gd`).
 
 ## How to read this script

@@ -41,9 +41,9 @@ activity, and finishing it brings that part of the island back to colour.
 
 | Activity | What the child does | Based on |
 |---|---|---|
-| Hør og finn (listen and find) | Pip says a sound; the child taps the gold letter that makes it. A wrong letter says its own sound and wobbles. | Systematic letter-sound teaching |
-| Sandskriving (sand writing) | Pip writes the letter stroke by stroke and says its sound, then the child writes it from memory in the sand. | Handwriting from memory, not tracing |
-| Ordbroa (the word bridge) | The child drags letter stones onto a bridge to build a word; the hero walks across and the word is read aloud. | Moveable alphabet, connected blending |
+| Hør og finn (listen and find) | Pip says a sound; the child taps the gold letter that makes it. The sound flies out of Kaptein Hysj's jar back to the island, and the first time each sound is found its thing appears (ape, sol, is, lam, ost, mus). A wrong letter says its own sound and wobbles. | Systematic letter-sound teaching |
+| Sandskriving (sand writing) | Pip writes the letter stroke by stroke and says its sound, then the child writes it from memory in the sand. The letter becomes a stone that rolls off to the bridge. | Handwriting from memory, not tracing |
+| Ordbroa (the word bridge) | The child drags letter stones onto a bridge to build `lam`, `lama` or `is`; Pip sounds the word out while the planks light, and the lamb comes over. | Moveable alphabet, connected blending |
 
 After about 12 minutes Pip gets sleepy. The child reads the day's words to a grown-up,
 who holds the **Voksen: Hørt!** button, and Pip suggests one thing to do away from the
@@ -70,13 +70,17 @@ story, is in [docs/GDD.md](docs/GDD.md).
 - The cel-shaded look comes from a toon light shader (`shaders/toon.gdshader`) with a
   two-tone shadow, an outline shell on things the child can touch, and unshaded gold
   letters with a halo.
-- Every spoken line is a sound file generated once from `tools/voice_lines.tsv` by
-  `tools/make_voice.py`, so the app never needs the internet. Single letter sounds are
-  cut from a spoken sentence, because a voice reading "sss" on its own spells the letter.
+- Every spoken line is its own sound file, one per line id in `docs/SCRIPT.md`
+  (mono, -18 LUFS), so the app never needs the internet. **The current files are
+  placeholders** made by `tools/make_voice.py` from `tools/voice_lines.tsv` while the
+  final voice is chosen; a real recording replaces `assets/audio/tts_<id>.mp3` under the
+  same name. A sound such as [s] is always its own clip after a short pause, never
+  spliced into a sentence.
 
 ## Credits
 
-- Voice: Microsoft Finn (nb-NO), generated with [edge-tts](https://github.com/rany2/edge-tts).
+- Placeholder voice (until the final voice is chosen): Microsoft Finn and Pernille
+  (nb-NO), generated with [edge-tts](https://github.com/rany2/edge-tts).
 - Hero: [KayKit Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0)
   by Kay Lousberg (CC0). Full asset list and licences: [docs/ASSETS.md](docs/ASSETS.md).
 - Font: [Andika](https://software.sil.org/andika/) by SIL, designed for beginning
