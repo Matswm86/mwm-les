@@ -4,13 +4,15 @@ extends Activity
 ## The camera is close, the bridge fills the middle of the screen. Every
 ## letter has its own big plank slot; missing ones are outlined sockets that
 ## glow, the one to fill next pulses and says its sound when tapped. The
-## word's picture is stuck on the little island and comes home over the
-## finished bridge. Letter stones sit in a neat row on a raft at the bottom.
-## Pip models first: the word, then each sound slowly while its slot lights,
-## then the word again. Scaffold: first only the last letter is missing
-## (one stone, then a choice of two), then two, then the whole word.
-## Hints: a wrong stone says its own sound and slides back; then the right
-## stone glows and bounces; after two misses the ghost hand drags it.
+## lamb (or the llama, or the ice cream) waits on the little island and comes
+## over the finished bridge (docs/SCRIPT.md scene 4). Letter stones sit in a
+## neat row on a raft at the bottom. Pip models first: "Hør på ordet. [lam]",
+## then "Hør på lydene. [l-a-m]" (one clip; each plank lights at its sound's
+## time mark from clip_marks.json), then "Det blir lam." Scaffold: first only
+## the last letter is missing (one stone, then a choice of two), then two,
+## then the whole word. Hints: a wrong stone says its own sound and slides
+## back, then one line; then the right stone glows and bounces; after two
+## misses the ghost hand drags it.
 
 const DRAG_START_PX: float = 18.0
 const STONE_LIFT: float = 0.9
@@ -22,6 +24,7 @@ var graphemes: Array[String] = []
 var word: String = ""
 var picture: Node3D
 var pitch_m: float = 1.4
+var walking: bool = false  # the picture crosses the bridge (screenshot bot)
 var _missing_from: int = 0  # slots >= this start empty
 var _sockets: Array[Node3D] = []
 var _socket_mats: Array[StandardMaterial3D] = []
@@ -59,19 +62,23 @@ func begin_visit() -> void:
 	super.begin_visit()
 	_first_of_visit = true
 	main.pip.home_offset = GameTune.PIP_BRIDGE_OFFSET
+	if main.things.has("l"):  # the bridge brings its own lamb to the islet
+		(main.things["l"] as Node3D).visible = false
 
 
 func end_visit() -> void:
 	super.end_visit()
 	main.hud.ghost.stop()
 	main.pip.home_offset = GameTune.PIP_SCREEN_OFFSET
+	if main.things.has("l"):
+		(main.things["l"] as Node3D).visible = true
 	_clear()
 	if picture:
 		picture.queue_free()
 		picture = null
 
 
-## The first bridges ever use a fixed, easy word order (is, sol, lam).
+## The first bridges ever use a fixed word order (lam, lama, is).
 func adjust_task(task: Dictionary) -> Dictionary:
 	var done: int = Game.bridge_items_done
 	if done >= GameTune.BRIDGE_FIRST_WORDS.size():
@@ -104,13 +111,23 @@ func story_intro(_first_task: Dictionary) -> void:
 	pass  # the bridge tells its story per word, see _story()
 
 
+## SCRIPT.md 4a: "Se! Lammet står på den lille øya." + why it wants to come
+## over ("... igjen" once the child has met it), then on the first bridge of
+## a visit "Vi bygger en bro av bokstaver."
 func _story() -> void:
-	var ids: Array = [str(item.get("story_audio", ""))]
+	var ids: Array = []
+	var again: Array = item.get("story_audio_again", [])
+	var met: bool = Game.bridge_words_met.has(word)
+	var story: Array = again if met and not again.is_empty() else item.get("story_audio", [])
+	for id: Variant in story:
+		ids.append(str(id))
 	if _first_of_visit:
-		ids.append("build_" + str(item.get("pronoun", "det")))
+		ids.append("bridge_build")
 	_first_of_visit = false
+	if not met:
+		Game.bridge_words_met.append(word)
 	main.pip.point_at(picture.global_position + Vector3(0, 2.4, 0))
-	var tw: Tween = create_tween()  # the stuck picture hops on the spot
+	var tw: Tween = create_tween()  # the waiting picture hops on the spot
 	var y0: float = picture.position.y
 	for k in 2:
 		tw.tween_property(picture, "position:y", y0 + 0.4, 0.18)
@@ -166,27 +183,49 @@ func start_item(p_item: Dictionary, p_format: Dictionary, hint_start: int) -> vo
 		_show_ghost()
 
 
+## "Hvilken bokstav mangler i lam?" + "Dra steinen til hullet." (replayable).
 func _say_prompt() -> void:
-	var ids: Array = [str(item.get("audio", "w_" + word)), "bridge_drag"]
+	var ids: Array = [str(item.get("ask_audio", "")), "bridge_drag"]
 	mark_prompt_end(Voice.say(ids, true))
 
 
-## Pip models: the word, then each sound slowly while its slot lights, then
-## the word again.
+## Pip models: "Hør på ordet. [lam]", then "Hør på lydene. [l-a-m]" while each
+## slot lights at its sound, then "Det blir lam."
 func _model_word() -> void:
 	_modelling = true
-	var w: String = str(item.get("audio", "w_" + word))
 	main.pip.giggle()
-	await get_tree().create_timer(Voice.say(["bridge_listen", w]) + 0.3).timeout
-	for i in graphemes.size():
+	var w: String = str(item.get("audio", ""))
+	await get_tree().create_timer(Voice.say(["bridge_hear_word", w]) + 0.3).timeout
+	await _sound_out(["bridge_hear_sounds", str(item.get("sound_out_audio", ""))])
+	await get_tree().create_timer(0.2).timeout
+	await get_tree().create_timer(Voice.say([str(item.get("word_again_audio", ""))]) + 0.3).timeout
+	_modelling = false
+
+
+## Says `ids` (the last one is the [lydering:x] clip) and lights plank i at
+## that clip's time mark i. Without marks the planks share the clip evenly.
+func _sound_out(ids: Array) -> void:
+	var clip: String = str(ids[ids.size() - 1])
+	var total: float = Voice.say(ids)
+	var start: float = Voice.offset_of(ids, ids.size() - 1)
+	var marks: Array[float] = Voice.marks(clip)
+	var n: int = graphemes.size()
+	if marks.size() != n:
+		marks.clear()
+		for i in n:
+			marks.append(Voice.length(clip) * float(i) / float(n))
+	var t0: int = Time.get_ticks_msec()
+	for i in n:
+		var at_ms: int = t0 + int((start + marks[i]) * 1000.0)
+		while Time.get_ticks_msec() < at_ms:
+			await get_tree().process_frame
 		_lit = i
 		if slots[i]:
 			slots[i].glyph.pop()
-		var d: float = Voice.say([Game.phoneme_clip(Game.skill_for_label(graphemes[i]))])
-		await get_tree().create_timer(maxf(d, 0.7) + 0.15).timeout
+	var end_ms: int = t0 + int(total * 1000.0)
+	while Time.get_ticks_msec() < end_ms:
+		await get_tree().process_frame
 	_lit = -1
-	await get_tree().create_timer(Voice.say([w]) + 0.3).timeout
-	_modelling = false
 
 
 func _distractors(count: int) -> Array[String]:
@@ -452,17 +491,25 @@ func _target_stone(slot_i: int) -> Stone:
 # ---------------------------------------------------------------- hints
 
 
-func apply_hint(level: int) -> void:
+## Level 1: "Hør på lyden som mangler. [x]", the right stone glows and
+## bounces. Level 2: "Se på hånden." and the ghost hand drags it. `speak`
+## false = only the visuals (a line has just been said).
+func apply_hint(level: int, speak: bool = true) -> void:
 	var si: int = _next_empty()
 	var tgt: Stone = _target_stone(si)
 	if tgt == null:
 		return
 	if level >= 1:
-		_say_prompt()
 		_glow_stone(tgt)
 	if level >= 2:
 		main.pip.point_at(tgt.global_position + Vector3(0, 0.6, 0))
 		_show_ghost()
+	if not speak:
+		return
+	if level >= 2:
+		Voice.say(["bridge_hint_2"])
+	elif level >= 1:
+		Voice.say(["bridge_hint_1", Game.phoneme_clip(tgt.skill)])
 
 
 ## The right stone glows and bounces.
@@ -670,38 +717,37 @@ func _wrong(st: Stone, slot_i: int) -> void:
 		return
 	var lv: int = hints.on_wrong()
 	if not _explained:
+		# one calm line with the right model (R10): "Hør en gang til. [x]"
 		_explained = true
 		var want: String = Game.phoneme_clip(Game.skill_for_label(graphemes[slot_i]))
-		await (
-			get_tree()
-			. create_timer(Voice.say(["den_sa", Game.phoneme_clip(st.skill), "vi_leter", want]))
-			. timeout
-		)
+		apply_hint(lv, false)
+		await get_tree().create_timer(Voice.say(["bridge_wrong", want])).timeout
+	else:
+		apply_hint(lv)
 	frozen = false
-	apply_hint(lv)
 
 
+## SCRIPT.md 4d: the planks light left to right with the same [lydering:x]
+## clip, "Det står lam.", the lamb trots over ("Se! Lammet går over broa.")
+## and reaches Pip ("Du bygde ordet lam. Nå er lammet her.").
 func _complete() -> void:
 	main.hud.ghost.stop()
 	await get_tree().create_timer(0.3).timeout
-	for i in slots.size():
-		_lit = i
-		var st: Stone = slots[i]
-		st.glyph.pop()
-		var d: float = Voice.sound(Game.phoneme_clip(st.skill))
-		await get_tree().create_timer(maxf(d, GameTune.BRIDGE_LIGHT_STEP_SEC)).timeout
-	_lit = -1
-	var wd: float = Voice.say([str(item.get("audio", "w_" + word))])
+	await _sound_out([str(item.get("sound_out_audio", ""))])
+	var wd: float = Voice.say([str(item.get("says_audio", ""))])
 	Game.note_word_built(word)
 	Game.bridge_items_done += 1
 	Game.save()
 	main.burst(slot_pos[slot_pos.size() / 2] + Vector3(0, 0.8, 0))
 	Voice.sfx("fanfare")
 	await get_tree().create_timer(wd + 0.2).timeout
+	Voice.say([str(item.get("walk_audio", ""))])
+	walking = true
 	await _picture_home()
+	walking = false
+	await Voice.wait_idle()
 	main.hero.cheer()
-	var home_line: String = "home_" + str(item.get("pronoun", "det"))
-	await get_tree().create_timer(Voice.say([home_line]) + 0.6).timeout
+	await get_tree().create_timer(Voice.say([str(item.get("done_audio", ""))]) + 0.6).timeout
 	for st: Stone in stones:
 		create_tween().tween_property(st, "global_position:y", st.global_position.y - 1.5, 0.5)
 	if picture:

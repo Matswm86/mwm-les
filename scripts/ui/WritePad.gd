@@ -16,7 +16,6 @@ var show_start_dot: bool = false
 var show_trace: bool = false
 var compare_alpha: float = 0.0
 var patch_alpha: float = 0.0
-var wash: float = -1.0  # story beat: a wave sweeps over the sand, 0 -> 1 (-1 = off)
 var box: Rect2
 var _t: float = 0.0
 var _grain: PackedVector2Array = PackedVector2Array()
@@ -114,36 +113,12 @@ func _draw() -> void:
 		_draw_model()
 	if compare_alpha > 0.0:
 		_draw_compare()
-	if wash >= 0.0:
-		_draw_wash()
 	if show_start_dot:
 		var p: Vector2 = model_start()
 		var r: float = 65.0 * (1.0 + 0.08 * sin(_t * TAU / GameTune.HINT_PULSE_PERIOD_SEC))
 		draw_circle(p, r, Color(GameTune.GOLD, 0.35))
 		_draw_dotted_circle(p, r * 0.8)
 		draw_circle(p, 16.0, GameTune.GOLD)
-
-
-## A wave band (sea blue with a white foam edge) crossing the patch left to
-## right, clipped to the patch.
-func _draw_wash() -> void:
-	var pr: Rect2 = patch_rect().grow(-10.0)
-	var front: float = lerpf(pr.position.x - 120.0, pr.end.x + 420.0, wash)
-	var foam: PackedVector2Array = PackedVector2Array()
-	var steps: int = 24
-	for k in steps + 1:
-		var y: float = lerpf(pr.position.y, pr.end.y, float(k) / float(steps))
-		var x: float = front + 26.0 * sin(y * 0.03 + _t * 6.0)
-		foam.append(Vector2(clampf(x, pr.position.x, pr.end.x), y))
-	var back: float = clampf(front - 420.0, pr.position.x, pr.end.x)
-	var water: PackedVector2Array = PackedVector2Array()
-	water.append(Vector2(back, pr.end.y))
-	water.append(Vector2(back, pr.position.y))
-	water.append_array(foam)
-	if foam[0].x - back > 2.0 or foam[foam.size() - 1].x - back > 2.0:
-		draw_colored_polygon(water, Color(GameTune.SEA_SHALLOW, 0.85))
-	if front > pr.position.x and front < pr.end.x + 30.0:
-		draw_polyline(foam, Color(GameTune.FOAM, 0.95), 30.0, true)
 
 
 func _draw_dotted_circle(c: Vector2, r: float) -> void:

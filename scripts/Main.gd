@@ -2,12 +2,13 @@ class_name MainScene
 extends Node3D
 ## Enhjørningenga, first playable slice: the island hub with three lit
 ## stations, the station visits (engine -> activity -> engine), colour
-## restoration, the read-to-a-grown-up step and the parent gate.
+## restoration, the read-to-a-grown-up step and the parent gate. Owns Hysj's
+## ship in the bay and the things found sounds bring back (docs/SCRIPT.md).
 
 enum Mode { INTRO, HUB, FLYING, ACTIVITY, GROWNUP, PARENT, SUNSET, STORY }
 
 const STATIONS: Array[String] = ["hor_og_finn", "skriv", "ordbro"]
-const NEXT_LINES: Array[String] = ["next_find", "next_write", "next_bridge"]
+const NEXT_LINES: Array[String] = ["hub_next_find", "hub_next_write", "hub_next_bridge"]
 const HUB_GHOST_AFTER_SEC: float = 7.0
 
 var mode: Mode = Mode.INTRO
@@ -16,6 +17,8 @@ var rig: CameraRig
 var pip: Pip
 var hero: Hero
 var unicorn: Unicorn
+var ship: Ship
+var things: Dictionary = {}  # sound label -> the thing it brought back this session
 var hud: Hud
 var beacons: Array[Beacon] = []
 var activities: Array[Activity] = []
@@ -38,11 +41,15 @@ func _ready() -> void:
 	add_child(hero)
 	hero.global_position = world.knight_spot
 	hero.face(world.knight_spot + Vector3(-0.6, 0, 1.0))
+	# the unicorn is a silent island animal: no part in the story
 	unicorn = Unicorn.new()
 	add_child(unicorn)
-	unicorn.stripes = Game.unicorn_stripes
+	unicorn.stripes = Unicorn.STRIPES
 	unicorn.global_position = world.unicorn_spot
 	unicorn.rotation.y = deg_to_rad(-20.0)
+	ship = Ship.new()
+	add_child(ship)
+	anchor_ship()
 	pip = Pip.new()
 	add_child(pip)
 	pip.cam = rig.cam
@@ -69,8 +76,6 @@ func _ready() -> void:
 	for i in 3:
 		if Game.restored[i]:
 			world.set_zone_now(i, 1.0)
-	if Game.unicorn_stripes == 0:
-		unicorn.sad.call_deferred()
 	if Game.story_seen:
 		_intro()
 	else:
@@ -99,7 +104,7 @@ func _intro() -> void:
 	)
 	await tw.finished
 	pip.giggle()
-	await get_tree().create_timer(Voice.say(["pip_hello"]) + 0.2).timeout
+	await get_tree().create_timer(Voice.say(["hub_hello"]) + 0.2).timeout
 	_enter_hub()
 
 
@@ -157,9 +162,10 @@ func _process(delta: float) -> void:
 		return
 	_hub_idle += delta
 	if _hub_idle >= HUB_GHOST_AFTER_SEC and not Voice.is_busy():
+		_hub_idle = 0.0
 		var b: Beacon = beacons[_next]
 		hud.ghost.tap(func() -> Vector2: return rig.cam.unproject_position(b.global_position))
-		Voice.repeat_prompt()
+		Voice.say(["hub_idle"])
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -200,7 +206,7 @@ func _hub_touch(event: InputEvent) -> void:
 		if _next >= 0:
 			Voice.repeat_prompt()
 		else:
-			Voice.say(["pip_hello"])
+			Voice.say(["hub_pip"])
 		return
 	var hp: Vector2 = rig.cam.unproject_position(hero.global_position + Vector3(0, 0.8, 0))
 	if t.position.distance_to(hp) < 150.0:
@@ -224,7 +230,7 @@ func start_station(i: int) -> void:
 	pip.go_home()
 	Voice.sfx("whoosh")
 	var pose: Dictionary = act.camera_pose()
-	await rig.fly_to(pose["target"], pose["distance"], pose["pitch"], 0.0).finished
+	await rig.fly_to(pose["target"], pose["distance"], pose["pitch"], pose.get("yaw", 0.0)).finished
 	mode = Mode.ACTIVITY
 	hud.show_activity()
 	_visit_abort = false
@@ -288,7 +294,7 @@ func _restore(i: int) -> void:
 	Game.restored[i] = true
 	Game.save()
 	Voice.sfx("fanfare")
-	Voice.say(["restore"])
+	Voice.say(["hub_restore"])
 	hero.cheer()
 	await get_tree().create_timer(GameTune.ZONE_RESTORE_SEC + 0.6).timeout
 
@@ -321,16 +327,21 @@ func _on_answered(
 
 func _on_disengaged(item_id: StringName) -> void:
 	Game.engine.record_disengaged(str(item_id))
-	Voice.say(["break"])
+	Voice.say(["pause_taps"])
 	if current:
-		current.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.length("break"))
+		current.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.length("pause_taps"))
 
 
-## Movement break stub (GDD 5.3/6.9): Pip invites a breather, objects rest.
+## Movement break stub (GDD 5.3/6.9): Pip invites a short shake, objects rest.
+## Waits for the current line so nothing is ever played after a sound slot.
 func _movement_break() -> void:
-	Voice.then(["break"])
+	var act: Activity = current
+	var ids: Array = ["pause_move_1", "pause_move_2"]
+	await Voice.wait_idle()
+	if act != current:
+		return
 	pip.giggle()
-	current.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.length("break"))
+	act.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.say(ids))
 
 
 func _on_replay() -> void:
@@ -357,7 +368,7 @@ func _grownup_step() -> void:
 	card.words = Game.grownup_words()
 	hud.add_overlay(card)
 	_overlay = card
-	Voice.say(["grownup_read"], true)
+	Voice.say(["grown_read"], true)
 	card.heard.connect(func() -> void: _end_grownup(true))
 	card.no_adult.connect(func() -> void: _end_grownup(false))
 
@@ -369,21 +380,19 @@ func _end_grownup(heard: bool) -> void:
 	if heard:
 		Game.words_read_to_adult = Game.words_today.duplicate()
 		Voice.sfx("fanfare")
-		Voice.say(["grownup_thanks"])
+		Voice.say(["grown_thanks"])
 	else:
-		Voice.say(["grownup_later"])
+		Voice.say(["grown_later"])
 	await Voice.wait_idle()
 	_sunset()
 
 
-## Yawn, one offline idea, warm light. A new session needs a fresh tap.
+## Yawn, today's sound, one offline idea, goodbye, warm light (SCRIPT.md
+## scene 7). A new session needs a fresh tap.
 func _sunset() -> void:
 	mode = Mode.SUNSET
-	var line: Dictionary = Game.pick_offline_line()
-	var ids: Array = ["yawn"]
-	ids.append_array(line.get("audio", []))
-	Voice.say(ids)
 	create_tween().tween_method(world.set_sunset, 0.0, 1.0, 3.0)
+	_sunset_lines()
 	rig.fly_to(
 		hub_pose()["target"] + Vector3(0, 2, -6),
 		float(hub_pose()["distance"]) * 1.15,
@@ -394,11 +403,31 @@ func _sunset() -> void:
 	Game.save()
 
 
+## Each sequence ends on its slot; the next one starts after a pause.
+func _sunset_lines() -> void:
+	var sound: String = Game.most_practised()
+	var parts: Array = [["end_yawn"]]
+	if sound != "":
+		parts.append(["end_today", Game.phoneme_clip(sound)])
+	var line: Dictionary = Game.pick_offline_line()
+	if not line.is_empty():
+		parts.append(line.get("audio", []))
+	parts.append(["end_bye"])
+	for ids: Array in parts:
+		if mode != Mode.SUNSET:
+			return
+		await get_tree().create_timer(Voice.say(ids) + 0.4).timeout
+
+
 func _new_session() -> void:
 	create_tween().tween_method(world.set_sunset, 1.0, 0.0, 1.0)
+	Voice.stop()
 	visits_done = [false, false, false]
 	Game.words_today.clear()
 	Game.practised_today.clear()
+	Game.found_today.clear()
+	_clear_things()
+	ship.fill_jar()
 	Game.engine.model.start_session()
 	await (
 		rig.fly_to(hub_pose()["target"], hub_pose()["distance"], hub_pose()["pitch"], 0.0).finished
@@ -435,6 +464,77 @@ func _close_overlay() -> void:
 		_overlay.queue_free()
 		_overlay = null
 	_enter_hub()
+
+
+# ---------------------------------------------------------------- ship and found things
+
+
+## The ship at anchor in the bay, Hysj asleep by the full jar.
+func anchor_ship() -> void:
+	ship.global_position = world.ship_anchor
+	ship.rotation.y = world.ship_yaw
+	ship.fill_jar()
+	ship.sleep()
+
+
+## A found sound comes back (SCRIPT.md 2d). The first time this session its
+## thing appears; later it only hops. Returns the thing (or null).
+func bring_back(label: String) -> Node3D:
+	if things.has(label):
+		var t: Node3D = things[label]
+		var y0: float = t.position.y
+		var tw: Tween = t.create_tween()
+		tw.tween_property(t, "position:y", y0 + 0.6, 0.18).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(t, "position:y", y0, 0.22).set_trans(Tween.TRANS_BOUNCE).set_ease(
+			Tween.EASE_OUT
+		)
+		return t
+	var kind: String = str(
+		Game.engine.pack.skill(Game.skill_for_label(label)).get("back_thing", "")
+	)
+	var thing: Node3D = Props.make(kind)
+	if thing == null:
+		return null
+	add_child(thing)
+	things[label] = thing
+	var at: Vector3 = world.thing_spots.get(label, world.zone_centers[0])
+	var sc: float = float(GameTune.THING_SCALES.get(label, 0.75))
+	thing.global_position = at
+	thing.rotation.y = deg_to_rad(GameTune.FIND_CAM_YAW_DEG)
+	if label == "l":
+		thing.rotation.y = deg_to_rad(-90.0)  # the lamb looks toward the bridge
+	thing.scale = Vector3.ONE * 0.01
+	var grow: Tween = thing.create_tween()
+	grow.tween_property(thing, "scale", Vector3.ONE * sc, 0.5).set_trans(Tween.TRANS_BACK).set_ease(
+		Tween.EASE_OUT
+	)
+	if label == "s":  # the sun comes up
+		thing.global_position = at - Vector3(0, 6.0, 0)
+		grow.parallel().tween_property(thing, "global_position", at, 1.4).set_trans(
+			Tween.TRANS_SINE
+		)
+	burst(at + Vector3(0, 1.0, 0))
+	return thing
+
+
+func thing_spot(label: String) -> Vector3:
+	return world.thing_spots.get(label, world.zone_centers[0])
+
+
+func hide_things() -> void:
+	for t: Node3D in things.values():
+		t.visible = false
+
+
+func show_things() -> void:
+	for t: Node3D in things.values():
+		t.visible = true
+
+
+func _clear_things() -> void:
+	for t: Node3D in things.values():
+		t.queue_free()
+	things.clear()
 
 
 # ---------------------------------------------------------------- effects

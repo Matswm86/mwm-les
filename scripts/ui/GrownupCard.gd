@@ -42,7 +42,7 @@ func _ready() -> void:
 		b.color = Color(1.0, 0.97, 0.88)
 		b.resize(Vector2(slot_w - 40.0, 300))
 		b.position = Vector2(310 + slot_w * i, 290)
-		b.pressed.connect(func() -> void: Voice.say(["w_" + words[i]]))
+		b.pressed.connect(func() -> void: Voice.say(["ord_" + words[i]]))
 		add_child(b)
 		_word_labels.append(b)
 	var adult: RoundButton = RoundButton.new().setup(

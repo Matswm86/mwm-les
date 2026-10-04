@@ -1,9 +1,12 @@
 class_name Sandskriving
 extends Activity
-## Sandskriving, "watch then write" (GDD 0.2, 6.1). Pip writes the letter
-## stroke by stroke with its sound, the model fades to empty sand, then the
-## child writes it from memory. Lenient shape check, not scored in BKT.
-## Hints: 1 dotted start point, 2 Pip writes it again, 3 trace overlay (last).
+## Sandskriving, "watch then write" (GDD 0.2, 6.1, docs/SCRIPT.md scene 3).
+## Pip writes the letter stroke by stroke with its held sound, the model fades
+## to empty sand, then the child writes it from memory. Lenient shape check,
+## not scored in BKT. An accepted letter lifts out of the sand as a letter
+## stone and rolls off to the bridge; at the end of the visit the stones lie
+## ready by the bridge. Hints: 1 dotted start point, 2 Pip writes it again,
+## 3 trace overlay (last).
 
 enum Phase { IDLE, WATCH, WRITE, CHECK, DONE }
 
@@ -11,12 +14,15 @@ var pad: WritePad
 var phase: Phase = Phase.IDLE
 var skill: String = ""
 var model: Array[PackedVector2Array] = []
+var rolling: bool = false  # a stone is rolling to the bridge (screenshot bot)
+var payoff_shown: bool = false  # the stones by the bridge are on screen (screenshot bot)
 var _finger_down: bool = false
 var _since_up: float = -1.0
 var _pass: int = 0
 var _passes: int = 1
 var _watch_nag_ms: int = 0
-var _lifted: GlowLetter
+var _lifted: Stone
+var _pile: Array[Stone] = []  # letter stones by the bridge (this session)
 var _attempts: int = 0  # tries on this pass; the third only has to be near
 var _others: Array = []  # stroke models of every other letter (the lenient judge)
 var _orient: bool = false
@@ -48,42 +54,32 @@ func begin_visit() -> void:
 	create_tween().tween_property(pad, "patch_alpha", 1.0, 0.5)
 
 
-## Story: the letter lies in the sand, a wave washes it away. Pip: "Havet
-## har vasket bort bokstaven. Skriv den i sanden, så øya husker den!"
-func story_intro(first_task: Dictionary) -> void:
-	var sk: String = str(first_task.get("skill", ""))
-	var strokes: Array[PackedVector2Array] = WriteCheck.strokes_from_json(
-		Game.engine.pack.skill(sk).get("strokes", [])
-	)
-	pad.model = strokes
-	pad.model_progress = float(strokes.size())
-	await get_tree().create_timer(0.5).timeout
-	create_tween().tween_property(pad, "model_alpha", 1.0, 0.4)
-	await get_tree().create_timer(1.0).timeout
-	var d: float = Voice.say(["story_write"])
-	Voice.sfx("whoosh")
-	pad.wash = 0.0
-	var tw: Tween = create_tween()
-	tw.tween_property(pad, "wash", 1.0, 2.2).set_trans(Tween.TRANS_SINE)
-	tw.parallel().tween_property(pad, "model_alpha", 0.0, 0.8).set_delay(0.7)
-	await tw.finished
-	pad.wash = -1.0
-	pad.model_progress = 0.0
-	await get_tree().create_timer(maxf(d - 2.2, 0.0) + 0.2).timeout
+## Every visit (write_in_1-4): writing makes letter stones for the bridge.
+func story_intro(_first_task: Dictionary) -> void:
+	var ids: Array = ["write_in_1", "write_in_2", "write_in_3", "write_in_4"]
+	var d: float = Voice.say(ids)
+	await get_tree().create_timer(Voice.offset_of(ids, 3)).timeout
+	main.pip.point_toward(main.world.bridge_start + Vector3(0, 1.0, 0))
+	await get_tree().create_timer(d - Voice.offset_of(ids, 3) + 0.2).timeout
+	main.pip.go_home()
 
 
-## Payoff: the meadow's unicorn gets one more colour ribbon in its mane.
+## Payoff: the stones written this visit lie ready by the bridge frame.
 func story_payoff() -> void:
 	create_tween().tween_property(pad, "patch_alpha", 0.0, 0.4)
-	var u: Unicorn = main.unicorn
-	var at: Vector3 = u.global_position + Vector3(0, 1.1, 0)
-	await main.rig.fly_to(at, GameTune.CAM_UNICORN_DISTANCE, 18.0, 0.0, 1.4).finished
-	u.gain_stripe()
-	Game.unicorn_stripes = u.stripes
-	Game.save()
-	main.burst(u.global_position + Vector3(0, 2.0, 0))
+	var at: Vector3 = _pile_center()
+	await (
+		main
+		. rig
+		. fly_to(at + Vector3(0, 0.6, 0), GameTune.CAM_PILE_DISTANCE, 30.0, 0.0, 1.4)
+		. finished
+	)
+	payoff_shown = true
+	for st: Stone in _pile:
+		st.glyph.pop()
+	main.burst(at + Vector3(0, 1.0, 0))
 	Voice.sfx("fanfare")
-	await get_tree().create_timer(Voice.say(["payoff_write"]) + 1.0).timeout
+	await get_tree().create_timer(Voice.say(["write_payoff"]) + 0.8).timeout
 
 
 func end_visit() -> void:
@@ -94,9 +90,9 @@ func end_visit() -> void:
 		pad.patch_alpha = 0.0
 		pad.clear_ink()
 		pad.model_alpha = 0.0
-	if _lifted:
+	if _lifted and not _pile.has(_lifted):
 		_lifted.queue_free()
-		_lifted = null
+	_lifted = null
 
 
 func start_item(p_item: Dictionary, p_format: Dictionary, _hint_start: int) -> void:
@@ -127,26 +123,37 @@ static func other_models(target: String) -> Array:
 	return out
 
 
+## Pass 1 watches the model first (with the link line); pass 2 writes from
+## memory (write_again_2).
 func _run_pass(with_model: bool) -> void:
 	_attempts = 0
 	pad.clear_ink()
 	pad.show_start_dot = false
 	pad.show_trace = false
 	if with_model:
-		await _watch()
-	_start_write()
+		await _watch(true)
+		_start_write(["write_turn_1"] + _turn_prompt())
+	else:
+		_start_write(["write_again_2"])
 
 
-func _watch() -> void:
+## "Skriv bokstaven som sier [x]": the prompt replayed on Pip tap and idle.
+func _turn_prompt() -> Array:
+	return ["write_turn_2", Game.phoneme_clip(skill)]
+
+
+## write_watch, then the model with its held sound. With `link`: one more
+## [x] on its own, then "Sol begynner med den lyden." as a separate line.
+func _watch(link: bool) -> void:
 	phase = Phase.WATCH
 	active = false
 	main.pip.point_at(main.world.write_patch + Vector3(1.5, 0.5, 0))
-	await get_tree().create_timer(Voice.say(["watch"])).timeout
+	await get_tree().create_timer(Voice.say(["write_watch"])).timeout
 	await draw_model()
 	await get_tree().create_timer(LearnBalance.MODEL_HOLD_SEC).timeout
-	var ph: String = Game.phoneme_clip(skill)
-	var ex: String = str(Game.engine.pack.skill(skill).get("example_audio", ""))
-	await get_tree().create_timer(Voice.say([ph, "som_i", ex])).timeout
+	if link:
+		await get_tree().create_timer(Voice.sound(Game.phoneme_clip(skill)) + 0.35).timeout
+		await get_tree().create_timer(Voice.say([Game.sound_clip(skill, "link")])).timeout
 	var fade: Tween = create_tween()
 	fade.tween_property(pad, "model_alpha", 0.0, LearnBalance.MODEL_FADE_SEC)
 	await fade.finished
@@ -154,9 +161,9 @@ func _watch() -> void:
 
 
 ## Pip's pen draws the model stroke by stroke at a calm, even speed (time per
-## stroke follows its length); the letter's sound plays while the pen moves.
+## stroke follows its length); the held sound plays while the pen moves.
 func draw_model() -> void:
-	var ph: String = Game.phoneme_clip(skill)
+	var ph: String = Game.sound_clip(skill, "hold")
 	pad.model_alpha = 1.0
 	pad.model_progress = 0.0
 	for si in model.size():
@@ -178,29 +185,46 @@ func draw_model() -> void:
 		await get_tree().create_timer(0.25).timeout
 
 
-func _start_write() -> void:
+## Empty sand, the child's turn. `ids` is what Pip says now; the replayable
+## prompt is always write_turn_2 + [x] (write_again_2 on pass 2).
+func _start_write(ids: Array) -> void:
 	phase = Phase.WRITE
 	pad.show_start_dot = hints.level >= LearnBalance.WRITE_HINT_START_DOT
 	pad.show_trace = hints.level >= LearnBalance.WRITE_HINT_TRACE
-	var d: float = Voice.say(["your_turn", Game.phoneme_clip(skill)], true)
+	var d: float = Voice.say(ids)
+	Voice.set_prompt(["write_again_2"] if ids == ["write_again_2"] else _turn_prompt())
 	mark_prompt_end(d)
 	_since_up = -1.0
 	active = true
 	reset_idle()
 
 
+## One line per hint level (SCRIPT.md 3): 1 "Begynn ved prikken.", 2 "Se en
+## gang til." + Pip writes it again + write_turn_2, 3 "Følg prikkene med
+## fingeren."
 func apply_hint(level: int) -> void:
 	if phase != Phase.WRITE:
 		return
 	if level >= LearnBalance.WRITE_HINT_TRACE:
 		pad.show_trace = true
 		pad.show_start_dot = true
-		Voice.repeat_prompt()
+		mark_prompt_end(Voice.say(["write_hint_3"]))
 	elif level == LearnBalance.WRITE_HINT_REMODEL:
-		_run_pass(true)
+		_remodel()
 	elif level >= LearnBalance.WRITE_HINT_START_DOT:
 		pad.show_start_dot = true
-		Voice.repeat_prompt()
+		mark_prompt_end(Voice.say(["write_hint_1"]))
+
+
+## Hint 2: "Se en gang til.", the model again (no link line), then the turn.
+func _remodel() -> void:
+	var tries: int = _attempts
+	pad.clear_ink()
+	await get_tree().create_timer(Voice.say(["write_hint_2"])).timeout
+	await _watch(false)
+	_attempts = tries
+	pad.show_start_dot = true
+	_start_write(_turn_prompt())
 
 
 func touch(event: InputEvent) -> void:
@@ -208,7 +232,7 @@ func touch(event: InputEvent) -> void:
 		var tw: InputEventScreenTouch = event as InputEventScreenTouch
 		if tw and tw.pressed and Time.get_ticks_msec() > _watch_nag_ms:
 			_watch_nag_ms = Time.get_ticks_msec() + 4000
-			Voice.then(["watch_first"])
+			Voice.then(["write_wait"])
 		return
 	if phase != Phase.WRITE or frozen:
 		return
@@ -218,7 +242,7 @@ func touch(event: InputEvent) -> void:
 			_finger_down = true
 			_since_up = -1.0
 			pad.begin_stroke(t.position)
-			Voice.sound(Game.phoneme_clip(skill))
+			Voice.sound(Game.sound_clip(skill, "hold"))
 			reset_idle()
 		elif not t.pressed and _finger_down:
 			_finger_down = false
@@ -227,7 +251,7 @@ func touch(event: InputEvent) -> void:
 		var dr: InputEventScreenDrag = event as InputEventScreenDrag
 		pad.extend_stroke(dr.position)
 		if not Voice.sound_playing():
-			Voice.sound(Game.phoneme_clip(skill))
+			Voice.sound(Game.sound_clip(skill, "hold"))
 		reset_idle()
 
 
@@ -282,12 +306,13 @@ func _check() -> void:
 
 
 ## A mirrored letter is not a failure (GDD 6.1): the child's letter stays faint,
-## Pip says it turns the other way and writes it again on top, then the child
-## tries again with the start point.
+## Pip says it turns the other way, writes it again on top (write_watch +
+## model), then the child tries again with the start point (write_hint_1).
 func _mirrored() -> void:
 	create_tween().tween_property(pad, "ink_alpha", 0.4, 0.3)
 	main.pip.point_at(main.world.write_patch + Vector3(1.5, 0.5, 0))
-	await get_tree().create_timer(Voice.say(["mirror"]) + 0.2).timeout
+	await get_tree().create_timer(Voice.say(["write_mirror"]) + 0.2).timeout
+	await get_tree().create_timer(Voice.say(["write_watch"])).timeout
 	await draw_model()
 	await get_tree().create_timer(1.5).timeout
 	var tw: Tween = create_tween()
@@ -299,7 +324,7 @@ func _mirrored() -> void:
 	hints.level = maxi(hints.level, LearnBalance.WRITE_HINT_START_DOT)
 	hints.highest = maxi(hints.highest, hints.level)
 	phase = Phase.WRITE
-	_start_write()
+	_start_write(["write_hint_1"])
 
 
 func _accepted() -> void:
@@ -313,25 +338,23 @@ func _accepted() -> void:
 	tw2.parallel().tween_property(pad, "patch_alpha", 0.0, 0.5)
 	pad.show_start_dot = false
 	pad.show_trace = false
-	_lift_letter()
+	_lift_stone()
 	var ph: String = Game.phoneme_clip(skill)
-	var ex: String = str(Game.engine.pack.skill(skill).get("example_audio", ""))
 	Voice.chime()
+	# the stone says its sound, then Pip says what the child did
+	await get_tree().create_timer(Voice.sound(ph) + 0.35).timeout
 	main.pip.giggle()
-	await get_tree().create_timer(Voice.say([ph, "som_i", ex]) + 0.4).timeout
+	await get_tree().create_timer(Voice.say(["write_right", ph]) + 0.3).timeout
+	await _roll_to_bridge(_lifted)
 	_pass += 1
 	if _pass < _passes:
 		# pass 2: write straight from memory, no model first (GDD 6.1)
 		hints.level = 1 if hints.highest >= LearnBalance.WRITE_HINT_REMODEL else 0
-		if _lifted:
-			_lifted.sink(3.0)
 		create_tween().tween_property(pad, "patch_alpha", 1.0, 0.4)
 		_run_pass(false)
 		return
 	phase = Phase.DONE
-	await get_tree().create_timer(0.6).timeout
-	if _lifted:
-		_lifted.sink(3.0)
+	await get_tree().create_timer(0.3).timeout
 	create_tween().tween_property(pad, "patch_alpha", 1.0, 0.4)
 	item_done.emit()
 
@@ -345,31 +368,84 @@ func _not_accepted() -> void:
 	var lv: int = mini(hints.on_wrong(), LearnBalance.WRITE_HINT_TRACE)
 	hints.level = lv
 	phase = Phase.WRITE
+	# one calm line: "Prøv en gang til." (R10), then the hint for the new level
+	await get_tree().create_timer(Voice.say(["write_retry"]) + 0.2).timeout
 	if lv == LearnBalance.WRITE_HINT_REMODEL:
-		await get_tree().create_timer(Voice.say(["write_again"])).timeout
-		var tries: int = _attempts
-		await _run_pass(true)
-		_attempts = tries
-		pad.show_start_dot = true
+		await _remodel()
 		return
-	_start_write()
+	var ids: Array = _turn_prompt()
+	if lv >= LearnBalance.WRITE_HINT_TRACE:
+		ids = ["write_hint_3"]
+	elif lv >= LearnBalance.WRITE_HINT_START_DOT:
+		ids = ["write_hint_1"]
+	_start_write(ids)
 
 
-func _lift_letter() -> void:
-	if _lifted:
+## The child's letter lifts out of the sand as a letter stone.
+func _lift_stone() -> void:
+	if _lifted and not _pile.has(_lifted):
 		_lifted.queue_free()
 	var p: Vector3 = main.rig.ground_point(pad.ink_bounds().get_center(), main.world.write_patch.y)
 	p.y = main.world.write_patch.y
-	_lifted = GlowLetter.new()
-	_lifted.setup(Game.label(skill), 2.2)
+	_lifted = Stone.new()
+	_lifted.setup(Game.label(skill), skill)
 	add_child(_lifted)
-	_lifted.global_position = p
-	_lifted.set_base_y(p.y)
+	_lifted.scale = Vector3.ONE * GameTune.WRITE_STONE_SCALE
+	_lifted.global_position = p - Vector3(0, 1.0, 0)
 	_lifted.rotation.y = main.rig.cam.global_rotation.y
-	# lean back to face the steep writing camera
-	_lifted.rotation.x = -deg_to_rad(GameTune.CAM_WRITE_PITCH_DEG) * 0.8
-	_lifted.rise_from(1.6, 0.0)
+	_lifted.home = p
+	(
+		create_tween()
+		. tween_property(_lifted, "global_position", p, 0.5)
+		. set_trans(Tween.TRANS_BACK)
+		. set_ease(Tween.EASE_OUT)
+	)
 	main.burst(p + Vector3(0, 0.6, 0))
+
+
+## The stone rolls off toward the bridge and joins the pile there.
+func _roll_to_bridge(st: Stone) -> void:
+	if st == null:
+		return
+	var from: Vector3 = st.global_position
+	var dir: Vector3 = main.world.bridge_start - from
+	dir.y = 0.0
+	dir = dir.normalized()
+	var to: Vector3 = from + dir * GameTune.WRITE_STONE_ROLL_M
+	var axis: Vector3 = Vector3.UP.cross(dir).normalized()
+	var b0: Basis = st.global_basis
+	Voice.sfx("whoosh")
+	rolling = true
+	var tw: Tween = create_tween()
+	tw.tween_method(
+		func(k: float) -> void:
+			var q: Vector3 = from.lerp(to, k)
+			q.y = main.world.ground_y(q) + absf(sin(k * PI * 4.0)) * 0.25
+			st.global_position = q
+			st.global_basis = Basis(axis, k * TAU * 2.0) * b0,
+		0.0,
+		1.0,
+		1.3
+	)
+	await tw.finished
+	rolling = false
+	_pile.append(st)
+	var k: int = _pile.size() - 1
+	var spot: Vector3 = (
+		_pile_center() + Vector3(1.4 * float(k % 3) - 1.4, 0, 1.25 * floorf(float(k) / 3.0))
+	)
+	spot = main.world.on_ground(spot.x, spot.z)
+	st.global_basis = Basis()
+	st.scale = Vector3.ONE * GameTune.PILE_STONE_SCALE
+	st.global_position = spot
+	st.home = spot
+
+
+func _pile_center() -> Vector3:
+	var b: Vector3 = main.world.bridge_start
+	var d: Vector3 = (main.world.bridge_end - b).normalized()
+	var p: Vector3 = b - d * 1.6 + Vector3(-d.z, 0, d.x) * 1.5
+	return main.world.on_ground(p.x, p.z)
 
 
 ## For the screenshot bot: the model letter as screen-space strokes.

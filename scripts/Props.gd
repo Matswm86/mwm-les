@@ -3,7 +3,9 @@ extends RefCounted
 ## Word pictures built from primitives in the cel-shaded look, one merged mesh
 ## + outline each, about 2 m tall, standing on their local origin:
 ## sun (sol), ice cream (is), lamb (lam), llama (lama), slime (slim),
-## glue bottle (lim), salami (salami).
+## glue bottle (lim), salami (salami), and the things a found sound brings
+## back in Hør og finn (docs/SCRIPT.md 2d): monkey in a palm (ape), cheese
+## (ost), mouse by a rock (mus). Placeholder primitives (docs/ASSETS.md).
 
 
 static func make(kind: String) -> Node3D:
@@ -22,6 +24,12 @@ static func make(kind: String) -> Node3D:
 			return _glue()
 		"salami":
 			return _salami()
+		"monkey":
+			return _monkey()
+		"cheese":
+			return _cheese()
+		"mouse":
+			return _mouse()
 	return null
 
 
@@ -314,3 +322,124 @@ static func _lamb() -> Node3D:
 		p.append([MeshKit.cylinder(0.07, 0.07, 0.5, 6), MeshKit.xf(leg), face])
 	MeshKit.instance(MeshKit.merge(p), MeshKit.with_outline(MeshKit.char_toon(), 0.0035), root)
 	return root
+
+
+## A small palm with a brown monkey hugging the trunk, face to +z.
+static func _monkey() -> Node3D:
+	var p: Array = []
+	World.palm_tree(p, Vector3(0, 0, -0.25), 1.0, Vector3(0.2, 0, -0.1))
+	var fur: Color = Color(0.48, 0.30, 0.17)
+	var skin: Color = Color(0.93, 0.76, 0.58)
+	var c: Vector3 = Vector3(0.0, 1.45, 0.05)
+	p.append([MeshKit.sphere(0.32, 14, 10), MeshKit.xf(c, Vector3(0.9, 1.15, 0.8)), fur])
+	p.append(
+		[
+			MeshKit.sphere(0.22, 12, 8),
+			MeshKit.xf(c + Vector3(0, 0, 0.18), Vector3(0.8, 0.9, 0.5)),
+			skin
+		]
+	)
+	var h: Vector3 = c + Vector3(0, 0.55, 0.06)
+	p.append([MeshKit.sphere(0.28, 14, 10), MeshKit.xf(h), fur])
+	p.append(
+		[
+			MeshKit.sphere(0.2, 12, 8),
+			MeshKit.xf(h + Vector3(0, -0.05, 0.16), Vector3(1.1, 0.85, 0.6)),
+			skin
+		]
+	)
+	for x: float in [-0.3, 0.3]:
+		p.append([MeshKit.sphere(0.11, 10, 6), MeshKit.xf(h + Vector3(x, 0.04, 0)), skin])
+		# arms and legs round the trunk
+		p.append(
+			[
+				MeshKit.cylinder(0.06, 0.07, 0.5, 6),
+				MeshKit.xf(c + Vector3(x * 0.9, 0.2, -0.12), Vector3.ONE, Vector3(70, 0, 0)),
+				fur
+			]
+		)
+		p.append(
+			[
+				MeshKit.cylinder(0.07, 0.08, 0.45, 6),
+				MeshKit.xf(c + Vector3(x * 0.85, -0.3, -0.1), Vector3.ONE, Vector3(65, 0, 0)),
+				fur
+			]
+		)
+	p.append(
+		[
+			MeshKit.cylinder(0.04, 0.05, 0.7, 6),
+			MeshKit.xf(c + Vector3(0.3, -0.45, 0.1), Vector3.ONE, Vector3(0, 0, -50)),
+			fur
+		]
+	)
+	_face(p, h + Vector3(0, 0.03, 0.27), 0.08, 0.045)
+	return _finish(p)
+
+
+## A big block of cheese with holes on the front and top, and a face.
+static func _cheese() -> Node3D:
+	var p: Array = []
+	var gold: Color = Color(1.0, 0.84, 0.32)
+	var hole: Color = Color(0.86, 0.62, 0.16)
+	p.append([MeshKit.box(Vector3(1.7, 1.0, 1.1)), MeshKit.xf(Vector3(0, 0.5, 0)), gold])
+	for h: Vector3 in [
+		Vector3(-0.55, 0.25, 0.55),
+		Vector3(0.6, 0.72, 0.55),
+		Vector3(0.62, 0.22, 0.55),
+		Vector3(-0.68, 0.78, 0.55)
+	]:
+		p.append([MeshKit.sphere(0.13, 12, 8), MeshKit.xf(h, Vector3(1, 1, 0.25)), hole])
+	for h2: Vector3 in [
+		Vector3(-0.3, 1.0, -0.2), Vector3(0.45, 1.0, 0.15), Vector3(0.05, 1.0, -0.35)
+	]:
+		p.append([MeshKit.sphere(0.15, 12, 8), MeshKit.xf(h2, Vector3(1, 0.2, 1)), hole])
+	_face(p, Vector3(0.0, 0.55, 0.56), 0.2, 0.08)
+	return _finish(p)
+
+
+## A grey mouse peeking out beside a rock.
+static func _mouse() -> Node3D:
+	var p: Array = []
+	var grey: Color = Color(0.66, 0.64, 0.68)
+	var pink: Color = Color(1.0, 0.68, 0.74)
+	p.append(
+		[
+			MeshKit.sphere(0.7, 12, 8),
+			MeshKit.xf(Vector3(-0.55, 0.45, -0.2), Vector3(1.2, 0.85, 1.0)),
+			GameTune.ROCK
+		]
+	)
+	p.append(
+		[
+			MeshKit.sphere(0.32, 14, 10),
+			MeshKit.xf(Vector3(0.25, 0.3, 0.1), Vector3(1.0, 0.85, 1.2)),
+			grey
+		]
+	)
+	var h: Vector3 = Vector3(0.3, 0.62, 0.3)
+	p.append([MeshKit.sphere(0.22, 14, 10), MeshKit.xf(h, Vector3(1.0, 0.95, 1.1)), grey])
+	p.append([MeshKit.sphere(0.06, 8, 5), MeshKit.xf(h + Vector3(0, -0.04, 0.24)), pink])
+	for x: float in [-0.18, 0.18]:
+		p.append(
+			[
+				MeshKit.sphere(0.15, 12, 8),
+				MeshKit.xf(h + Vector3(x, 0.2, -0.02), Vector3(1, 1, 0.35)),
+				grey
+			]
+		)
+		p.append(
+			[
+				MeshKit.sphere(0.1, 10, 6),
+				MeshKit.xf(h + Vector3(x, 0.2, 0.02), Vector3(1, 1, 0.3)),
+				pink
+			]
+		)
+	p.append(
+		[
+			MeshKit.cylinder(0.025, 0.03, 0.6, 6),
+			MeshKit.xf(Vector3(0.5, 0.15, -0.15), Vector3.ONE, Vector3(0, 30, 70)),
+			pink
+		]
+	)
+	_face(p, h + Vector3(0, 0.05, 0.19), 0.08, 0.035)
+	return _finish(p)

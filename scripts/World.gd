@@ -20,7 +20,9 @@ var bridge_start: Vector3
 var bridge_end: Vector3
 var islet_picture_spot: Vector3
 var unicorn_spot: Vector3
-var flower_spot: Vector3
+var ship_anchor: Vector3  # Hysj's ship in the bay off the Hør og finn beach
+var ship_yaw: float = 0.0  # radians; the hull lies along the coast
+var thing_spots: Dictionary = {}  # sound label -> where its found thing appears
 var write_patch: Vector3
 var knight_spot: Vector3
 var sun: DirectionalLight3D
@@ -118,8 +120,31 @@ func _layout() -> void:
 	bridge_end.y = 0.35
 	islet_picture_spot = GameTune.ISLET_CENTER + Vector3(0.3, 2.6, -0.4)
 	unicorn_spot = station_point(GameTune.UNICORN_ANGLE, GameTune.UNICORN_INSET)
-	var a: Vector3 = zone_centers[0]
-	flower_spot = on_ground(a.x - 1.2, a.z - 2.6)
+	var ts: float = deg_to_rad(GameTune.SHIP_ANGLE_DEG)
+	var out: Vector3 = Vector3(cos(ts), 0, sin(ts))
+	var along: Vector3 = Vector3(-sin(ts), 0, cos(ts))
+	ship_anchor = out * (coast(ts, GameTune.ISLAND_RADIUS) + GameTune.SHIP_OFFSHORE_M)
+	# the hull lies along the coast, its deck side (+z) toward the island
+	ship_yaw = atan2(-along.z, along.x)
+	for l: String in GameTune.THING_SPOTS:
+		var spot: Vector3 = GameTune.THING_SPOTS[l]
+		if l == "l":  # the lamb stands on the little island
+			thing_spots[l] = on_ground(
+				GameTune.ISLET_CENTER.x + spot.x, GameTune.ISLET_CENTER.z + spot.z
+			)
+		elif l == "s":  # the sun rises over the sea, ahead of the Hør og finn view
+			var y: float = deg_to_rad(GameTune.FIND_CAM_YAW_DEG)
+			var ahead: Vector3 = Vector3(-sin(y), 0, -cos(y))
+			var right: Vector3 = Vector3(cos(y), 0, -sin(y))
+			thing_spots[l] = (
+				Vector3(zone_centers[0].x, spot.y, zone_centers[0].z)
+				+ ahead * spot.x
+				+ right * spot.z
+			)
+		else:
+			var p: Vector3 = station_point(spot.x, spot.y)
+			p.y += spot.z
+			thing_spots[l] = p
 	knight_spot = on_ground(bridge_start.x - dir.x * 1.6 - 1.4, bridge_start.z - 1.6)
 
 

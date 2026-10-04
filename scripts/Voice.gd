@@ -3,12 +3,18 @@ extends Node
 ## letter sounds on touch, and small sound effects. Timing runs on clip
 ## lengths, not on playback callbacks, so it behaves the same with the Dummy
 ## audio driver in tests.
+## Slot clips ([lyd:x], [ord:x], [lydering:x] in docs/SCRIPT.md) only ever come
+## last in a sequence, after a short pause: nothing is played after a slot.
 
 const CLIP_PATH: String = "res://assets/audio/tts_%s.mp3"
 const SFX_PATH: String = "res://assets/audio/sfx_%s.wav"
+const MARKS_PATH: String = "res://content/nb_reading/clip_marks.json"
+const SLOT_PREFIXES: Array[String] = ["lyd_", "ord_", "lydering_"]
 const GAP_SEC: float = 0.12
+const SLOT_PAUSE_SEC: float = 0.3  # extra pause before a slot clip
 const MISSING_SEC: float = 0.4
 
+var sequence_errors: int = 0  # sequences that put a clip after a slot (tests read this)
 var _voice: AudioStreamPlayer
 var _sound: AudioStreamPlayer
 var _fx: AudioStreamPlayer
@@ -18,9 +24,15 @@ var _sound_until: float = 0.0
 var _last_prompt: Array[String] = []
 var _cache: Dictionary = {}
 var _chime_step: int = 0
+var _playing: String = ""
+var _marks: Dictionary = {}  # clip id -> Array of sound start times (s)
 
 
 func _ready() -> void:
+	if FileAccess.file_exists(MARKS_PATH):
+		var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(MARKS_PATH))
+		if d is Dictionary:
+			_marks = (d as Dictionary).get("marks", {})
 	_voice = AudioStreamPlayer.new()
 	_sound = AudioStreamPlayer.new()
 	_fx = AudioStreamPlayer.new()
@@ -53,13 +65,48 @@ func length(id: String) -> float:
 
 func total_length(ids: Array) -> float:
 	var t: float = 0.0
-	for id: Variant in ids:
-		t += length(str(id)) + GAP_SEC
+	for k in ids.size():
+		t += length(str(ids[k])) + GAP_SEC
+		if k + 1 < ids.size() and is_slot(str(ids[k + 1])):
+			t += SLOT_PAUSE_SEC
 	return t
+
+
+## Seconds from the start of a sequence until clip `index` in it begins.
+func offset_of(ids: Array, index: int) -> float:
+	return (
+		total_length(ids.slice(0, index))
+		+ (SLOT_PAUSE_SEC if index > 0 and is_slot(str(ids[index])) else 0.0)
+	)
+
+
+static func is_slot(id: String) -> bool:
+	for p: String in SLOT_PREFIXES:
+		if id.begins_with(p):
+			return true
+	return false
+
+
+## Start times of the sounds inside a [lydering:x] clip (data, see MARKS_PATH).
+func marks(id: String) -> Array[float]:
+	var out: Array[float] = []
+	for m: Variant in _marks.get(id, []):
+		out.append(float(m))
+	return out
+
+
+## The rule from SCRIPT.md: a slot is always the last clip of a sequence.
+func _check(ids: Array) -> void:
+	for k in range(ids.size() - 1):
+		if is_slot(str(ids[k])):
+			sequence_errors += 1
+			push_error("Voice: %s plays after the slot %s" % [ids[k + 1], ids[k]])
+			return
 
 
 ## Say a sequence of clips now, replacing anything queued. Returns its length.
 func say(ids: Array, is_prompt: bool = false) -> float:
+	_check(ids)
 	_queue.clear()
 	for id: Variant in ids:
 		_queue.append(str(id))
@@ -71,8 +118,13 @@ func say(ids: Array, is_prompt: bool = false) -> float:
 	return total_length(ids)
 
 
-## Append clips after whatever is being said.
+## Append clips after whatever is being said (never after a slot).
 func then(ids: Array) -> void:
+	var tail: Array = _queue.duplicate()
+	if tail.is_empty() and is_busy() and _playing != "":
+		tail = [_playing]
+	tail.append_array(ids)
+	_check(tail)
 	for id: Variant in ids:
 		_queue.append(str(id))
 	if not is_busy():
@@ -86,6 +138,7 @@ func repeat_prompt() -> float:
 
 
 func set_prompt(ids: Array) -> void:
+	_check(ids)
 	_last_prompt.clear()
 	for id: Variant in ids:
 		_last_prompt.append(str(id))
@@ -136,6 +189,7 @@ func stop() -> void:
 	_queue.clear()
 	_voice.stop()
 	_busy_until = 0.0
+	_playing = ""
 
 
 func _process(_delta: float) -> void:
@@ -151,4 +205,7 @@ func _next() -> void:
 	_voice.stream = s
 	if s:
 		_voice.play()
+	_playing = id
 	_busy_until = _now() + length(id) + GAP_SEC
+	if not _queue.is_empty() and is_slot(_queue[0]):
+		_busy_until += SLOT_PAUSE_SEC

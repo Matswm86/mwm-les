@@ -22,10 +22,13 @@
    "group": "vowel",
    "world": 1,
    "audio": {
-    "short": "ph_a"
+    "short": "lyd_a",
+    "hold": "lyd_a_hold",
+    "intro": "intro_a",
+    "link": "write_link_a",
+    "back": "back_a"
    },
    "example_word": "ape",
-   "example_audio": "ex_ape",
    "strokes": [
     [
      [
@@ -169,7 +172,8 @@
       1.0
      ]
     ]
-   ]
+   ],
+   "back_thing": "monkey"
   },
   {
    "id": "gp_s",
@@ -181,10 +185,13 @@
    "group": "cont",
    "world": 1,
    "audio": {
-    "short": "ph_s"
+    "short": "lyd_s",
+    "hold": "lyd_s_hold",
+    "intro": "intro_s",
+    "link": "write_link_s",
+    "back": "back_s"
    },
    "example_word": "sol",
-   "example_audio": "ex_sol",
    "strokes": [
     [
      [
@@ -312,7 +319,8 @@
       0.92
      ]
     ]
-   ]
+   ],
+   "back_thing": "sun"
   },
   {
    "id": "gp_i",
@@ -324,10 +332,13 @@
    "group": "vowel",
    "world": 1,
    "audio": {
-    "short": "ph_i"
+    "short": "lyd_i",
+    "hold": "lyd_i_hold",
+    "intro": "intro_i",
+    "link": "write_link_i",
+    "back": "back_i"
    },
    "example_word": "is",
-   "example_audio": "ex_is",
    "strokes": [
     [
      [
@@ -349,7 +360,8 @@
       0.19
      ]
     ]
-   ]
+   ],
+   "back_thing": "ice"
   },
   {
    "id": "gp_l",
@@ -361,10 +373,13 @@
    "group": "cont",
    "world": 1,
    "audio": {
-    "short": "ph_l"
+    "short": "lyd_l",
+    "hold": "lyd_l_hold",
+    "intro": "intro_l",
+    "link": "write_link_l",
+    "back": "back_l"
    },
    "example_word": "lam",
-   "example_audio": "ex_lam",
    "strokes": [
     [
      [
@@ -376,7 +391,8 @@
       1.0
      ]
     ]
-   ]
+   ],
+   "back_thing": "lamb"
   },
   {
    "id": "gp_o",
@@ -388,10 +404,13 @@
    "group": "vowel",
    "world": 1,
    "audio": {
-    "short": "ph_o"
+    "short": "lyd_o",
+    "hold": "lyd_o_hold",
+    "intro": "intro_o",
+    "link": "write_link_o",
+    "back": "back_o"
    },
    "example_word": "ost",
-   "example_audio": "ex_ost",
    "strokes": [
     [
      [
@@ -527,7 +546,8 @@
       0.37
      ]
     ]
-   ]
+   ],
+   "back_thing": "cheese"
   },
   {
    "id": "gp_m",
@@ -539,10 +559,13 @@
    "group": "cont",
    "world": 1,
    "audio": {
-    "short": "ph_m"
+    "short": "lyd_m",
+    "hold": "lyd_m_hold",
+    "intro": "intro_m",
+    "link": "write_link_m",
+    "back": "back_m"
    },
    "example_word": "mus",
-   "example_audio": "ex_mus",
    "strokes": [
     [
      [
@@ -650,7 +673,8 @@
       1.0
      ]
     ]
-   ]
+   ],
+   "back_thing": "mouse"
   }
  ]
 }

@@ -145,6 +145,20 @@ func point_at(world_pos: Vector3) -> void:
 	_set_horn_glow(true)
 
 
+## Point at something far away or off screen (the jar on the ship, the
+## bridge): Pip swims to a spot `depth` m in front of the camera, toward the
+## thing's place on screen (kept inside the screen), so it stays big.
+func point_toward(world_pos: Vector3, depth: float = 8.0) -> void:
+	if cam == null:
+		return
+	var vp: Rect2 = cam.get_viewport().get_visible_rect().grow(-220.0)
+	var sp: Vector2 = cam.unproject_position(world_pos)
+	if cam.is_position_behind(world_pos):
+		sp = vp.size - sp
+	sp = sp.clamp(vp.position, vp.end)
+	guide_to(cam.project_position(sp + Vector2(-150, 110), depth))
+
+
 func go_home() -> void:
 	_pointing = false
 	_set_horn_glow(false)

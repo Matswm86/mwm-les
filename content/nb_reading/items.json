@@ -8,7 +8,7 @@
    "skills": [
     "gp_a"
    ],
-   "audio": "ph_a",
+   "audio": "lyd_a",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -21,7 +21,7 @@
    "skills": [
     "gp_s"
    ],
-   "audio": "ph_s",
+   "audio": "lyd_s",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -34,7 +34,7 @@
    "skills": [
     "gp_i"
    ],
-   "audio": "ph_i",
+   "audio": "lyd_i",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -47,7 +47,7 @@
    "skills": [
     "gp_l"
    ],
-   "audio": "ph_l",
+   "audio": "lyd_l",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -60,7 +60,7 @@
    "skills": [
     "gp_o"
    ],
-   "audio": "ph_o",
+   "audio": "lyd_o",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -73,7 +73,7 @@
    "skills": [
     "gp_m"
    ],
-   "audio": "ph_m",
+   "audio": "lyd_m",
    "activities": [
     "hor_og_finn",
     "skriv"
@@ -95,13 +95,22 @@
     "gp_i",
     "gp_s"
    ],
-   "audio": "w_is",
    "activities": [
     "ordbro"
    ],
+   "audio": "ord_is",
+   "card": true,
    "picture": "ice",
-   "pronoun": "den",
-   "story_audio": "stuck_is"
+   "story_audio": [
+    "bridge_is_1",
+    "bridge_is_2"
+   ],
+   "sound_out_audio": "lydering_is",
+   "word_again_audio": "bridge_word_again_is",
+   "ask_audio": "bridge_ask_is",
+   "says_audio": "bridge_says_is",
+   "walk_audio": "bridge_walk_is",
+   "done_audio": "bridge_done_is"
   },
   {
    "id": "w_sa",
@@ -119,7 +128,6 @@
     "gp_s",
     "gp_a"
    ],
-   "audio": "w_sa",
    "activities": []
   },
   {
@@ -138,7 +146,6 @@
     "gp_s",
     "gp_i"
    ],
-   "audio": "w_si",
    "activities": []
   },
   {
@@ -157,7 +164,6 @@
     "gp_l",
     "gp_a"
    ],
-   "audio": "w_la",
    "activities": []
   },
   {
@@ -176,7 +182,6 @@
     "gp_l",
     "gp_i"
    ],
-   "audio": "w_li",
    "activities": []
   },
   {
@@ -195,7 +200,6 @@
     "gp_l",
     "gp_o"
    ],
-   "audio": "w_lo",
    "activities": []
   },
   {
@@ -217,7 +221,6 @@
     "gp_a",
     "gp_l"
    ],
-   "audio": "w_sal",
    "activities": []
   },
   {
@@ -239,7 +242,6 @@
     "gp_i",
     "gp_l"
    ],
-   "audio": "w_sil",
    "activities": []
   },
   {
@@ -261,13 +263,7 @@
     "gp_i",
     "gp_m"
    ],
-   "audio": "w_lim",
-   "activities": [
-    "ordbro"
-   ],
-   "picture": "glue",
-   "pronoun": "det",
-   "story_audio": "stuck_lim"
+   "activities": []
   },
   {
    "id": "w_mil",
@@ -288,7 +284,6 @@
     "gp_i",
     "gp_l"
    ],
-   "audio": "w_mil",
    "activities": []
   },
   {
@@ -310,7 +305,6 @@
     "gp_o",
     "gp_s"
    ],
-   "audio": "w_mos",
    "activities": []
   },
   {
@@ -332,7 +326,6 @@
     "gp_o",
     "gp_s"
    ],
-   "audio": "w_los",
    "activities": []
   },
   {
@@ -354,13 +347,26 @@
     "gp_a",
     "gp_m"
    ],
-   "audio": "w_lam",
    "activities": [
     "ordbro"
    ],
+   "audio": "ord_lam",
+   "card": true,
    "picture": "lamb",
-   "pronoun": "det",
-   "story_audio": "stuck_lam"
+   "story_audio": [
+    "bridge_lam_1",
+    "bridge_lam_2"
+   ],
+   "story_audio_again": [
+    "bridge_lam_1",
+    "bridge_lam_2r"
+   ],
+   "sound_out_audio": "lydering_lam",
+   "word_again_audio": "bridge_word_again_lam",
+   "ask_audio": "bridge_ask_lam",
+   "says_audio": "bridge_says_lam",
+   "walk_audio": "bridge_walk_lam",
+   "done_audio": "bridge_done_lam"
   },
   {
    "id": "w_sol",
@@ -381,13 +387,9 @@
     "gp_o",
     "gp_l"
    ],
-   "audio": "w_sol",
-   "activities": [
-    "ordbro"
-   ],
-   "picture": "sun",
-   "pronoun": "den",
-   "story_audio": "stuck_sol"
+   "activities": [],
+   "audio": "ord_sol",
+   "card": true
   },
   {
    "id": "w_slim",
@@ -411,13 +413,7 @@
     "gp_i",
     "gp_m"
    ],
-   "audio": "w_slim",
-   "activities": [
-    "ordbro"
-   ],
-   "picture": "slime",
-   "pronoun": "det",
-   "story_audio": "stuck_slim"
+   "activities": []
   },
   {
    "id": "w_sola",
@@ -441,7 +437,6 @@
     "gp_l",
     "gp_a"
    ],
-   "audio": "w_sola",
    "activities": []
   },
   {
@@ -466,7 +461,6 @@
     "gp_l",
     "gp_o"
    ],
-   "audio": "w_silo",
    "activities": []
   },
   {
@@ -489,13 +483,22 @@
     "gp_a",
     "gp_m"
    ],
-   "audio": "w_lama",
    "activities": [
     "ordbro"
    ],
+   "audio": "ord_lama",
+   "card": true,
    "picture": "llama",
-   "pronoun": "den",
-   "story_audio": "stuck_lama"
+   "story_audio": [
+    "bridge_lama_1",
+    "bridge_lama_2"
+   ],
+   "sound_out_audio": "lydering_lama",
+   "word_again_audio": "bridge_word_again_lama",
+   "ask_audio": "bridge_ask_lama",
+   "says_audio": "bridge_says_lama",
+   "walk_audio": "bridge_walk_lama",
+   "done_audio": "bridge_done_lama"
   },
   {
    "id": "w_salami",
@@ -523,13 +526,7 @@
     "gp_m",
     "gp_i"
    ],
-   "audio": "w_salami",
-   "activities": [
-    "ordbro"
-   ],
-   "picture": "salami",
-   "pronoun": "den",
-   "story_audio": "stuck_salami"
+   "activities": []
   }
  ]
 }

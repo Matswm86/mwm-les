@@ -56,7 +56,7 @@ const ZONE_RADIUS: float = 9.0
 const ZONE_A_ANGLE: float = 118.0  # Hør og finn, south-west beach
 const ZONE_B_ANGLE: float = 66.0  # Sandskriving, south beach
 const ZONE_C_ANGLE: float = 8.0  # Ordbroa, east shore facing the islet
-const UNICORN_ANGLE: float = 88.0  # the meadow's unicorn, inland behind the writing beach
+const UNICORN_ANGLE: float = 88.0  # the unicorn (a silent animal), inland behind the writing beach
 const UNICORN_INSET: float = 0.52
 const STATION_INSET: float = 0.86  # fraction of the coast radius where a station stands
 const LETTER_SPACING: float = 2.6
@@ -69,7 +69,10 @@ const CAM_HUB_PITCH_DEG: float = 20.0  # story shot: lower than 38 so sky and cl
 const CAM_STATION_DISTANCE: float = 7.6
 const CAM_WRITE_PITCH_DEG: float = 64.0
 const CAM_WRITE_DISTANCE: float = 7.5
-const CAM_UNICORN_DISTANCE: float = 5.2
+const CAM_PILE_DISTANCE: float = 8.0  # Sandskriving payoff: the stones by the bridge
+const WRITE_STONE_SCALE: float = 1.9  # the letter stone that lifts out of the sand
+const WRITE_STONE_ROLL_M: float = 9.0  # how far it rolls toward the bridge (out of view)
+const PILE_STONE_SCALE: float = 1.0
 const CAM_FLY_SEC: float = 1.8
 const CAM_INTRO_SEC: float = 3.2
 # --- Hør og finn: big, front-facing letters on round sand tiles
@@ -78,6 +81,26 @@ const FIND_SPACING_M: float = 3.7
 const FIND_CAM_DISTANCE: float = 7.2
 const FIND_CAM_PITCH_DEG: float = 24.0
 const FIND_CAM_LIFT: float = 1.3
+const FIND_CAM_YAW_DEG: float = 30.0  # along the beach; the ship with the jar in the bay behind
+# --- The ship in the bay and what each found sound brings back (SCRIPT.md 2d)
+const SHIP_ANGLE_DEG: float = 182.0  # the west bay, seen past the Hør og finn beach
+const SHIP_OFFSHORE_M: float = 6.0
+# Spots behind the letter row, seen from the Hør og finn camera once the letters
+# have sunk. label -> (coast angle deg, inset, lift) on the main island; "s" =
+# (ahead m, height m, right m) from the Hør og finn station along its view, low
+# over the sea so it rises at the horizon; "l" = (x, unused, z) on the islet.
+const THING_SPOTS: Dictionary = {
+	"a": Vector3(155.0, 0.9, 0.0),
+	"s": Vector3(40.0, 3.2, -4.0),
+	"i": Vector3(125.0, 0.6, 0.0),
+	"l": Vector3(-0.6, 0.0, 0.9),
+	"o": Vector3(128.0, 0.92, 0.0),
+	"m": Vector3(138.0, 0.7, 0.0),
+}
+const THING_SCALES: Dictionary = {"a": 1.1, "s": 1.6, "i": 0.75, "l": 0.75, "o": 0.7, "m": 1.0}
+const LETTER_FLY_SEC: float = 1.3
+const LETTER_FLY_ARC_M: float = 1.5  # low arc: the find view shows little sky
+const THING_CAM_SEC: float = 1.1
 const TILE_RADIUS_M: float = 1.35
 const TILE_TOP_M: float = 0.12
 # --- Ordbroa: close camera, one big slot per letter, stones on a raft
@@ -94,10 +117,11 @@ const BRIDGE_STONE_SCALE: float = 1.1
 const BRIDGE_STONE_GAP_PX: float = 340.0
 const BRIDGE_STONE_ROW_FROM_BOTTOM_PX: float = 160.0
 const RAFT_Y: float = 0.3
-const PICTURE_FROM_RIGHT_PX: float = 290.0  # the stuck picture's feet on screen
+const PICTURE_FROM_RIGHT_PX: float = 290.0  # the waiting picture's feet on screen
 const PICTURE_FEET_Y: float = 0.6
 const PICTURE_SCALE: float = 0.72
-const BRIDGE_FIRST_WORDS: Array[String] = ["w_is", "w_sol", "w_lam"]
+# lam first (the hub line and the found lamb point at it); is when m is not open yet
+const BRIDGE_FIRST_WORDS: Array[String] = ["w_lam", "w_lama", "w_is"]
 # Scaffold by the child's finished bridges: the last `missing` letters are
 # empty, the rest pre-placed; `distractors` extra stones (owner report 2026-10-03).
 const BRIDGE_STAGES: Array[Dictionary] = [
@@ -110,7 +134,7 @@ const BRIDGE_STAGES: Array[Dictionary] = [
 ]
 # --- Opening story
 const HYSJ_SCALE: float = 1.5  # big and readable from the story camera
-const STORY_SHIP_Z: float = 17.5  # the ship's lane, just off the south beach
+const STORY_SHIP_GLIDE_M: float = 45.0  # the ship glides in from this far along the coast
 # --- Pip
 const PIP_SCREEN_OFFSET: Vector3 = Vector3(-2.85, -1.15, -5.0)  # camera-local home spot
 const PIP_BRIDGE_OFFSET: Vector3 = Vector3(-3.0, -0.75, -5.0)  # over the water by the bridge
@@ -132,7 +156,6 @@ const TAP_RADIUS_MIN_PX: float = 120.0  # 1.5x the visual (DESIGN 4)
 const WRONG_WOBBLE_DEG: float = 6.0
 const WRONG_WOBBLE_SEC: float = 0.4
 const FREEZE_AFTER_RANDOM_TAPS_SEC: float = 1.5
-const BRIDGE_LIGHT_STEP_SEC: float = 0.35
 const ZONE_RESTORE_SEC: float = 2.5
 const PLANT_STAGGER_SEC: float = 0.05
 # Slice: all six sounds are open from the start so every station has content.

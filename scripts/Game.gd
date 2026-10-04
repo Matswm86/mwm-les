@@ -15,8 +15,9 @@ var stations_done: Array[bool] = [false, false, false]  # each station finished 
 var named_letters: Array[String] = []  # letters introduced by name (period 1, GDD 4.2)
 var demos_seen: Array[String] = []  # activity templates whose ghost demo has run (GDD 6.0)
 var bridge_items_done: int = 0  # finished word bridges, drives the bridge scaffold
-var unicorn_stripes: int = 0  # mane colours the unicorn has back
+var bridge_words_met: Array[String] = []  # bridge words whose story has been told once
 var words_today: Array[String] = []
+var found_today: Array[String] = []  # sound labels found in Hør og finn this session
 var words_read_to_adult: Array[String] = []
 var practised_today: Dictionary = {}  # skill -> answers this session
 var offline_today: Dictionary = {}
@@ -56,8 +57,9 @@ func reset_progress() -> void:
 	named_letters.clear()
 	demos_seen.clear()
 	bridge_items_done = 0
-	unicorn_stripes = 0
+	bridge_words_met.clear()
 	words_today.clear()
+	found_today.clear()
 	practised_today.clear()
 	start_session_content()
 	save()
@@ -94,8 +96,24 @@ func label(skill_id: String) -> String:
 
 
 func phoneme_clip(skill_id: String) -> String:
+	return sound_clip(skill_id, "short")
+
+
+## A clip tied to one sound: short, hold, intro, link, back (skills.json "audio").
+func sound_clip(skill_id: String, kind: String) -> String:
 	var audio: Dictionary = engine.pack.skill(skill_id).get("audio", {})
-	return str(audio.get("short", ""))
+	return str(audio.get(kind, ""))
+
+
+## The sound answered most often this session ("" if none).
+func most_practised() -> String:
+	var best: String = ""
+	var best_n: int = 0
+	for s: Variant in practised_today:
+		if int(practised_today[s]) > best_n:
+			best_n = int(practised_today[s])
+			best = str(s)
+	return best
 
 
 func skill_for_label(text: String) -> String:
@@ -116,13 +134,13 @@ func note_word_built(word: String) -> void:
 
 
 ## Words for the read-to-a-grown-up card: today's words first, topped up with
-## other decodable words from the pack.
+## the pack's card words (is, lam, lama, sol: each has its own [ord:x] clip).
 func grownup_words() -> Array[String]:
 	var out: Array[String] = words_today.duplicate()
 	for it: Dictionary in engine.pack.items:
 		if out.size() >= LearnBalance.GROWNUP_CARD_WORDS_MIN:
 			break
-		if str(it.get("kind", "")) != "word" or (it.get("activities", []) as Array).is_empty():
+		if str(it.get("kind", "")) != "word" or not bool(it.get("card", false)):
 			continue
 		var w: String = str(it["text"])
 		if not out.has(w):
@@ -162,7 +180,7 @@ func save() -> void:
 	d["named_letters"] = named_letters
 	d["demos_seen"] = demos_seen
 	d["bridge_items_done"] = bridge_items_done
-	d["unicorn_stripes"] = unicorn_stripes
+	d["bridge_words_met"] = bridge_words_met
 	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(d))
@@ -189,7 +207,8 @@ func _load() -> void:
 	for a: Variant in dd.get("demos_seen", []):
 		demos_seen.append(str(a))
 	bridge_items_done = int(dd.get("bridge_items_done", 0))
-	unicorn_stripes = int(dd.get("unicorn_stripes", 0))
+	for w: Variant in dd.get("bridge_words_met", []):
+		bridge_words_met.append(str(w))
 
 
 func _load_offline() -> void:

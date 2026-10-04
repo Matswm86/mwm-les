@@ -66,7 +66,7 @@ func _ready() -> void:
 	Hud.place_top_right(close, GameTune.SAFE_MARGIN_PX * 0.6)
 	close.pressed.connect(func() -> void: closed.emit())
 	add_child(close)
-	Voice.say(["grownups_only"])
+	Voice.say(["gate_1", "gate_2"])
 
 
 func _label(t: String, px: int, pos: Vector2) -> Label:
