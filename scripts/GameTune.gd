@@ -50,12 +50,14 @@ const SUN_YAW_DEG: float = -35.0
 const SHADOW_MAX_DISTANCE: float = 60.0
 # --- Island layout (world metres; angle 0 = +x, 90 = +z toward the camera)
 const ISLAND_RADIUS: float = 12.5
-const ISLET_CENTER: Vector3 = Vector3(18.6, 0.0, 1.0)
+const ISLET_CENTER: Vector3 = Vector3(23.4, 0.0, 1.0)  # far enough for a 7 m word bridge
 const ISLET_RADIUS: float = 3.4
 const ZONE_RADIUS: float = 9.0
 const ZONE_A_ANGLE: float = 118.0  # Hør og finn, south-west beach
 const ZONE_B_ANGLE: float = 66.0  # Sandskriving, south beach
 const ZONE_C_ANGLE: float = 8.0  # Ordbroa, east shore facing the islet
+const UNICORN_ANGLE: float = 88.0  # the meadow's unicorn, inland behind the writing beach
+const UNICORN_INSET: float = 0.52
 const STATION_INSET: float = 0.86  # fraction of the coast radius where a station stands
 const LETTER_SPACING: float = 2.6
 # --- Camera (DESIGN 7.5)
@@ -67,11 +69,51 @@ const CAM_HUB_PITCH_DEG: float = 20.0  # story shot: lower than 38 so sky and cl
 const CAM_STATION_DISTANCE: float = 7.6
 const CAM_WRITE_PITCH_DEG: float = 64.0
 const CAM_WRITE_DISTANCE: float = 7.5
-const CAM_BRIDGE_DISTANCE: float = 11.5
+const CAM_UNICORN_DISTANCE: float = 5.2
 const CAM_FLY_SEC: float = 1.8
 const CAM_INTRO_SEC: float = 3.2
+# --- Hør og finn: big, front-facing letters on round sand tiles
+const FIND_LETTER_M: float = 2.8  # glyph em-based height; x-height letters land at >= 260 px
+const FIND_SPACING_M: float = 3.7
+const FIND_CAM_DISTANCE: float = 7.2
+const FIND_CAM_PITCH_DEG: float = 24.0
+const FIND_CAM_LIFT: float = 1.3
+const TILE_RADIUS_M: float = 1.35
+const TILE_TOP_M: float = 0.12
+# --- Ordbroa: close camera, one big slot per letter, stones on a raft
+# camera target = bridge middle + offset (toward the islet)
+const BRIDGE_CAM_OFFSET: Vector3 = Vector3(1.0, 0.3, 0.5)
+const BRIDGE_CAM_DISTANCE: float = 5.4  # 6-letter words still get >= 160 px slots
+const BRIDGE_CAM_PITCH_DEG: float = 34.0
+const BRIDGE_DECK_Y: float = 0.42
+const BRIDGE_END_MARGIN_M: float = 0.35
+const BRIDGE_PITCH_MIN_M: float = 1.05
+const BRIDGE_PITCH_MAX_M: float = 1.7
+const BRIDGE_SLOT_FILL: float = 0.9  # plank/slot width as a share of the pitch
+const BRIDGE_STONE_SCALE: float = 1.1
+const BRIDGE_STONE_GAP_PX: float = 340.0
+const BRIDGE_STONE_ROW_FROM_BOTTOM_PX: float = 160.0
+const RAFT_Y: float = 0.3
+const PICTURE_FROM_RIGHT_PX: float = 290.0  # the stuck picture's feet on screen
+const PICTURE_FEET_Y: float = 0.6
+const PICTURE_SCALE: float = 0.72
+const BRIDGE_FIRST_WORDS: Array[String] = ["w_is", "w_sol", "w_lam"]
+# Scaffold by the child's finished bridges: the last `missing` letters are
+# empty, the rest pre-placed; `distractors` extra stones (owner report 2026-10-03).
+const BRIDGE_STAGES: Array[Dictionary] = [
+	{"after": 0, "missing": 1, "distractors": 0},
+	{"after": 1, "missing": 1, "distractors": 1},
+	{"after": 3, "missing": 2, "distractors": 0},
+	{"after": 5, "missing": 2, "distractors": 1},
+	{"after": 7, "missing": 99, "distractors": 0},
+	{"after": 9, "missing": 99, "distractors": 1},
+]
+# --- Opening story
+const HYSJ_SCALE: float = 1.5  # big and readable from the story camera
+const STORY_SHIP_Z: float = 17.5  # the ship's lane, just off the south beach
 # --- Pip
 const PIP_SCREEN_OFFSET: Vector3 = Vector3(-2.85, -1.15, -5.0)  # camera-local home spot
+const PIP_BRIDGE_OFFSET: Vector3 = Vector3(-3.0, -0.75, -5.0)  # over the water by the bridge
 const PIP_FOLLOW_RATE: float = 4.0
 const PIP_BOB_HEIGHT: float = 0.12
 const PIP_BOB_HZ: float = 0.55

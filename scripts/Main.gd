@@ -4,15 +4,18 @@ extends Node3D
 ## stations, the station visits (engine -> activity -> engine), colour
 ## restoration, the read-to-a-grown-up step and the parent gate.
 
-enum Mode { INTRO, HUB, FLYING, ACTIVITY, GROWNUP, PARENT, SUNSET }
+enum Mode { INTRO, HUB, FLYING, ACTIVITY, GROWNUP, PARENT, SUNSET, STORY }
 
 const STATIONS: Array[String] = ["hor_og_finn", "skriv", "ordbro"]
+const NEXT_LINES: Array[String] = ["next_find", "next_write", "next_bridge"]
+const HUB_GHOST_AFTER_SEC: float = 7.0
 
 var mode: Mode = Mode.INTRO
 var world: World
 var rig: CameraRig
 var pip: Pip
 var hero: Hero
+var unicorn: Unicorn
 var hud: Hud
 var beacons: Array[Beacon] = []
 var activities: Array[Activity] = []
@@ -21,6 +24,9 @@ var current_station: int = -1
 var visits_done: Array[bool] = [false, false, false]
 var _overlay: Control
 var _visit_abort: bool = false
+var _story: OpeningStory
+var _hub_idle: float = 0.0
+var _next: int = -1
 
 
 func _ready() -> void:
@@ -32,6 +38,11 @@ func _ready() -> void:
 	add_child(hero)
 	hero.global_position = world.knight_spot
 	hero.face(world.knight_spot + Vector3(-0.6, 0, 1.0))
+	unicorn = Unicorn.new()
+	add_child(unicorn)
+	unicorn.stripes = Game.unicorn_stripes
+	unicorn.global_position = world.unicorn_spot
+	unicorn.rotation.y = deg_to_rad(-20.0)
 	pip = Pip.new()
 	add_child(pip)
 	pip.cam = rig.cam
@@ -40,6 +51,7 @@ func _ready() -> void:
 	hud.replay_pressed.connect(_on_replay)
 	hud.home_pressed.connect(_on_home)
 	hud.parent_pressed.connect(open_parent_gate)
+	hud.story_pressed.connect(_replay_story)
 	for i in 3:
 		var b: Beacon = Beacon.new()
 		b.station = i
@@ -57,7 +69,12 @@ func _ready() -> void:
 	for i in 3:
 		if Game.restored[i]:
 			world.set_zone_now(i, 1.0)
-	_intro()
+	if Game.unicorn_stripes == 0:
+		unicorn.sad.call_deferred()
+	if Game.story_seen:
+		_intro()
+	else:
+		_play_story(false)
 
 
 # ---------------------------------------------------------------- hub
@@ -82,21 +99,76 @@ func _intro() -> void:
 	)
 	await tw.finished
 	pip.giggle()
-	Voice.say(["pip_hello", "pip_island"], true)
+	await get_tree().create_timer(Voice.say(["pip_hello"]) + 0.2).timeout
 	_enter_hub()
 
 
+## The opening story (GDD 9). First launch: it plays through and only a tap
+## on Pip ends it. From the hub button it can be replayed and skipped.
+func _play_story(replay: bool) -> void:
+	mode = Mode.STORY
+	for b: Beacon in beacons:
+		b.visible = false
+	_story = OpeningStory.new()
+	_story.main = self
+	_story.skippable = Game.story_seen
+	add_child(_story)
+	await _story.play()
+	_story = null
+	Game.story_seen = true
+	Game.save()
+	if not replay:
+		pip.giggle()
+	_enter_hub()
+
+
+func _replay_story() -> void:
+	if mode != Mode.HUB:
+		return
+	hud.hide_all()
+	_play_story(true)
+
+
+## Only the next station is lit; Pip swims over to it and says why.
 func _enter_hub() -> void:
 	mode = Mode.HUB
 	hud.show_hub()
+	_hub_idle = 0.0
+	_next = Game.next_station(visits_done)
 	for i in 3:
-		beacons[i].visible = true
+		beacons[i].visible = i == _next
+	if _next < 0:
+		pip.go_home()
+		return
+	pip.guide_to(_guide_spot(beacons[_next]))
+	Voice.say([NEXT_LINES[_next]], true)
+
+
+## A spot on the camera ray to the beacon, close enough that Pip stays big,
+## just left of and below the beacon on screen.
+func _guide_spot(b: Beacon) -> Vector3:
+	var cam_pos: Vector3 = rig.cam.global_position
+	var dir: Vector3 = (b.global_position - cam_pos).normalized()
+	return cam_pos + dir * 11.0 - rig.cam.global_basis.x * 1.9 - Vector3(0, 1.1, 0)
+
+
+func _process(delta: float) -> void:
+	if mode != Mode.HUB or _next < 0 or hud.ghost.showing():
+		return
+	_hub_idle += delta
+	if _hub_idle >= HUB_GHOST_AFTER_SEC and not Voice.is_busy():
+		var b: Beacon = beacons[_next]
+		hud.ghost.tap(func() -> Vector2: return rig.cam.unproject_position(b.global_position))
+		Voice.repeat_prompt()
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		return
 	match mode:
+		Mode.STORY:
+			if _story:
+				_story.touch(event)
 		Mode.HUB:
 			_hub_touch(event)
 		Mode.ACTIVITY:
@@ -117,14 +189,19 @@ func _hub_touch(event: InputEvent) -> void:
 	var t: InputEventScreenTouch = event as InputEventScreenTouch
 	if t == null or not t.pressed:
 		return
-	if pip.hit(t.position):
-		pip.giggle()
-		Voice.say(["pip_hello"])
-		return
+	_hub_idle = 0.0
+	hud.ghost.stop()
 	for i in 3:
 		if beacons[i].hit(rig.cam, t.position):
 			start_station(i)
 			return
+	if pip.hit(t.position):
+		pip.giggle()
+		if _next >= 0:
+			Voice.repeat_prompt()
+		else:
+			Voice.say(["pip_hello"])
+		return
 	var hp: Vector2 = rig.cam.unproject_position(hero.global_position + Vector3(0, 0.8, 0))
 	if t.position.distance_to(hp) < 150.0:
 		hero.cheer()
@@ -143,6 +220,8 @@ func start_station(i: int) -> void:
 	for b: Beacon in beacons:
 		b.visible = false
 	hud.hide_all()
+	Voice.stop()
+	pip.go_home()
 	Voice.sfx("whoosh")
 	var pose: Dictionary = act.camera_pose()
 	await rig.fly_to(pose["target"], pose["distance"], pose["pitch"], 0.0).finished
@@ -152,10 +231,19 @@ func start_station(i: int) -> void:
 	act.begin_visit()
 	var n: int = int(GameTune.ITEMS_PER_VISIT[STATIONS[i]])
 	var max_choices: int = int(GameTune.MAX_CHOICES[STATIONS[i]])
+	if not Game.stations_done[i]:
+		max_choices = mini(max_choices, 2)  # the very first visit: two choices
 	var used: Array[String] = []
 	var finished_all: bool = true
+	var first: Dictionary = act.adjust_task(Game.engine.next_task(STATIONS[i], max_choices, used))
+	if not first.is_empty():
+		await act.story_intro(first)
 	for k in n:
-		var task: Dictionary = Game.engine.next_task(STATIONS[i], max_choices, used)
+		var task: Dictionary = (
+			first
+			if k == 0
+			else act.adjust_task(Game.engine.next_task(STATIONS[i], max_choices, used))
+		)
 		if task.is_empty():
 			break
 		var it: Dictionary = task["item"]
@@ -170,6 +258,9 @@ func start_station(i: int) -> void:
 		if _visit_abort:
 			finished_all = false
 			break
+	if finished_all and not _visit_abort:
+		await act.story_payoff()
+		Game.stations_done[i] = true
 	act.end_visit()
 	Game.save()
 	if finished_all and not _visit_abort:

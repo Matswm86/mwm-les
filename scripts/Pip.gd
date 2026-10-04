@@ -5,6 +5,8 @@ extends Node3D
 ## left of the camera view, bobs, and can fly over to point at something.
 
 var cam: Camera3D
+var home_offset: Vector3 = GameTune.PIP_SCREEN_OFFSET  # camera-local resting spot
+var rise: float = 0.0  # extra height, tweened by pop_up()
 var _body: Node3D
 var _horn_mat: ShaderMaterial
 var _t: float = 0.0
@@ -103,12 +105,12 @@ func _process(delta: float) -> void:
 	_t += delta
 	if cam == null:
 		return
-	var home: Vector3 = cam.global_transform * GameTune.PIP_SCREEN_OFFSET
+	var home: Vector3 = cam.global_transform * home_offset
 	var goal: Vector3 = _target if _pointing else home
 	var k: float = 1.0 - exp(-GameTune.PIP_FOLLOW_RATE * delta)
 	global_position = global_position.lerp(goal, k)
 	var bob: float = sin(_t * TAU * GameTune.PIP_BOB_HZ) * GameTune.PIP_BOB_HEIGHT
-	_body.position.y = bob
+	_body.position.y = bob + rise
 	var face: Basis = Basis.looking_at(-cam.global_basis.z, Vector3.UP)
 	global_basis = (
 		face * Basis.from_euler(Vector3(0, deg_to_rad(-55.0), 0)) * Basis.from_scale(scale)
@@ -119,7 +121,22 @@ func _process(delta: float) -> void:
 
 func snap_home() -> void:
 	if cam:
-		global_position = cam.global_transform * GameTune.PIP_SCREEN_OFFSET
+		global_position = cam.global_transform * home_offset
+
+
+## Swim to an exact spot and stay there (hub guide, story).
+func guide_to(world_pos: Vector3) -> void:
+	_target = world_pos
+	_pointing = true
+	_set_horn_glow(true)
+
+
+## Pop out of the water at the current spot (story).
+func pop_up() -> void:
+	rise = -1.6
+	var tw: Tween = create_tween()
+	tw.tween_property(self, "rise", 0.0, 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	giggle()
 
 
 func point_at(world_pos: Vector3) -> void:

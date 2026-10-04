@@ -6,10 +6,13 @@ extends CanvasLayer
 signal replay_pressed
 signal home_pressed
 signal parent_pressed
+signal story_pressed
 
 var replay_btn: RoundButton
 var home_btn: RoundButton
 var parent_btn: RoundButton
+var story_btn: RoundButton
+var ghost: GhostHand
 var root: Control
 
 
@@ -40,6 +43,14 @@ func _ready() -> void:
 	parent_btn.modulate = Color(1, 1, 1, 0.6)
 	parent_btn.pressed.connect(func() -> void: parent_pressed.emit())
 	root.add_child(parent_btn)
+	story_btn = RoundButton.new().setup(
+		GameTune.BTN_SECONDARY_PX, GameTune.SEA_BTN, RoundButton.Icon.STORY
+	)
+	Hud.place_top_right(story_btn, m * 0.6)
+	story_btn.pressed.connect(func() -> void: story_pressed.emit())
+	root.add_child(story_btn)
+	ghost = GhostHand.new()
+	root.add_child(ghost)
 	show_hub()
 
 
@@ -58,19 +69,24 @@ func show_hub() -> void:
 	replay_btn.visible = false
 	home_btn.visible = false
 	parent_btn.visible = true
+	story_btn.visible = Game.story_seen
 
 
 func show_activity() -> void:
 	replay_btn.visible = true
 	home_btn.visible = true
 	parent_btn.visible = false
+	story_btn.visible = false
 
 
 func hide_all() -> void:
 	replay_btn.visible = false
 	home_btn.visible = false
 	parent_btn.visible = false
+	story_btn.visible = false
+	ghost.stop()
 
 
 func add_overlay(c: Control) -> void:
 	root.add_child(c)
+	root.move_child(ghost, -1)

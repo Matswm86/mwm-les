@@ -18,9 +18,9 @@ var zone_centers: Array[Vector3] = []
 var zone_amount: Array[float] = [0.0, 0.0, 0.0]
 var bridge_start: Vector3
 var bridge_end: Vector3
-var bridge_slots: Array[Vector3] = []
-var stone_spots: Array[Vector3] = []
 var islet_picture_spot: Vector3
+var unicorn_spot: Vector3
+var flower_spot: Vector3
 var write_patch: Vector3
 var knight_spot: Vector3
 var sun: DirectionalLight3D
@@ -28,6 +28,9 @@ var _flowers: Array[MultiMeshInstance3D] = []
 var _flower_xforms: Array = []  # per zone: Array[Transform3D]
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _sky_mat: ProceduralSkyMaterial
+var _sea_mat: ShaderMaterial
+var _foam_mats: Array[ShaderMaterial] = []
+var _cloud_mat: ShaderMaterial
 var _env: Environment
 
 
@@ -113,21 +116,10 @@ func _layout() -> void:
 	bridge_end = GameTune.ISLET_CENTER - dir * (islet_edge * 0.93)
 	bridge_start.y = 0.35
 	bridge_end.y = 0.35
-	bridge_slots.clear()
-	for i in 3:
-		var t: float = (float(i) + 0.5) / 3.0
-		var p: Vector3 = bridge_start.lerp(bridge_end, t)
-		p.y = 0.42
-		bridge_slots.append(p)
-	stone_spots.clear()
-	# the stone basket: two rows on the beach in front of and left of the bridge
-	for i in 6:
-		var row: int = i / 3
-		var col: int = i % 3
-		var sx: float = bridge_start.x - 6.6 + float(col) * 1.9 + float(row) * 0.95
-		var sz: float = bridge_start.z + 1.6 + float(row) * 1.7
-		stone_spots.append(on_ground(sx, sz))
 	islet_picture_spot = GameTune.ISLET_CENTER + Vector3(0.3, 2.6, -0.4)
+	unicorn_spot = station_point(GameTune.UNICORN_ANGLE, GameTune.UNICORN_INSET)
+	var a: Vector3 = zone_centers[0]
+	flower_spot = on_ground(a.x - 1.2, a.z - 2.6)
 	knight_spot = on_ground(bridge_start.x - dir.x * 1.6 - 1.4, bridge_start.z - 1.6)
 
 
@@ -142,6 +134,34 @@ func set_sunset(k: float) -> void:
 	sun.light_color = Color(1.0, 0.97, 0.9).lerp(Color(1.0, 0.68, 0.42), k)
 	sun.rotation_degrees.x = lerpf(GameTune.SUN_PITCH_DEG, -20.0, k)
 	_env.ambient_light_color = GameTune.SKY_HORIZON.lerp(Color(1.0, 0.75, 0.6), k)
+
+
+## 0 = day, 1 = night (the opening story): deep blue sky, moonlight.
+func set_night(k: float) -> void:
+	_sky_mat.sky_top_color = GameTune.SKY_TOP.lerp(Color(0.05, 0.08, 0.22), k)
+	_sky_mat.sky_horizon_color = GameTune.SKY_HORIZON.lerp(Color(0.20, 0.27, 0.50), k)
+	_sky_mat.ground_horizon_color = _sky_mat.sky_horizon_color
+	sun.light_color = Color(1.0, 0.97, 0.9).lerp(Color(0.55, 0.65, 1.0), k)
+	sun.light_energy = lerpf(GameTune.SUN_ENERGY, 0.22, k)
+	_env.ambient_light_color = GameTune.SKY_HORIZON.lerp(Color(0.22, 0.28, 0.55), k)
+	_env.ambient_light_energy = lerpf(GameTune.AMBIENT_ENERGY, 0.2, k)
+	# the sea and the foam are unlit shaders: blue-shift and darken them directly
+	_sea_mat.set_shader_parameter("deep", GameTune.SEA_DEEP.lerp(Color(0.03, 0.07, 0.20), k))
+	_sea_mat.set_shader_parameter("shallow", GameTune.SEA_SHALLOW.lerp(Color(0.07, 0.16, 0.34), k))
+	_sea_mat.set_shader_parameter("foam", GameTune.FOAM.lerp(Color(0.32, 0.40, 0.62), k))
+	_sea_mat.set_shader_parameter("horizon", GameTune.SKY_HORIZON.lerp(Color(0.12, 0.17, 0.38), k))
+	_cloud_mat.set_shader_parameter("top", GameTune.FOAM.lerp(Color(0.30, 0.36, 0.58), k))
+	_cloud_mat.set_shader_parameter(
+		"under", Color(0.74, 0.85, 0.96).lerp(Color(0.16, 0.20, 0.40), k)
+	)
+	for fm: ShaderMaterial in _foam_mats:
+		fm.set_shader_parameter("foam", GameTune.FOAM.lerp(Color(0.32, 0.40, 0.62), k))
+
+
+## Whole-island colour for the story: 1 = every zone in colour, 0 = grey.
+func set_colour_all(k: float) -> void:
+	for i in 3:
+		set_zone_now(i, k)
 
 
 func _build_environment() -> void:
@@ -203,6 +223,7 @@ func _build_sea() -> void:
 		]
 	)
 	m.set_shader_parameter("islands", isl)
+	_sea_mat = m
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.mesh = plane
 	mi.material_override = m
@@ -320,6 +341,7 @@ func _add_foam_ring(center: Vector3, radius: float) -> void:
 	var m: ShaderMaterial = ShaderMaterial.new()
 	m.shader = FOAM_SHADER
 	m.set_shader_parameter("foam", GameTune.FOAM)
+	_foam_mats.append(m)
 	var mi: MeshInstance3D = MeshKit.instance(st.commit(), m, self)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
@@ -413,6 +435,8 @@ func _far_from_stations(p: Vector3, min_d: float) -> bool:
 		if Vector2(p.x - c.x, p.z - c.z).length() < min_d:
 			return false
 	if Vector2(p.x - bridge_start.x, p.z - bridge_start.z).length() < 4.5:
+		return false
+	if Vector2(p.x - unicorn_spot.x, p.z - unicorn_spot.z).length() < 3.0:
 		return false
 	return true
 
@@ -532,6 +556,7 @@ func _build_clouds() -> void:
 	var m: ShaderMaterial = ShaderMaterial.new()
 	m.shader = CLOUD_SHADER
 	m.set_shader_parameter("top", GameTune.FOAM)
+	_cloud_mat = m
 	var mi: MeshInstance3D = MeshKit.instance(MeshKit.merge(parts), m, self)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
@@ -576,7 +601,8 @@ func _build_bridge_frame() -> void:
 	var length: float = bridge_start.distance_to(bridge_end)
 	var mid: Vector3 = (bridge_start + bridge_end) * 0.5
 	var yaw: float = rad_to_deg(atan2(-dir.z, dir.x))
-	for s: float in [-1.0, 1.0]:
+	# one rope rail on the far side only: a near rail would cross the letters
+	for s: float in [1.0 if side.z < 0.0 else -1.0]:
 		var rp: Vector3 = mid + side * s * 0.8 + Vector3(0, 0.95, 0)
 		parts.append(
 			[

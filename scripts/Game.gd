@@ -9,6 +9,13 @@ const LOG_PATH: String = "user://evidence.log"
 var engine: LearnEngine = LearnEngine.new()
 var offline_lines: Array[Dictionary] = []
 var restored: Array[bool] = [false, false, false]
+# Progress that shapes what the child sees next (saved with the learner)
+var story_seen: bool = false  # the opening story has been watched once
+var stations_done: Array[bool] = [false, false, false]  # each station finished at least once
+var named_letters: Array[String] = []  # letters introduced by name (period 1, GDD 4.2)
+var demos_seen: Array[String] = []  # activity templates whose ghost demo has run (GDD 6.0)
+var bridge_items_done: int = 0  # finished word bridges, drives the bridge scaffold
+var unicorn_stripes: int = 0  # mane colours the unicorn has back
 var words_today: Array[String] = []
 var words_read_to_adult: Array[String] = []
 var practised_today: Dictionary = {}  # skill -> answers this session
@@ -44,10 +51,38 @@ func reset_progress() -> void:
 	if persist:
 		engine.log_path = LOG_PATH
 	restored = [false, false, false]
+	story_seen = false
+	stations_done = [false, false, false]
+	named_letters.clear()
+	demos_seen.clear()
+	bridge_items_done = 0
+	unicorn_stripes = 0
 	words_today.clear()
 	practised_today.clear()
 	start_session_content()
 	save()
+
+
+## Station order (owner report 2026-10-03): Hør og finn, then Sandskriving,
+## and the word bridge only after both have been done once. After that the
+## child goes round the stations not yet visited this session, in order.
+func next_station(visited: Array[bool]) -> int:
+	for i in 3:
+		if not stations_done[i]:
+			return i
+	for i in 3:
+		if not visited[i]:
+			return i
+	return -1
+
+
+func demo_due(activity: String) -> bool:
+	return LearnBalance.GHOST_DEMO_FIRST_USE and not demos_seen.has(activity)
+
+
+func mark_demo(activity: String) -> void:
+	if not demos_seen.has(activity):
+		demos_seen.append(activity)
 
 
 func session_seconds() -> float:
@@ -122,6 +157,12 @@ func save() -> void:
 		return
 	var d: Dictionary = engine.to_dict()
 	d["restored"] = restored
+	d["story_seen"] = story_seen
+	d["stations_done"] = stations_done
+	d["named_letters"] = named_letters
+	d["demos_seen"] = demos_seen
+	d["bridge_items_done"] = bridge_items_done
+	d["unicorn_stripes"] = unicorn_stripes
 	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(d))
@@ -139,6 +180,16 @@ func _load() -> void:
 	var r: Array = dd.get("restored", [])
 	for i in mini(r.size(), 3):
 		restored[i] = bool(r[i])
+	story_seen = bool(dd.get("story_seen", false))
+	var sd: Array = dd.get("stations_done", [])
+	for i in mini(sd.size(), 3):
+		stations_done[i] = bool(sd[i])
+	for l: Variant in dd.get("named_letters", []):
+		named_letters.append(str(l))
+	for a: Variant in dd.get("demos_seen", []):
+		demos_seen.append(str(a))
+	bridge_items_done = int(dd.get("bridge_items_done", 0))
+	unicorn_stripes = int(dd.get("unicorn_stripes", 0))
 
 
 func _load_offline() -> void:

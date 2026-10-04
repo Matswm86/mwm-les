@@ -1,0 +1,6 @@
+Source: Poly Pizza, author account "Quaternius", licence shown on page: "Public Domain (CC0)" / "Licence":"CC0 1.0" (checked 2026-10-03)
+WhiteHorse.glb    https://poly.pizza/m/bEdE4rmZy9  uploaded 2021-09-07
+PirateCaptain.glb https://poly.pizza/m/sN18LyyHAU  uploaded 2023-11-05
+Note: quaternius.com/license.html now shows "Quaternius Asset License v1.0" (updated 2026-08-28), which says changes do not apply retroactively.
+These copies were published under CC0 1.0 before that date.
+Horse_D3h.glb     https://poly.pizza/m/D3hAeqeDBE  (CC0 1.0 on page, Quaternius)

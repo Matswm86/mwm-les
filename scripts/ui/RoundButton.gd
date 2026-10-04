@@ -7,7 +7,7 @@ extends Control
 signal pressed
 signal held
 
-enum Icon { NONE, SPEAKER, HOUSE, PARENT, CHECK, SUN, CLOSE, BACK, NUMBER }
+enum Icon { NONE, SPEAKER, HOUSE, PARENT, CHECK, SUN, CLOSE, BACK, NUMBER, STORY }
 
 var color: Color = GameTune.SEA_BTN
 var icon_color: Color = Color(1, 1, 1)
@@ -189,5 +189,18 @@ func _draw_icon(c: Vector2, s: float) -> void:
 				ic
 			)
 			draw_rect(Rect2(c + Vector2(-s * 0.25, -s * 0.22), Vector2(s * 1.1, s * 0.44)), ic)
+		Icon.STORY:  # an open picture book
+			for side: float in [-1.0, 1.0]:
+				draw_colored_polygon(
+					[
+						c + Vector2(0, -s * 0.45),
+						c + Vector2(side * s * 0.95, -s * 0.7),
+						c + Vector2(side * s * 0.95, s * 0.55),
+						c + Vector2(0, s * 0.8)
+					],
+					ic
+				)
+			draw_line(c + Vector2(0, -s * 0.45), c + Vector2(0, s * 0.8), color, s * 0.12)
+			draw_circle(c + Vector2(-s * 0.5, -s * 0.15), s * 0.16, GameTune.GOLD)
 		_:
 			pass
