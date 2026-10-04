@@ -55,14 +55,33 @@ const GROWNUP_CARD_WORDS_MIN: int = 3
 const GROWNUP_CARD_WORDS_MAX: int = 5
 # Watch then write (GDD 0.2, 6.1)
 const WRITE_LETTER_HEIGHT_FRAC: float = 0.60
-const MODEL_STROKE_SEC: float = 0.9  # Pip draws one stroke
+const MODEL_SPEED: float = 0.75  # Pip's pen, letter heights per second (calm)
+const MODEL_STROKE_MIN_SEC: float = 0.6  # shortest stroke (the dot on i)
 const MODEL_HOLD_SEC: float = 1.0  # full model visible
 const MODEL_FADE_SEC: float = 1.2  # model fades to empty sand
 const WRITE_DONE_IDLE_SEC: float = 1.5  # finger up this long = letter finished
 const WRITE_RESAMPLE_POINTS: int = 48
-const WRITE_MATCH_MAX: float = 0.18  # mean symmetric point distance, fraction of letter height
+# Lenient check (owner report 2026-10-03): position, size, stroke order,
+# direction and stroke count are ignored. Accept when the ink is closer to the
+# target letter than to every other known letter AND under a loose limit.
+const WRITE_MATCH_MAX: float = 0.095  # mean symmetric point distance, fraction of letter size
 const WRITE_MATCH_LOOSEN_STEP: float = 0.02  # +0.02 per hint level used
-const WRITE_MIN_INK_FRAC: float = 0.5  # ink length >= 50% of model arc length
+const WRITE_TAIL_PCT: float = 0.95  # distance blends the mean with this percentile
+const WRITE_TAIL_WEIGHT: float = 0.5
+const WRITE_ROTATIONS_DEG: Array[float] = [-12.0, -6.0, 0.0, 6.0, 12.0]  # slant is not an error
+const WRITE_DOT_MAX_FRAC: float = 0.22  # a stroke this small (of the letter size) up top is a dot
+const WRITE_DOT_MISMATCH: float = 0.05  # dot present/missing vs the model
+const WRITE_TIE_MARGIN: float = 0.003  # a near-tie with another letter goes to the target
+const WRITE_MIN_INK_FRAC: float = 0.4  # ink length >= 40% of model arc length (after size fit)
+const WRITE_MIN_SIZE_PX: float = 40.0  # smaller ink is a tap, not a letter
+const WRITE_NEAR_MAX: float = 0.30  # third try: accepted if anywhere near
+const WRITE_NEAR_ATTEMPT: int = 3  # the try that only has to be near
+const WRITE_ANY_INK_ATTEMPT: int = 4  # from this try any letter-sized ink lifts (no endless loop)
+# Orientation check (GDD 6.1): letters whose mirror image is wrong
+const ORIENT_CHECK_LETTERS: Array[String] = ["s", "b", "d", "p", "q", "j", "z"]
+const ORIENT_DIST_MARGIN: float = 0.015
+const ORIENT_ANGLE_MARGIN_DEG: float = 12.0
+const ORIENT_TANGENT_SPAN: int = 2
 const WRITE_HINT_START_DOT: int = 1  # hint level 1: dotted start point
 const WRITE_HINT_REMODEL: int = 2  # hint level 2: Pip models again
 const WRITE_HINT_TRACE: int = 3  # hint level 3 (last): full trace overlay
@@ -70,6 +89,8 @@ const WRITE_COMPARE_SEC: float = 0.8  # accepted: model shown over the child's l
 const WRITE_SMOOTH_SEC: float = 0.4  # not accepted: sand smooths
 const TRACE_TOLERANCE: float = 0.22  # corridor half-width, only for the hint-3 trace overlay
 const TRACE_COVERAGE_DONE: float = 0.90
+# Activity extras (GDD 6.0)
+const GHOST_DEMO_FIRST_USE: bool = true
 # Drag and drop
 const SNAP_RADIUS_PX: float = 90.0
 const MIN_TOUCH_PX: float = 130.0

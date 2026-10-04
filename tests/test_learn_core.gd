@@ -4,6 +4,8 @@ extends SceneTree
 ## Replays scripted answer sequences and checks the numbers in GDD 5.2-5.6.
 
 const PACK_DIR: String = "res://content/nb_reading"
+const WRITE_LETTERS: Array[String] = ["gp_a", "gp_s", "gp_i", "gp_l", "gp_o", "gp_m"]
+const FIXTURES_PER_LETTER: int = 12
 
 var _passed: int = 0
 var _failed: int = 0
@@ -50,7 +52,15 @@ func _test_pack() -> void:
 	_ok("pack loads 6 gated sounds", e.pack.unlock_order.size() == 6, str(e.pack.unlock_order))
 	_ok("pack first group is a pair", e.pack.first_group_size == 2)
 	var words: Array[Dictionary] = e.pack.items_for_activity("ordbro")
-	_ok("pack has 3-letter bridge words", words.size() >= 3, str(words.size()))
+	_ok("pack has bridge words", words.size() >= 3, str(words.size()))
+	var no_pic: Array[String] = []
+	for w: Dictionary in words:
+		var pic: Node3D = Props.make(str(w.get("picture", "")))
+		if pic == null:
+			no_pic.append(str(w["text"]))
+		else:
+			pic.free()
+	_ok("every bridge word has a picture (no nonsense syllables)", no_pic.is_empty(), str(no_pic))
 	var strokes: Array = e.pack.skill("gp_s").get("strokes", [])
 	_ok("pack carries stroke models under 'strokes'", strokes.size() >= 1)
 
@@ -338,13 +348,13 @@ func _test_next_task_reading() -> void:
 		(t["distractors"] as Array).size() == 1,
 		str(t["distractors"])
 	)
-	_ok("bridge has no word before o, l are introduced", e.next_task("ordbro", 4).is_empty())
+	_ok("bridge has no word before i is introduced", e.next_task("ordbro", 4).is_empty())
 	for sid: String in e.pack.unlock_order:
 		e.model.introduce(sid)
 	var b: Dictionary = e.next_task("ordbro", 4)
 	_ok(
-		"bridge serves a 3-letter word once all sounds are in",
-		not b.is_empty() and str((b["item"] as Dictionary)["text"]).length() == 3
+		"bridge serves a picturable word once all sounds are in",
+		not b.is_empty() and str((b["item"] as Dictionary).get("picture", "")) != ""
 	)
 
 
@@ -406,53 +416,196 @@ func _test_simulated_children() -> void:
 			)
 
 
+func _models(e: LearnEngine) -> Dictionary:
+	var out: Dictionary = {}
+	for sid: String in WRITE_LETTERS:
+		out[sid] = WriteCheck.strokes_from_json(e.pack.skill(sid)["strokes"])
+	return out
+
+
+func _others(models: Dictionary, target: String) -> Array:
+	var out: Array = []
+	for sid: String in models:
+		if sid != target:
+			out.append(models[sid])
+	return out
+
+
+## Dense polyline (so wobble bends straight strokes too).
+func _densify(s: PackedVector2Array, step: float) -> PackedVector2Array:
+	if s.size() < 2:
+		return s
+	var out: PackedVector2Array = PackedVector2Array([s[0]])
+	for i in range(1, s.size()):
+		var n: int = maxi(1, int(s[i - 1].distance_to(s[i]) / step))
+		for k in range(1, n + 1):
+			out.append(s[i - 1].lerp(s[i], float(k) / float(n)))
+	return out
+
+
+## A sloppy-but-recognisable child letter in screen pixels: random size
+## (small to oversized), place, slant, squash, low-frequency wobble, jitter,
+## reversed strokes, shuffled order, and sometimes a lifted (split) stroke.
+func _child_letter(
+	model: Array[PackedVector2Array], rng: RandomNumberGenerator
+) -> Array[PackedVector2Array]:
+	var size: float = rng.randf_range(140.0, 900.0)
+	var off: Vector2 = Vector2(rng.randf_range(0, 1200), rng.randf_range(0, 500))
+	var rot: float = deg_to_rad(rng.randf_range(-12.0, 12.0))
+	var sx: float = rng.randf_range(0.8, 1.25)
+	var shear: float = rng.randf_range(-0.15, 0.15)
+	var amp: float = rng.randf_range(0.015, 0.04)
+	var f1: float = rng.randf_range(4.0, 9.0)
+	var ph: float = rng.randf() * TAU
+	var out: Array[PackedVector2Array] = []
+	for st: PackedVector2Array in model:
+		var dense: PackedVector2Array = _densify(st, 0.03)
+		var t: PackedVector2Array = PackedVector2Array()
+		for i in dense.size():
+			var q: Vector2 = dense[i] - Vector2(0.5, 0.5)
+			q = Vector2(q.x * sx + q.y * shear, q.y).rotated(rot)
+			var u: float = float(i) / maxf(1.0, float(dense.size()))
+			q += Vector2(sin(u * f1 + ph), cos(u * f1 * 1.3 + ph)) * amp
+			q += Vector2(rng.randf_range(-1, 1), rng.randf_range(-1, 1)) * 0.006
+			t.append(q * size + off)
+		if rng.randf() < 0.5:
+			t.reverse()
+		if t.size() > 8 and rng.randf() < 0.3:
+			var cut: int = t.size() / 2
+			out.append(t.slice(0, cut))
+			out.append(t.slice(cut))
+		else:
+			out.append(t)
+	if rng.randf() < 0.5:
+		out.reverse()
+	return out
+
+
+func _scribble(rng: RandomNumberGenerator, kind: int) -> Array[PackedVector2Array]:
+	var s: PackedVector2Array = PackedVector2Array()
+	var c: Vector2 = Vector2(600, 400)
+	match kind % 4:
+		0:  # zigzag
+			for k in 9:
+				s.append(
+					c + Vector2(k * 45.0, (k % 2) * 220.0) + Vector2(rng.randf_range(-20, 20), 0)
+				)
+		1:  # horizontal line
+			s.append(c)
+			s.append(c + Vector2(rng.randf_range(250, 450), rng.randf_range(-20, 20)))
+		2:  # random walk
+			var p: Vector2 = c
+			for k in 14:
+				p += Vector2(rng.randf_range(-120, 120), rng.randf_range(-120, 120))
+				s.append(p)
+		3:  # a tap
+			s.append(c)
+			s.append(c + Vector2(6, 4))
+	return [s]
+
+
 func _test_write_check() -> void:
 	var e: LearnEngine = _engine()
-	var model_a: Array[PackedVector2Array] = WriteCheck.strokes_from_json(
-		e.pack.skill("gp_a")["strokes"]
-	)
-	var model_o: Array[PackedVector2Array] = WriteCheck.strokes_from_json(
-		e.pack.skill("gp_o")["strokes"]
-	)
-	var model_l: Array[PackedVector2Array] = WriteCheck.strokes_from_json(
-		e.pack.skill("gp_l")["strokes"]
-	)
-	var model_s: Array[PackedVector2Array] = WriteCheck.strokes_from_json(
-		e.pack.skill("gp_s")["strokes"]
-	)
-	var self_a: Dictionary = WriteCheck.check(model_a, model_a, 0)
-	_ok("write: the model matches itself", bool(self_a["accepted"]), str(self_a))
-	# A child's 'a': other size, other place, wobbly, drawn in screen pixels
+	var models: Dictionary = _models(e)
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = 9
-	var wobbly: Array[PackedVector2Array] = []
-	for s: PackedVector2Array in model_a:
-		var t: PackedVector2Array = PackedVector2Array()
-		for p: Vector2 in s:
-			t.append(
-				(
-					p * 380.0
-					+ Vector2(600, 200)
-					+ Vector2(rng.randf_range(-14, 14), rng.randf_range(-14, 14))
-				)
+	rng.seed = 2026
+	var pos_total: int = 0
+	var pos_ok: int = 0
+	var neg_total: int = 0
+	var neg_ok: int = 0
+	for sid: String in WRITE_LETTERS:
+		var model: Array[PackedVector2Array] = models[sid]
+		var others: Array = _others(models, sid)
+		var orient: bool = LearnBalance.ORIENT_CHECK_LETTERS.has(_label_of(e, sid))
+		var self_r: Dictionary = WriteCheck.judge(_child_scale(model), model, others, 0, orient)
+		_ok("write %s: the clean model is accepted" % sid, bool(self_r["accepted"]), str(self_r))
+		var passed: int = 0
+		var worst: float = 0.0
+		for k in FIXTURES_PER_LETTER:
+			var ink: Array[PackedVector2Array] = _child_letter(model, rng)
+			var r: Dictionary = WriteCheck.judge(ink, model, others, 0, orient)
+			worst = maxf(worst, float(r["distance"]))
+			if bool(r["accepted"]):
+				passed += 1
+			else:
+				print("  rejected sloppy %s #%d: %s" % [sid, k, r])
+		pos_total += FIXTURES_PER_LETTER
+		pos_ok += passed
+		print(
+			(
+				"  sloppy %s: %d/%d accepted (worst distance %.3f)"
+				% [sid, passed, FIXTURES_PER_LETTER, worst]
 			)
-		wobbly.append(t)
-	var r1: Dictionary = WriteCheck.check(wobbly, model_a, 0)
-	_ok("write: a wobbly, shifted, scaled 'a' is accepted", bool(r1["accepted"]), str(r1))
-	var r2: Dictionary = WriteCheck.check(model_o, model_l, 0)
-	_ok("write: an 'o' is not accepted as 'l'", not bool(r2["accepted"]), str(r2))
-	var r3: Dictionary = WriteCheck.check(model_l, model_o, 0)
-	_ok("write: an 'l' is not accepted as 'o'", not bool(r3["accepted"]), str(r3))
-	var mirrored: Array[PackedVector2Array] = []
-	for s: PackedVector2Array in model_s:
+		)
+		_ok(
+			"write %s: every sloppy child letter is accepted" % sid,
+			passed == FIXTURES_PER_LETTER,
+			"%d/%d" % [passed, FIXTURES_PER_LETTER]
+		)
+		var rejected: int = 0
+		var tried: int = 0
+		for oid: String in WRITE_LETTERS:
+			if oid == sid:
+				continue
+			for k in 3:
+				tried += 1
+				var other_ink: Array[PackedVector2Array] = _child_letter(models[oid], rng)
+				var r2: Dictionary = WriteCheck.judge(other_ink, model, others, 0, orient)
+				if not bool(r2["accepted"]):
+					rejected += 1
+				else:
+					print("  accepted %s as %s: %s" % [oid, sid, r2])
+		for k in 8:
+			tried += 1
+			var r3: Dictionary = WriteCheck.judge(_scribble(rng, k), model, others, 0, orient)
+			if not bool(r3["accepted"]):
+				rejected += 1
+			else:
+				print("  accepted scribble %d as %s: %s" % [k % 4, sid, r3])
+		neg_total += tried
+		neg_ok += rejected
+		_ok(
+			"write %s: other letters and scribbles are not accepted" % sid,
+			rejected == tried,
+			"%d/%d" % [rejected, tried]
+		)
+	print(
+		(
+			"  WRITE FIXTURES: sloppy letters accepted %d/%d, others+scribbles rejected %d/%d"
+			% [pos_ok, pos_total, neg_ok, neg_total]
+		)
+	)
+	# Mirrored s: flagged (gentle response), never accepted as a plain s.
+	var model_s: Array[PackedVector2Array] = models["gp_s"]
+	var mirror_flagged: int = 0
+	var correct_flagged: int = 0
+	for k in 10:
+		var m_ink: Array[PackedVector2Array] = _child_letter(WriteCheck.mirrored(model_s), rng)
+		var rm: Dictionary = WriteCheck.judge(m_ink, model_s, _others(models, "gp_s"), 0, true)
+		if bool(rm["mirrored"]) and not bool(rm["accepted"]):
+			mirror_flagged += 1
+		var c_ink: Array[PackedVector2Array] = _child_letter(model_s, rng)
+		var rc: Dictionary = WriteCheck.judge(c_ink, model_s, _others(models, "gp_s"), 0, true)
+		if bool(rc["mirrored"]):
+			correct_flagged += 1
+	print("  mirrored s flagged %d/10, correct s flagged %d/10" % [mirror_flagged, correct_flagged])
+	_ok("write: every mirrored s is flagged", mirror_flagged == 10, str(mirror_flagged))
+	_ok("write: no correct s is flagged as mirrored", correct_flagged == 0, str(correct_flagged))
+	# Third try: a rough but near letter counts as near.
+	var rough: Array[PackedVector2Array] = _child_letter(models["gp_a"], rng)
+	var rr: Dictionary = WriteCheck.judge(rough, models["gp_a"], [], 2, false)
+	_ok("write: a rough a is near enough for the third try", bool(rr["near"]), str(rr))
+
+
+func _child_scale(model: Array[PackedVector2Array]) -> Array[PackedVector2Array]:
+	var out: Array[PackedVector2Array] = []
+	for st: PackedVector2Array in model:
 		var t: PackedVector2Array = PackedVector2Array()
-		for p: Vector2 in s:
-			t.append(Vector2(1.0 - p.x, p.y))
-		mirrored.append(t)
-	var r4: Dictionary = WriteCheck.check(mirrored, model_s, 0)
-	print("  mirrored s: ", r4)
-	var dot: Array[PackedVector2Array] = [
-		PackedVector2Array([Vector2(0.5, 0.5), Vector2(0.52, 0.5)])
-	]
-	var r5: Dictionary = WriteCheck.check(dot, model_o, 3)
-	_ok("write: a dot is not a letter", not bool(r5["accepted"]), str(r5))
+		for q: Vector2 in st:
+			t.append(q * 400.0 + Vector2(300, 100))
+		out.append(t)
+	return out
+
+
+func _label_of(e: LearnEngine, sid: String) -> String:
+	return str(e.pack.skill(sid).get("label", ""))
