@@ -96,8 +96,12 @@
     "gp_s"
    ],
    "audio": "w_is",
-   "activities": [],
-   "picture": "ice"
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "ice",
+   "pronoun": "den",
+   "story_audio": "stuck_is"
   },
   {
    "id": "w_sa",
@@ -214,9 +218,7 @@
     "gp_l"
    ],
    "audio": "w_sal",
-   "activities": [
-    "ordbro"
-   ]
+   "activities": []
   },
   {
    "id": "w_sil",
@@ -238,9 +240,7 @@
     "gp_l"
    ],
    "audio": "w_sil",
-   "activities": [
-    "ordbro"
-   ]
+   "activities": []
   },
   {
    "id": "w_lim",
@@ -264,7 +264,10 @@
    "audio": "w_lim",
    "activities": [
     "ordbro"
-   ]
+   ],
+   "picture": "glue",
+   "pronoun": "det",
+   "story_audio": "stuck_lim"
   },
   {
    "id": "w_mil",
@@ -286,9 +289,7 @@
     "gp_l"
    ],
    "audio": "w_mil",
-   "activities": [
-    "ordbro"
-   ]
+   "activities": []
   },
   {
    "id": "w_mos",
@@ -310,9 +311,7 @@
     "gp_s"
    ],
    "audio": "w_mos",
-   "activities": [
-    "ordbro"
-   ]
+   "activities": []
   },
   {
    "id": "w_los",
@@ -334,9 +333,7 @@
     "gp_s"
    ],
    "audio": "w_los",
-   "activities": [
-    "ordbro"
-   ]
+   "activities": []
   },
   {
    "id": "w_lam",
@@ -361,7 +358,9 @@
    "activities": [
     "ordbro"
    ],
-   "picture": "lamb"
+   "picture": "lamb",
+   "pronoun": "det",
+   "story_audio": "stuck_lam"
   },
   {
    "id": "w_sol",
@@ -386,7 +385,9 @@
    "activities": [
     "ordbro"
    ],
-   "picture": "sun"
+   "picture": "sun",
+   "pronoun": "den",
+   "story_audio": "stuck_sol"
   },
   {
    "id": "w_slim",
@@ -411,7 +412,12 @@
     "gp_m"
    ],
    "audio": "w_slim",
-   "activities": []
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "slime",
+   "pronoun": "det",
+   "story_audio": "stuck_slim"
   },
   {
    "id": "w_sola",
@@ -484,7 +490,12 @@
     "gp_m"
    ],
    "audio": "w_lama",
-   "activities": []
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "llama",
+   "pronoun": "den",
+   "story_audio": "stuck_lama"
   },
   {
    "id": "w_salami",
@@ -513,7 +524,12 @@
     "gp_i"
    ],
    "audio": "w_salami",
-   "activities": []
+   "activities": [
+    "ordbro"
+   ],
+   "picture": "salami",
+   "pronoun": "den",
+   "story_audio": "stuck_salami"
   }
  ]
 }

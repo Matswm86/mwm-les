@@ -22,7 +22,7 @@ func setup(p_letter: String, p_skill: String) -> void:
 	_pebble.scale = Vector3(1.25, 0.5, 1.05)
 	_pebble.position.y = 0.2
 	glyph = GlowLetter.new()
-	glyph.setup(p_letter, 0.95, false)
+	glyph.setup(p_letter, 1.2, false)
 	glyph.idle_motion = false
 	glyph.position = Vector3(0, 0.35, 0.1)
 	add_child(glyph)
@@ -57,10 +57,11 @@ func wobble() -> Tween:
 	return tw
 
 
-func become_plank() -> void:
+## `width` is the plank's length along the bridge in the stone's own units.
+func become_plank(width: float = 1.0) -> void:
 	placed = true
 	var wood: ShaderMaterial = MeshKit.toon(GameTune.WOOD_LIGHT, false)
-	var plank: MeshInstance3D = MeshKit.instance(MeshKit.box(Vector3(1.0, 0.16, 1.5)), wood, self)
+	var plank: MeshInstance3D = MeshKit.instance(MeshKit.box(Vector3(width, 0.16, 1.5)), wood, self)
 	plank.position.y = 0.05
 	plank.scale = Vector3(0.2, 1, 0.2)
 	(
