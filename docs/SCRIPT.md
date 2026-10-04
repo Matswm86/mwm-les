@@ -250,6 +250,8 @@ Old ids that go away: `den_sa`, `vi_leter`, `som_i`, `your_turn`, `write_done`, 
 
 ## Open questions for the teacher
 
+**Approved by the owner 2026-10-04: yes to all six (allow `is` early on the bridge, Hysj asleep, unicorn kept silent, `sol` and `is` on the grown-up card, letter names as listed, the five (sjekk) lines as written).** Hysj's voice must be more theatrical and natural than the first try.
+
 1. **Bridge words.** Only `lam` and `lama` fit "the lamb wants to come over". Both need /m/, the last of the six sounds, so the bridge station would open late. Is that fine? The other option is to also allow `is` early ("Se! Det står en is på den lille øya." / "Vi henter isen over broa."), where Pip fetches the ice cream instead of an animal walking. `sol`, `lim`, `slim` and `salami` are left out because none of them can cross a bridge.
 2. **Hysj asleep on deck.** Is a sleeping, snoring captain all right for the tone, as the reason the jar stays where the child can see it?
 3. **The unicorn.** It has no part in this story. Keep it as a silent animal on the island, or remove it?
