@@ -1,107 +1,158 @@
 # id	mode	text
-# mode say = whole line; mode phoneme = carrier sentence, the LAST word is cut out
-# as the isolated sound (TTS spells a bare "sss"). Longer lines that contain a
-# sound are clip sequences (see content/nb_reading/offline.json).
-ph_a	phoneme	Lyden er aaa.
-ph_s	phoneme	Lyden er sss.
-ph_i	phoneme	Lyden er iii.
-ph_l	phoneme	Lyden er lll.
-ph_o	phoneme	Lyden er ooo.
-ph_m	phoneme	Lyden er mmm.
-pip_hello	say	Hei! Jeg er Pip.
-pip_island	say	Øya har mistet fargene. Trykk på et lys!
-find_prompt	say	Vis meg
-den_sa	say	Den sa
-vi_leter	say	Vi leter etter
-found	say	Du fant den!
-watch	say	Se på meg.
-watch_first	say	Se på meg først!
-your_turn	say	Nå du! Skriv
-som_i	say	som i
-write_again	say	Se en gang til.
-write_done	say	Du skrev
-bridge_prompt	say	Bygg ordet
-bridge_done	say	Du bygde
-restore	say	Se! Fargene kommer tilbake!
-break	say	Oi, skal vi ta en pust?
-grownup_read	say	Les ordene for en voksen!
-grownup_thanks	say	Takk for at du hørte på!
-grownup_later	say	Da leser vi dem for en voksen neste gang!
-grownups_only	say	Dette er for voksne.
-yawn	say	Jeg blir så søvnig.
-ex_ape	say	ape.
-ex_sol	say	sol.
-ex_is	say	is.
-ex_lam	say	lam.
-ex_ost	say	ost.
-ex_mus	say	mus.
-w_is	say	is.
-w_sa	say	sa.
-w_si	say	si.
-w_la	say	la.
-w_li	say	li.
-w_lo	say	lo.
-w_sal	say	sal.
-w_sil	say	sil.
-w_lim	say	lim.
-w_mil	say	mil.
-w_mos	say	mos.
-w_los	say	los.
-w_lam	say	lam.
-w_sol	say	sol.
-w_slim	say	slim.
-w_sola	say	sola.
-w_silo	say	silo.
-w_lama	say	lama.
-w_salami	say	salami.
-off_find	say	Finn tre ting hjemme som begynner med
-off_write	say	Skriv
-off_write_dugg	say	med fingeren på dugg i vinduet!
-off_say	say	Si
-off_say_long	say	så lenge du klarer, sammen med en voksen!
-off_snake	say	Lag en slange av et tau. Den sier
-off_stretch	say	Strekk armene høyt opp, som en
-off_back	say	på ryggen til en voksen!
-off_ring	say	Lag en ring med armene og si
-off_food	say	når maten smaker godt i dag!
-off_gen1	say	Klapp navnet ditt i stavelser!
-off_gen2	say	Lytt etter lyder på tur ute i dag!
-off_gen3	say	Les ordene dine for en voksen igjen i kveld!
-find_where	say	Hvor er
-find_tap	say	Trykk på
-intro_a	say	Denne heter a. Store A og lille a.
-intro_s	say	Denne heter ess. Store S og lille s.
-intro_i	say	Denne heter i. Store I og lille i.
-intro_l	say	Denne heter ell. Store L og lille l.
-intro_o	say	Denne heter o. Store O og lille o.
-intro_m	say	Denne heter em. Store M og lille m.
-de_sier	say	De sier
-tap_small	say	Trykk på den lille!
-mirror	say	Se, den snur andre veien.
-bridge_listen	say	Hør!
-bridge_drag	say	Dra steinen til hullet!
-story_find_1	say	Lyden
-story_find_2	say	sover i en blomst. Finn den, så våkner blomsten!
-story_write	say	Havet har vasket bort bokstaven. Skriv den i sanden, så øya husker den!
-stuck_is	say	Isen står fast på den lille øya.
-stuck_sol	say	Sola står fast på den lille øya.
-stuck_lam	say	Lammet står fast på den lille øya.
-stuck_lama	say	Lamaen står fast på den lille øya.
-stuck_slim	say	Slimet står fast på den lille øya.
-stuck_lim	say	Limet står fast på den lille øya.
-stuck_salami	say	Salamien står fast på den lille øya.
-build_det	say	Bygg en ordbro, så det kan komme hjem!
-build_den	say	Bygg en ordbro, så den kan komme hjem!
-home_det	say	Hurra! Nå er det hjemme!
-home_den	say	Hurra! Nå er den hjemme!
-payoff_find	say	Se, blomsten våknet!
-payoff_write	say	Se, enhjørningen fikk en farge!
-next_find	say	Se, blomstene sover. Kom!
-next_write	say	Se, enhjørningen mangler fargene sine. Kom!
-next_bridge	say	Se, noen står fast på den lille øya. Kom!
-hysj_shush	hysj	Hysj! For mye bråk!
-hysj_jar	hysj	Alle lydene skal sove i krukka mi.
-story_pip_1	say	Hei, venn! Jeg er Pip.
-story_pip_2	say	Kaptein Hysj har tatt lydene, og nå er øya grå.
-story_pip_3	say	Vil du hjelpe meg å vekke lydene?
-tap_me	say	Trykk på meg!
+# Every id and text comes from docs/SCRIPT.md (owner-approved 2026-10-04).
+# PLACEHOLDER VOICE: the final voice is not chosen. These clips only make the
+# wiring testable. A real recording replaces assets/audio/tts_<id>.mp3 under the
+# same name (one file per line, mono, -18 LUFS).
+#
+# Modes:
+#   say      Pip line, whole text
+#   hysj     Kaptein Hysj line, whole text
+#   phoneme  [lyd:x] short sound: carrier sentence, the LAST word is cut out
+#   hold     [lyd:x] held sound: the clip named in `text`, stretched to about 1.5 s
+#   concat   [lydering:x]: the clips named in `text` joined with a gap; the start
+#            time of each sound is written to content/nb_reading/clip_marks.json
+# A line that ends in a slot holds only the sentence; the game plays the slot
+# clip after it. Nothing is ever recorded or played after a slot.
+#
+# ---- [lyd:x] short (R2: flat, no intonation; o = /u/ as in ost)
+lyd_a	phoneme	Lyden er aaa.
+lyd_s	phoneme	Lyden er sss.
+lyd_i	phoneme	Lyden er iii.
+lyd_l	phoneme	Lyden er lll.
+lyd_o	phoneme	Lyden er ooo.
+lyd_m	phoneme	Lyden er mmm.
+# ---- [lyd:x] held, for writing strokes and stone holds
+lyd_a_hold	hold	lyd_a
+lyd_s_hold	hold	lyd_s
+lyd_i_hold	hold	lyd_i
+lyd_l_hold	hold	lyd_l
+lyd_o_hold	hold	lyd_o
+lyd_m_hold	hold	lyd_m
+# ---- [ord:x]
+ord_lam	say	lam.
+ord_lama	say	lama.
+ord_sol	say	sol.
+ord_is	say	is.
+# ---- [lydering:x], one time mark per sound
+lydering_lam	concat	lyd_l lyd_a lyd_m
+lydering_lama	concat	lyd_l lyd_a lyd_m lyd_a
+lydering_is	concat	lyd_i lyd_s
+# ---- Scene 0: opening story
+op_hysj_1	hysj	Hysj! For mye bråk!
+op_hysj_2	hysj	Alle lydene skal i krukka mi.
+op_hysj_3	hysj	Sånn. Nå er det stille.
+op_hysj_4	hysj	Nå skal jeg sove.
+op_pip_1	say	Hei! Jeg er Pip.
+op_pip_2	say	Kaptein Hysj tok alle lydene.
+op_pip_3	say	Nå er øya grå og stille.
+op_pip_4	say	Lydene er i krukka til Hysj.
+op_pip_5	say	Vil du hjelpe meg å hente dem hjem?
+op_pip_6	say	Trykk på meg!
+# ---- Scene 1: hub
+hub_hello	say	Hei! Der er du igjen.
+hub_pip	say	Hei! Jeg er Pip.
+hub_next_find	say	Kom! Vi henter lyder fra krukka.
+hub_next_write	say	Kom! Vi skal skrive i sanden.
+hub_next_bridge	say	Se! Lammet vil over til oss. Kom!
+hub_idle	say	Trykk der det lyser.
+hub_restore	say	Se! Fargene kommer tilbake.
+# ---- Scene 2: Hør og finn
+find_in_1	say	Se! Krukka står på skipet til Hysj.
+find_in_2	say	Finn bokstavene. Da flyr lydene hjem.
+intro_a	say	Dette er bokstaven A. Store A og lille a.
+intro_s	say	Dette er bokstaven S. Store S og lille s.
+intro_i	say	Dette er bokstaven I. Store I og lille i.
+intro_l	say	Dette er bokstaven L. Store L og lille l.
+intro_o	say	Dette er bokstaven O. Store O og lille o.
+intro_m	say	Dette er bokstaven M. Store M og lille m.
+intro_hear	say	Hør på lyden.
+intro_tap	say	Trykk på den lille bokstaven.
+find_prompt	say	Finn bokstaven som sier
+find_hint_1	say	Hør godt.
+find_hint_2	say	Se hvor jeg peker.
+find_wrong	say	Hør en gang til.
+find_praise	say	Ja! Det var
+back_a	say	Se! En ape i treet.
+back_s	say	Se! Sola kommer opp.
+back_i	say	Se! En stor is.
+back_l	say	Se! Et lam på den lille øya.
+back_o	say	Se! En stor ost.
+back_m	say	Se! En mus titter fram.
+# ---- Scene 3: Sandskriving
+write_in_1	say	Her skriver vi i sanden.
+write_in_2	say	Du skriver en bokstav.
+write_in_3	say	Den blir til en stein.
+write_in_4	say	Steinene bruker vi til broa.
+write_watch	say	Se hvordan jeg skriver bokstaven.
+write_link_a	say	Ape begynner med den lyden.
+write_link_s	say	Sol begynner med den lyden.
+write_link_i	say	Is begynner med den lyden.
+write_link_l	say	Lam begynner med den lyden.
+write_link_o	say	Ost begynner med den lyden.
+write_link_m	say	Mus begynner med den lyden.
+write_turn_1	say	Nå er det din tur.
+write_turn_2	say	Skriv bokstaven som sier
+write_again_2	say	Skriv bokstaven en gang til.
+write_wait	say	Se på meg først.
+write_retry	say	Prøv en gang til.
+write_hint_1	say	Begynn ved prikken.
+write_hint_2	say	Se en gang til.
+write_hint_3	say	Følg prikkene med fingeren.
+write_mirror	say	Se! Bokstaven din snur andre veien.
+write_right	say	Ja! Du skrev bokstaven som sier
+write_payoff	say	Se! Steinene ligger klare til broa.
+# ---- Scene 4: Ordbroa (words lam, lama, and is from open question 1, option two)
+bridge_lam_1	say	Se! Lammet står på den lille øya.
+bridge_lam_2	say	Lammet vil komme over til oss.
+bridge_lam_2r	say	Lammet vil over til oss igjen.
+bridge_lama_1	say	Se! Der er en lama også.
+bridge_lama_2	say	Lamaen vil også komme over.
+bridge_is_1	say	Se! Det står en is på den lille øya.
+bridge_is_2	say	Vi henter isen over broa.
+bridge_build	say	Vi bygger en bro av bokstaver.
+bridge_hear_word	say	Hør på ordet.
+bridge_hear_sounds	say	Hør på lydene.
+bridge_word_again_lam	say	Det blir lam.
+bridge_word_again_lama	say	Det blir lama.
+bridge_word_again_is	say	Det blir is.
+bridge_ask_lam	say	Hvilken bokstav mangler i lam?
+bridge_ask_lama	say	Hvilken bokstav mangler i lama?
+bridge_ask_is	say	Hvilken bokstav mangler i is?
+bridge_drag	say	Dra steinen til hullet.
+bridge_hint_1	say	Hør på lyden som mangler.
+bridge_hint_2	say	Se på hånden.
+bridge_wrong	say	Hør en gang til.
+bridge_says_lam	say	Det står lam.
+bridge_says_lama	say	Det står lama.
+bridge_says_is	say	Det står is.
+bridge_walk_lam	say	Se! Lammet går over broa.
+bridge_done_lam	say	Du bygde ordet lam. Nå er lammet her.
+bridge_walk_lama	say	Se! Lamaen går over broa.
+bridge_done_lama	say	Du bygde ordet lama. Nå er lamaen her.
+# not in SCRIPT.md: the two closing lines for `is`, written to the same frame (owner to check)
+bridge_walk_is	say	Se! Isen kommer over broa.
+bridge_done_is	say	Du bygde ordet is. Nå er isen her.
+# ---- Scene 5: pauses
+pause_taps	say	Vent litt. Hør på meg.
+pause_move_1	say	Vi tar en liten pause.
+pause_move_2	say	Rist på armene med meg!
+# ---- Scene 6: read to a grown-up
+grown_read	say	Les ordene for en voksen.
+grown_thanks	say	Takk for at du hørte på!
+grown_later	say	Da leser du ordene neste gang.
+# ---- Scene 7: session end
+end_yawn	say	Jeg blir så søvnig.
+end_today	say	Hør hva vi øvde på i dag.
+off_a	say	Gap stort foran speilet og si
+off_s	say	Kryp som en slange og si
+off_i	say	Smil stort foran speilet og si
+off_l	say	Tegn en strek på ryggen til en voksen og si
+off_o	say	Lag en ring med munnen og si
+off_m	say	Når maten smaker godt, kan du si
+off_gen_1	say	Klapp navnet ditt sammen med en voksen.
+off_gen_2	say	Hør etter lyder når du er ute i dag.
+off_gen_3	say	Les ordene dine for en voksen i kveld.
+end_bye	say	Ha det, venn!
+# ---- Scene 8: parent gate
+gate_1	say	Dette er for voksne.
+gate_2	say	Trykk på krysset for å gå tilbake.

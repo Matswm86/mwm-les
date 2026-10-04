@@ -1,0 +1,20 @@
+{
+ "note": "Start time in seconds of each sound inside a [lydering:x] clip, in order. The bridge lights plank i at marks[i]. Re-measure when a real recording replaces the clip.",
+ "marks": {
+  "lydering_is": [
+   0.0,
+   0.922
+  ],
+  "lydering_lam": [
+   0.0,
+   1.042,
+   2.036
+  ],
+  "lydering_lama": [
+   0.0,
+   1.042,
+   2.036,
+   3.102
+  ]
+ }
+}

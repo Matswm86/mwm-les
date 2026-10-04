@@ -2,830 +2,1156 @@
  "pack": "nb_reading",
  "clips": [
   {
-   "id": "ph_a",
-   "file": "res://assets/audio/tts_ph_a.mp3",
+   "id": "lyd_a",
+   "file": "res://assets/audio/tts_lyd_a.mp3",
    "mode": "phoneme",
    "text": "Lyden er aaa.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ph_s",
-   "file": "res://assets/audio/tts_ph_s.mp3",
+   "id": "lyd_s",
+   "file": "res://assets/audio/tts_lyd_s.mp3",
    "mode": "phoneme",
    "text": "Lyden er sss.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ph_i",
-   "file": "res://assets/audio/tts_ph_i.mp3",
+   "id": "lyd_i",
+   "file": "res://assets/audio/tts_lyd_i.mp3",
    "mode": "phoneme",
    "text": "Lyden er iii.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "review",
-   "note": "cut letter sound may be unclear; owner to check by ear"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ph_l",
-   "file": "res://assets/audio/tts_ph_l.mp3",
+   "id": "lyd_l",
+   "file": "res://assets/audio/tts_lyd_l.mp3",
    "mode": "phoneme",
    "text": "Lyden er lll.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ph_o",
-   "file": "res://assets/audio/tts_ph_o.mp3",
+   "id": "lyd_o",
+   "file": "res://assets/audio/tts_lyd_o.mp3",
    "mode": "phoneme",
    "text": "Lyden er ooo.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "review",
-   "note": "cut letter sound may be unclear; owner to check by ear"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ph_m",
-   "file": "res://assets/audio/tts_ph_m.mp3",
+   "id": "lyd_m",
+   "file": "res://assets/audio/tts_lyd_m.mp3",
    "mode": "phoneme",
    "text": "Lyden er mmm.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "pip_hello",
-   "file": "res://assets/audio/tts_pip_hello.mp3",
-   "mode": "say",
-   "text": "Hei! Jeg er Pip.",
+   "id": "lyd_a_hold",
+   "file": "res://assets/audio/tts_lyd_a_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_a",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "pip_island",
-   "file": "res://assets/audio/tts_pip_island.mp3",
-   "mode": "say",
-   "text": "Øya har mistet fargene. Trykk på et lys!",
+   "id": "lyd_s_hold",
+   "file": "res://assets/audio/tts_lyd_s_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_s",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "find_prompt",
-   "file": "res://assets/audio/tts_find_prompt.mp3",
-   "mode": "say",
-   "text": "Vis meg",
+   "id": "lyd_i_hold",
+   "file": "res://assets/audio/tts_lyd_i_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_i",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "den_sa",
-   "file": "res://assets/audio/tts_den_sa.mp3",
-   "mode": "say",
-   "text": "Den sa",
+   "id": "lyd_l_hold",
+   "file": "res://assets/audio/tts_lyd_l_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_l",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "vi_leter",
-   "file": "res://assets/audio/tts_vi_leter.mp3",
-   "mode": "say",
-   "text": "Vi leter etter",
+   "id": "lyd_o_hold",
+   "file": "res://assets/audio/tts_lyd_o_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_o",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "found",
-   "file": "res://assets/audio/tts_found.mp3",
-   "mode": "say",
-   "text": "Du fant den!",
+   "id": "lyd_m_hold",
+   "file": "res://assets/audio/tts_lyd_m_hold.mp3",
+   "mode": "hold",
+   "text": "lyd_m",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "watch",
-   "file": "res://assets/audio/tts_watch.mp3",
-   "mode": "say",
-   "text": "Se på meg.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "watch_first",
-   "file": "res://assets/audio/tts_watch_first.mp3",
-   "mode": "say",
-   "text": "Se på meg først!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "your_turn",
-   "file": "res://assets/audio/tts_your_turn.mp3",
-   "mode": "say",
-   "text": "Nå du! Skriv",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "som_i",
-   "file": "res://assets/audio/tts_som_i.mp3",
-   "mode": "say",
-   "text": "som i",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "write_again",
-   "file": "res://assets/audio/tts_write_again.mp3",
-   "mode": "say",
-   "text": "Se en gang til.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "write_done",
-   "file": "res://assets/audio/tts_write_done.mp3",
-   "mode": "say",
-   "text": "Du skrev",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "bridge_prompt",
-   "file": "res://assets/audio/tts_bridge_prompt.mp3",
-   "mode": "say",
-   "text": "Bygg ordet",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "bridge_done",
-   "file": "res://assets/audio/tts_bridge_done.mp3",
-   "mode": "say",
-   "text": "Du bygde",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "restore",
-   "file": "res://assets/audio/tts_restore.mp3",
-   "mode": "say",
-   "text": "Se! Fargene kommer tilbake!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "break",
-   "file": "res://assets/audio/tts_break.mp3",
-   "mode": "say",
-   "text": "Oi, skal vi ta en pust?",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "grownup_read",
-   "file": "res://assets/audio/tts_grownup_read.mp3",
-   "mode": "say",
-   "text": "Les ordene for en voksen!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "grownup_thanks",
-   "file": "res://assets/audio/tts_grownup_thanks.mp3",
-   "mode": "say",
-   "text": "Takk for at du hørte på!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "grownup_later",
-   "file": "res://assets/audio/tts_grownup_later.mp3",
-   "mode": "say",
-   "text": "Da leser vi dem for en voksen neste gang!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "grownups_only",
-   "file": "res://assets/audio/tts_grownups_only.mp3",
-   "mode": "say",
-   "text": "Dette er for voksne.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "yawn",
-   "file": "res://assets/audio/tts_yawn.mp3",
-   "mode": "say",
-   "text": "Jeg blir så søvnig.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "ex_ape",
-   "file": "res://assets/audio/tts_ex_ape.mp3",
-   "mode": "say",
-   "text": "ape.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "ex_sol",
-   "file": "res://assets/audio/tts_ex_sol.mp3",
-   "mode": "say",
-   "text": "sol.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "ex_is",
-   "file": "res://assets/audio/tts_ex_is.mp3",
-   "mode": "say",
-   "text": "is.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "ex_lam",
-   "file": "res://assets/audio/tts_ex_lam.mp3",
+   "id": "ord_lam",
+   "file": "res://assets/audio/tts_ord_lam.mp3",
    "mode": "say",
    "text": "lam.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "ex_ost",
-   "file": "res://assets/audio/tts_ex_ost.mp3",
-   "mode": "say",
-   "text": "ost.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "ex_mus",
-   "file": "res://assets/audio/tts_ex_mus.mp3",
-   "mode": "say",
-   "text": "mus.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_is",
-   "file": "res://assets/audio/tts_w_is.mp3",
-   "mode": "say",
-   "text": "is.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_sa",
-   "file": "res://assets/audio/tts_w_sa.mp3",
-   "mode": "say",
-   "text": "sa.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_si",
-   "file": "res://assets/audio/tts_w_si.mp3",
-   "mode": "say",
-   "text": "si.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_la",
-   "file": "res://assets/audio/tts_w_la.mp3",
-   "mode": "say",
-   "text": "la.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_li",
-   "file": "res://assets/audio/tts_w_li.mp3",
-   "mode": "say",
-   "text": "li.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_lo",
-   "file": "res://assets/audio/tts_w_lo.mp3",
-   "mode": "say",
-   "text": "lo.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_sal",
-   "file": "res://assets/audio/tts_w_sal.mp3",
-   "mode": "say",
-   "text": "sal.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_sil",
-   "file": "res://assets/audio/tts_w_sil.mp3",
-   "mode": "say",
-   "text": "sil.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_lim",
-   "file": "res://assets/audio/tts_w_lim.mp3",
-   "mode": "say",
-   "text": "lim.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_mil",
-   "file": "res://assets/audio/tts_w_mil.mp3",
-   "mode": "say",
-   "text": "mil.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_mos",
-   "file": "res://assets/audio/tts_w_mos.mp3",
-   "mode": "say",
-   "text": "mos.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_los",
-   "file": "res://assets/audio/tts_w_los.mp3",
-   "mode": "say",
-   "text": "los.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_lam",
-   "file": "res://assets/audio/tts_w_lam.mp3",
-   "mode": "say",
-   "text": "lam.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_sol",
-   "file": "res://assets/audio/tts_w_sol.mp3",
-   "mode": "say",
-   "text": "sol.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_slim",
-   "file": "res://assets/audio/tts_w_slim.mp3",
-   "mode": "say",
-   "text": "slim.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_sola",
-   "file": "res://assets/audio/tts_w_sola.mp3",
-   "mode": "say",
-   "text": "sola.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_silo",
-   "file": "res://assets/audio/tts_w_silo.mp3",
-   "mode": "say",
-   "text": "silo.",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "w_lama",
-   "file": "res://assets/audio/tts_w_lama.mp3",
+   "id": "ord_lama",
+   "file": "res://assets/audio/tts_ord_lama.mp3",
    "mode": "say",
    "text": "lama.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "w_salami",
-   "file": "res://assets/audio/tts_w_salami.mp3",
+   "id": "ord_sol",
+   "file": "res://assets/audio/tts_ord_sol.mp3",
    "mode": "say",
-   "text": "salami.",
+   "text": "sol.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_find",
-   "file": "res://assets/audio/tts_off_find.mp3",
+   "id": "ord_is",
+   "file": "res://assets/audio/tts_ord_is.mp3",
    "mode": "say",
-   "text": "Finn tre ting hjemme som begynner med",
+   "text": "is.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_write",
-   "file": "res://assets/audio/tts_off_write.mp3",
-   "mode": "say",
-   "text": "Skriv",
+   "id": "lydering_lam",
+   "file": "res://assets/audio/tts_lydering_lam.mp3",
+   "mode": "concat",
+   "text": "lyd_l lyd_a lyd_m",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_write_dugg",
-   "file": "res://assets/audio/tts_off_write_dugg.mp3",
-   "mode": "say",
-   "text": "med fingeren på dugg i vinduet!",
+   "id": "lydering_lama",
+   "file": "res://assets/audio/tts_lydering_lama.mp3",
+   "mode": "concat",
+   "text": "lyd_l lyd_a lyd_m lyd_a",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_say",
-   "file": "res://assets/audio/tts_off_say.mp3",
-   "mode": "say",
-   "text": "Si",
+   "id": "lydering_is",
+   "file": "res://assets/audio/tts_lydering_is.mp3",
+   "mode": "concat",
+   "text": "lyd_i lyd_s",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_say_long",
-   "file": "res://assets/audio/tts_off_say_long.mp3",
-   "mode": "say",
-   "text": "så lenge du klarer, sammen med en voksen!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "id": "op_hysj_1",
+   "file": "res://assets/audio/tts_op_hysj_1.mp3",
+   "mode": "hysj",
+   "text": "Hysj! For mye bråk!",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_snake",
-   "file": "res://assets/audio/tts_off_snake.mp3",
-   "mode": "say",
-   "text": "Lag en slange av et tau. Den sier",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "id": "op_hysj_2",
+   "file": "res://assets/audio/tts_op_hysj_2.mp3",
+   "mode": "hysj",
+   "text": "Alle lydene skal i krukka mi.",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_stretch",
-   "file": "res://assets/audio/tts_off_stretch.mp3",
-   "mode": "say",
-   "text": "Strekk armene høyt opp, som en",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "id": "op_hysj_3",
+   "file": "res://assets/audio/tts_op_hysj_3.mp3",
+   "mode": "hysj",
+   "text": "Sånn. Nå er det stille.",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_back",
-   "file": "res://assets/audio/tts_off_back.mp3",
-   "mode": "say",
-   "text": "på ryggen til en voksen!",
-   "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "id": "op_hysj_4",
+   "file": "res://assets/audio/tts_op_hysj_4.mp3",
+   "mode": "hysj",
+   "text": "Nå skal jeg sove.",
+   "voice": "nb-NO-PernilleNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_ring",
-   "file": "res://assets/audio/tts_off_ring.mp3",
+   "id": "op_pip_1",
+   "file": "res://assets/audio/tts_op_pip_1.mp3",
    "mode": "say",
-   "text": "Lag en ring med armene og si",
+   "text": "Hei! Jeg er Pip.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_food",
-   "file": "res://assets/audio/tts_off_food.mp3",
+   "id": "op_pip_2",
+   "file": "res://assets/audio/tts_op_pip_2.mp3",
    "mode": "say",
-   "text": "når maten smaker godt i dag!",
+   "text": "Kaptein Hysj tok alle lydene.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_gen1",
-   "file": "res://assets/audio/tts_off_gen1.mp3",
+   "id": "op_pip_3",
+   "file": "res://assets/audio/tts_op_pip_3.mp3",
    "mode": "say",
-   "text": "Klapp navnet ditt i stavelser!",
+   "text": "Nå er øya grå og stille.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_gen2",
-   "file": "res://assets/audio/tts_off_gen2.mp3",
+   "id": "op_pip_4",
+   "file": "res://assets/audio/tts_op_pip_4.mp3",
    "mode": "say",
-   "text": "Lytt etter lyder på tur ute i dag!",
+   "text": "Lydene er i krukka til Hysj.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "off_gen3",
-   "file": "res://assets/audio/tts_off_gen3.mp3",
+   "id": "op_pip_5",
+   "file": "res://assets/audio/tts_op_pip_5.mp3",
    "mode": "say",
-   "text": "Les ordene dine for en voksen igjen i kveld!",
+   "text": "Vil du hjelpe meg å hente dem hjem?",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "find_where",
-   "file": "res://assets/audio/tts_find_where.mp3",
+   "id": "op_pip_6",
+   "file": "res://assets/audio/tts_op_pip_6.mp3",
    "mode": "say",
-   "text": "Hvor er",
+   "text": "Trykk på meg!",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "find_tap",
-   "file": "res://assets/audio/tts_find_tap.mp3",
+   "id": "hub_hello",
+   "file": "res://assets/audio/tts_hub_hello.mp3",
    "mode": "say",
-   "text": "Trykk på",
+   "text": "Hei! Der er du igjen.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_pip",
+   "file": "res://assets/audio/tts_hub_pip.mp3",
+   "mode": "say",
+   "text": "Hei! Jeg er Pip.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_next_find",
+   "file": "res://assets/audio/tts_hub_next_find.mp3",
+   "mode": "say",
+   "text": "Kom! Vi henter lyder fra krukka.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_next_write",
+   "file": "res://assets/audio/tts_hub_next_write.mp3",
+   "mode": "say",
+   "text": "Kom! Vi skal skrive i sanden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_next_bridge",
+   "file": "res://assets/audio/tts_hub_next_bridge.mp3",
+   "mode": "say",
+   "text": "Se! Lammet vil over til oss. Kom!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_idle",
+   "file": "res://assets/audio/tts_hub_idle.mp3",
+   "mode": "say",
+   "text": "Trykk der det lyser.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "hub_restore",
+   "file": "res://assets/audio/tts_hub_restore.mp3",
+   "mode": "say",
+   "text": "Se! Fargene kommer tilbake.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "find_in_1",
+   "file": "res://assets/audio/tts_find_in_1.mp3",
+   "mode": "say",
+   "text": "Se! Krukka står på skipet til Hysj.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "find_in_2",
+   "file": "res://assets/audio/tts_find_in_2.mp3",
+   "mode": "say",
+   "text": "Finn bokstavene. Da flyr lydene hjem.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_a",
    "file": "res://assets/audio/tts_intro_a.mp3",
    "mode": "say",
-   "text": "Denne heter a. Store A og lille a.",
+   "text": "Dette er bokstaven A. Store A og lille a.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_s",
    "file": "res://assets/audio/tts_intro_s.mp3",
    "mode": "say",
-   "text": "Denne heter ess. Store S og lille s.",
+   "text": "Dette er bokstaven S. Store S og lille s.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_i",
    "file": "res://assets/audio/tts_intro_i.mp3",
    "mode": "say",
-   "text": "Denne heter i. Store I og lille i.",
+   "text": "Dette er bokstaven I. Store I og lille i.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_l",
    "file": "res://assets/audio/tts_intro_l.mp3",
    "mode": "say",
-   "text": "Denne heter ell. Store L og lille l.",
+   "text": "Dette er bokstaven L. Store L og lille l.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_o",
    "file": "res://assets/audio/tts_intro_o.mp3",
    "mode": "say",
-   "text": "Denne heter o. Store O og lille o.",
+   "text": "Dette er bokstaven O. Store O og lille o.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "intro_m",
    "file": "res://assets/audio/tts_intro_m.mp3",
    "mode": "say",
-   "text": "Denne heter em. Store M og lille m.",
+   "text": "Dette er bokstaven M. Store M og lille m.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "de_sier",
-   "file": "res://assets/audio/tts_de_sier.mp3",
+   "id": "intro_hear",
+   "file": "res://assets/audio/tts_intro_hear.mp3",
    "mode": "say",
-   "text": "De sier",
+   "text": "Hør på lyden.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "tap_small",
-   "file": "res://assets/audio/tts_tap_small.mp3",
+   "id": "intro_tap",
+   "file": "res://assets/audio/tts_intro_tap.mp3",
    "mode": "say",
-   "text": "Trykk på den lille!",
+   "text": "Trykk på den lille bokstaven.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "mirror",
-   "file": "res://assets/audio/tts_mirror.mp3",
+   "id": "find_prompt",
+   "file": "res://assets/audio/tts_find_prompt.mp3",
    "mode": "say",
-   "text": "Se, den snur andre veien.",
+   "text": "Finn bokstaven som sier",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "bridge_listen",
-   "file": "res://assets/audio/tts_bridge_listen.mp3",
+   "id": "find_hint_1",
+   "file": "res://assets/audio/tts_find_hint_1.mp3",
    "mode": "say",
-   "text": "Hør!",
+   "text": "Hør godt.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "find_hint_2",
+   "file": "res://assets/audio/tts_find_hint_2.mp3",
+   "mode": "say",
+   "text": "Se hvor jeg peker.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "find_wrong",
+   "file": "res://assets/audio/tts_find_wrong.mp3",
+   "mode": "say",
+   "text": "Hør en gang til.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "find_praise",
+   "file": "res://assets/audio/tts_find_praise.mp3",
+   "mode": "say",
+   "text": "Ja! Det var",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_a",
+   "file": "res://assets/audio/tts_back_a.mp3",
+   "mode": "say",
+   "text": "Se! En ape i treet.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_s",
+   "file": "res://assets/audio/tts_back_s.mp3",
+   "mode": "say",
+   "text": "Se! Sola kommer opp.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_i",
+   "file": "res://assets/audio/tts_back_i.mp3",
+   "mode": "say",
+   "text": "Se! En stor is.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_l",
+   "file": "res://assets/audio/tts_back_l.mp3",
+   "mode": "say",
+   "text": "Se! Et lam på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_o",
+   "file": "res://assets/audio/tts_back_o.mp3",
+   "mode": "say",
+   "text": "Se! En stor ost.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "back_m",
+   "file": "res://assets/audio/tts_back_m.mp3",
+   "mode": "say",
+   "text": "Se! En mus titter fram.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_in_1",
+   "file": "res://assets/audio/tts_write_in_1.mp3",
+   "mode": "say",
+   "text": "Her skriver vi i sanden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_in_2",
+   "file": "res://assets/audio/tts_write_in_2.mp3",
+   "mode": "say",
+   "text": "Du skriver en bokstav.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_in_3",
+   "file": "res://assets/audio/tts_write_in_3.mp3",
+   "mode": "say",
+   "text": "Den blir til en stein.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_in_4",
+   "file": "res://assets/audio/tts_write_in_4.mp3",
+   "mode": "say",
+   "text": "Steinene bruker vi til broa.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_watch",
+   "file": "res://assets/audio/tts_write_watch.mp3",
+   "mode": "say",
+   "text": "Se hvordan jeg skriver bokstaven.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_a",
+   "file": "res://assets/audio/tts_write_link_a.mp3",
+   "mode": "say",
+   "text": "Ape begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_s",
+   "file": "res://assets/audio/tts_write_link_s.mp3",
+   "mode": "say",
+   "text": "Sol begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_i",
+   "file": "res://assets/audio/tts_write_link_i.mp3",
+   "mode": "say",
+   "text": "Is begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_l",
+   "file": "res://assets/audio/tts_write_link_l.mp3",
+   "mode": "say",
+   "text": "Lam begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_o",
+   "file": "res://assets/audio/tts_write_link_o.mp3",
+   "mode": "say",
+   "text": "Ost begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_link_m",
+   "file": "res://assets/audio/tts_write_link_m.mp3",
+   "mode": "say",
+   "text": "Mus begynner med den lyden.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_turn_1",
+   "file": "res://assets/audio/tts_write_turn_1.mp3",
+   "mode": "say",
+   "text": "Nå er det din tur.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_turn_2",
+   "file": "res://assets/audio/tts_write_turn_2.mp3",
+   "mode": "say",
+   "text": "Skriv bokstaven som sier",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_again_2",
+   "file": "res://assets/audio/tts_write_again_2.mp3",
+   "mode": "say",
+   "text": "Skriv bokstaven en gang til.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_wait",
+   "file": "res://assets/audio/tts_write_wait.mp3",
+   "mode": "say",
+   "text": "Se på meg først.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_retry",
+   "file": "res://assets/audio/tts_write_retry.mp3",
+   "mode": "say",
+   "text": "Prøv en gang til.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_hint_1",
+   "file": "res://assets/audio/tts_write_hint_1.mp3",
+   "mode": "say",
+   "text": "Begynn ved prikken.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_hint_2",
+   "file": "res://assets/audio/tts_write_hint_2.mp3",
+   "mode": "say",
+   "text": "Se en gang til.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_hint_3",
+   "file": "res://assets/audio/tts_write_hint_3.mp3",
+   "mode": "say",
+   "text": "Følg prikkene med fingeren.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_mirror",
+   "file": "res://assets/audio/tts_write_mirror.mp3",
+   "mode": "say",
+   "text": "Se! Bokstaven din snur andre veien.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_right",
+   "file": "res://assets/audio/tts_write_right.mp3",
+   "mode": "say",
+   "text": "Ja! Du skrev bokstaven som sier",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "write_payoff",
+   "file": "res://assets/audio/tts_write_payoff.mp3",
+   "mode": "say",
+   "text": "Se! Steinene ligger klare til broa.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_lam_1",
+   "file": "res://assets/audio/tts_bridge_lam_1.mp3",
+   "mode": "say",
+   "text": "Se! Lammet står på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_lam_2",
+   "file": "res://assets/audio/tts_bridge_lam_2.mp3",
+   "mode": "say",
+   "text": "Lammet vil komme over til oss.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_lam_2r",
+   "file": "res://assets/audio/tts_bridge_lam_2r.mp3",
+   "mode": "say",
+   "text": "Lammet vil over til oss igjen.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_lama_1",
+   "file": "res://assets/audio/tts_bridge_lama_1.mp3",
+   "mode": "say",
+   "text": "Se! Der er en lama også.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_lama_2",
+   "file": "res://assets/audio/tts_bridge_lama_2.mp3",
+   "mode": "say",
+   "text": "Lamaen vil også komme over.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_is_1",
+   "file": "res://assets/audio/tts_bridge_is_1.mp3",
+   "mode": "say",
+   "text": "Se! Det står en is på den lille øya.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_is_2",
+   "file": "res://assets/audio/tts_bridge_is_2.mp3",
+   "mode": "say",
+   "text": "Vi henter isen over broa.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_build",
+   "file": "res://assets/audio/tts_bridge_build.mp3",
+   "mode": "say",
+   "text": "Vi bygger en bro av bokstaver.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_hear_word",
+   "file": "res://assets/audio/tts_bridge_hear_word.mp3",
+   "mode": "say",
+   "text": "Hør på ordet.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_hear_sounds",
+   "file": "res://assets/audio/tts_bridge_hear_sounds.mp3",
+   "mode": "say",
+   "text": "Hør på lydene.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_word_again_lam",
+   "file": "res://assets/audio/tts_bridge_word_again_lam.mp3",
+   "mode": "say",
+   "text": "Det blir lam.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_word_again_lama",
+   "file": "res://assets/audio/tts_bridge_word_again_lama.mp3",
+   "mode": "say",
+   "text": "Det blir lama.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_word_again_is",
+   "file": "res://assets/audio/tts_bridge_word_again_is.mp3",
+   "mode": "say",
+   "text": "Det blir is.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_ask_lam",
+   "file": "res://assets/audio/tts_bridge_ask_lam.mp3",
+   "mode": "say",
+   "text": "Hvilken bokstav mangler i lam?",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_ask_lama",
+   "file": "res://assets/audio/tts_bridge_ask_lama.mp3",
+   "mode": "say",
+   "text": "Hvilken bokstav mangler i lama?",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "bridge_ask_is",
+   "file": "res://assets/audio/tts_bridge_ask_is.mp3",
+   "mode": "say",
+   "text": "Hvilken bokstav mangler i is?",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
    "id": "bridge_drag",
    "file": "res://assets/audio/tts_bridge_drag.mp3",
    "mode": "say",
-   "text": "Dra steinen til hullet!",
+   "text": "Dra steinen til hullet.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "story_find_1",
-   "file": "res://assets/audio/tts_story_find_1.mp3",
+   "id": "bridge_hint_1",
+   "file": "res://assets/audio/tts_bridge_hint_1.mp3",
    "mode": "say",
-   "text": "Lyden",
+   "text": "Hør på lyden som mangler.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "story_find_2",
-   "file": "res://assets/audio/tts_story_find_2.mp3",
+   "id": "bridge_hint_2",
+   "file": "res://assets/audio/tts_bridge_hint_2.mp3",
    "mode": "say",
-   "text": "sover i en blomst. Finn den, så våkner blomsten!",
+   "text": "Se på hånden.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "story_write",
-   "file": "res://assets/audio/tts_story_write.mp3",
+   "id": "bridge_wrong",
+   "file": "res://assets/audio/tts_bridge_wrong.mp3",
    "mode": "say",
-   "text": "Havet har vasket bort bokstaven. Skriv den i sanden, så øya husker den!",
+   "text": "Hør en gang til.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_is",
-   "file": "res://assets/audio/tts_stuck_is.mp3",
+   "id": "bridge_says_lam",
+   "file": "res://assets/audio/tts_bridge_says_lam.mp3",
    "mode": "say",
-   "text": "Isen står fast på den lille øya.",
+   "text": "Det står lam.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_sol",
-   "file": "res://assets/audio/tts_stuck_sol.mp3",
+   "id": "bridge_says_lama",
+   "file": "res://assets/audio/tts_bridge_says_lama.mp3",
    "mode": "say",
-   "text": "Sola står fast på den lille øya.",
+   "text": "Det står lama.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_lam",
-   "file": "res://assets/audio/tts_stuck_lam.mp3",
+   "id": "bridge_says_is",
+   "file": "res://assets/audio/tts_bridge_says_is.mp3",
    "mode": "say",
-   "text": "Lammet står fast på den lille øya.",
+   "text": "Det står is.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_lama",
-   "file": "res://assets/audio/tts_stuck_lama.mp3",
+   "id": "bridge_walk_lam",
+   "file": "res://assets/audio/tts_bridge_walk_lam.mp3",
    "mode": "say",
-   "text": "Lamaen står fast på den lille øya.",
+   "text": "Se! Lammet går over broa.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_slim",
-   "file": "res://assets/audio/tts_stuck_slim.mp3",
+   "id": "bridge_done_lam",
+   "file": "res://assets/audio/tts_bridge_done_lam.mp3",
    "mode": "say",
-   "text": "Slimet står fast på den lille øya.",
+   "text": "Du bygde ordet lam. Nå er lammet her.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_lim",
-   "file": "res://assets/audio/tts_stuck_lim.mp3",
+   "id": "bridge_walk_lama",
+   "file": "res://assets/audio/tts_bridge_walk_lama.mp3",
    "mode": "say",
-   "text": "Limet står fast på den lille øya.",
+   "text": "Se! Lamaen går over broa.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "stuck_salami",
-   "file": "res://assets/audio/tts_stuck_salami.mp3",
+   "id": "bridge_done_lama",
+   "file": "res://assets/audio/tts_bridge_done_lama.mp3",
    "mode": "say",
-   "text": "Salamien står fast på den lille øya.",
+   "text": "Du bygde ordet lama. Nå er lamaen her.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "build_det",
-   "file": "res://assets/audio/tts_build_det.mp3",
+   "id": "bridge_walk_is",
+   "file": "res://assets/audio/tts_bridge_walk_is.mp3",
    "mode": "say",
-   "text": "Bygg en ordbro, så det kan komme hjem!",
+   "text": "Se! Isen kommer over broa.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "build_den",
-   "file": "res://assets/audio/tts_build_den.mp3",
+   "id": "bridge_done_is",
+   "file": "res://assets/audio/tts_bridge_done_is.mp3",
    "mode": "say",
-   "text": "Bygg en ordbro, så den kan komme hjem!",
+   "text": "Du bygde ordet is. Nå er isen her.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "home_det",
-   "file": "res://assets/audio/tts_home_det.mp3",
+   "id": "pause_taps",
+   "file": "res://assets/audio/tts_pause_taps.mp3",
    "mode": "say",
-   "text": "Hurra! Nå er det hjemme!",
+   "text": "Vent litt. Hør på meg.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "home_den",
-   "file": "res://assets/audio/tts_home_den.mp3",
+   "id": "pause_move_1",
+   "file": "res://assets/audio/tts_pause_move_1.mp3",
    "mode": "say",
-   "text": "Hurra! Nå er den hjemme!",
+   "text": "Vi tar en liten pause.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "payoff_find",
-   "file": "res://assets/audio/tts_payoff_find.mp3",
+   "id": "pause_move_2",
+   "file": "res://assets/audio/tts_pause_move_2.mp3",
    "mode": "say",
-   "text": "Se, blomsten våknet!",
+   "text": "Rist på armene med meg!",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "payoff_write",
-   "file": "res://assets/audio/tts_payoff_write.mp3",
+   "id": "grown_read",
+   "file": "res://assets/audio/tts_grown_read.mp3",
    "mode": "say",
-   "text": "Se, enhjørningen fikk en farge!",
+   "text": "Les ordene for en voksen.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "next_find",
-   "file": "res://assets/audio/tts_next_find.mp3",
+   "id": "grown_thanks",
+   "file": "res://assets/audio/tts_grown_thanks.mp3",
    "mode": "say",
-   "text": "Se, blomstene sover. Kom!",
+   "text": "Takk for at du hørte på!",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "next_write",
-   "file": "res://assets/audio/tts_next_write.mp3",
+   "id": "grown_later",
+   "file": "res://assets/audio/tts_grown_later.mp3",
    "mode": "say",
-   "text": "Se, enhjørningen mangler fargene sine. Kom!",
+   "text": "Da leser du ordene neste gang.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "next_bridge",
-   "file": "res://assets/audio/tts_next_bridge.mp3",
+   "id": "end_yawn",
+   "file": "res://assets/audio/tts_end_yawn.mp3",
    "mode": "say",
-   "text": "Se, noen står fast på den lille øya. Kom!",
+   "text": "Jeg blir så søvnig.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "hysj_shush",
-   "file": "res://assets/audio/tts_hysj_shush.mp3",
-   "mode": "hysj",
-   "text": "Hysj! For mye bråk!",
-   "voice": "nb-NO-PernilleNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "hysj_jar",
-   "file": "res://assets/audio/tts_hysj_jar.mp3",
-   "mode": "hysj",
-   "text": "Alle lydene skal sove i krukka mi.",
-   "voice": "nb-NO-PernilleNeural (edge-tts)",
-   "status": "final"
-  },
-  {
-   "id": "story_pip_1",
-   "file": "res://assets/audio/tts_story_pip_1.mp3",
+   "id": "end_today",
+   "file": "res://assets/audio/tts_end_today.mp3",
    "mode": "say",
-   "text": "Hei, venn! Jeg er Pip.",
+   "text": "Hør hva vi øvde på i dag.",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "story_pip_2",
-   "file": "res://assets/audio/tts_story_pip_2.mp3",
+   "id": "off_a",
+   "file": "res://assets/audio/tts_off_a.mp3",
    "mode": "say",
-   "text": "Kaptein Hysj har tatt lydene, og nå er øya grå.",
+   "text": "Gap stort foran speilet og si",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "story_pip_3",
-   "file": "res://assets/audio/tts_story_pip_3.mp3",
+   "id": "off_s",
+   "file": "res://assets/audio/tts_off_s.mp3",
    "mode": "say",
-   "text": "Vil du hjelpe meg å vekke lydene?",
+   "text": "Kryp som en slange og si",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   },
   {
-   "id": "tap_me",
-   "file": "res://assets/audio/tts_tap_me.mp3",
+   "id": "off_i",
+   "file": "res://assets/audio/tts_off_i.mp3",
    "mode": "say",
-   "text": "Trykk på meg!",
+   "text": "Smil stort foran speilet og si",
    "voice": "nb-NO-FinnNeural (edge-tts)",
-   "status": "final"
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_l",
+   "file": "res://assets/audio/tts_off_l.mp3",
+   "mode": "say",
+   "text": "Tegn en strek på ryggen til en voksen og si",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_o",
+   "file": "res://assets/audio/tts_off_o.mp3",
+   "mode": "say",
+   "text": "Lag en ring med munnen og si",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_m",
+   "file": "res://assets/audio/tts_off_m.mp3",
+   "mode": "say",
+   "text": "Når maten smaker godt, kan du si",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_gen_1",
+   "file": "res://assets/audio/tts_off_gen_1.mp3",
+   "mode": "say",
+   "text": "Klapp navnet ditt sammen med en voksen.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_gen_2",
+   "file": "res://assets/audio/tts_off_gen_2.mp3",
+   "mode": "say",
+   "text": "Hør etter lyder når du er ute i dag.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "off_gen_3",
+   "file": "res://assets/audio/tts_off_gen_3.mp3",
+   "mode": "say",
+   "text": "Les ordene dine for en voksen i kveld.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "end_bye",
+   "file": "res://assets/audio/tts_end_bye.mp3",
+   "mode": "say",
+   "text": "Ha det, venn!",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "gate_1",
+   "file": "res://assets/audio/tts_gate_1.mp3",
+   "mode": "say",
+   "text": "Dette er for voksne.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
+  },
+  {
+   "id": "gate_2",
+   "file": "res://assets/audio/tts_gate_2.mp3",
+   "mode": "say",
+   "text": "Trykk på krysset for å gå tilbake.",
+   "voice": "nb-NO-FinnNeural (edge-tts)",
+   "status": "placeholder",
+   "note": "placeholder voice, final voice not chosen; replace the file under the same name"
   }
  ]
 }
