@@ -43,6 +43,23 @@ func camera_pose() -> Dictionary:
 	return {}
 
 
+## A 5-10 s story reason before the first item (shown, voiced by Pip).
+## Gets the visit's first task so the story can name its sound or word.
+func story_intro(_first_task: Dictionary) -> void:
+	pass
+
+
+## A 3-5 s story payoff after the last item, before the zone restores.
+func story_payoff() -> void:
+	pass
+
+
+## The station runner hands every task through here; an activity may swap the
+## item (a fixed first-word order) or the format (a scaffold).
+func adjust_task(task: Dictionary) -> Dictionary:
+	return task
+
+
 func begin_visit() -> void:
 	praise_count = 0
 	Voice.reset_chime()

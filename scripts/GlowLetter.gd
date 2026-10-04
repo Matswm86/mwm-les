@@ -159,6 +159,15 @@ func screen_radius(cam: Camera3D) -> float:
 	return maxf(a.distance_to(b) * 0.75, GameTune.TAP_RADIUS_MIN_PX)
 
 
+## Height of the visible glyph on screen in px (screenshot bot, size checks).
+func glyph_screen_height(cam: Camera3D) -> float:
+	var ab: AABB = _body.global_transform * _body.mesh.get_aabb()
+	var c: Vector3 = ab.get_center()
+	var top: Vector2 = cam.unproject_position(Vector3(c.x, ab.end.y, c.z))
+	var bot: Vector2 = cam.unproject_position(Vector3(c.x, ab.position.y, c.z))
+	return top.distance_to(bot)
+
+
 func screen_pos(cam: Camera3D) -> Vector2:
 	return cam.unproject_position(center_world())
 
