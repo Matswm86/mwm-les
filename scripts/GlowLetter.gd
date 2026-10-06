@@ -9,6 +9,9 @@ const HALO_SHADER: Shader = preload("res://shaders/halo.gdshader")
 const FONT: FontFile = preload("res://assets/fonts/Andika-Bold.ttf")
 const FONT_SIZE: int = 64
 const OUTLINE_PX: int = 10
+## Glyphs whose outline overlaps itself in Andika Bold: TextMesh builds only
+## their side walls ("Convex decomposing failed"), so a flat gold face caps them.
+const CAPPED_GLYPHS: Array[String] = ["e"]
 
 var letter: String = ""
 var height_m: float = 1.4
@@ -19,6 +22,7 @@ var _body: MeshInstance3D
 var _halo: MeshInstance3D
 var _mat: ShaderMaterial
 var _halo_mat: ShaderMaterial
+var _cap: Label3D
 var _t: float = 0.0
 var _base_y: float = 0.0
 
@@ -59,6 +63,19 @@ func setup(text: String, height: float = GameTune.LETTER_HEIGHT_M, with_halo: bo
 	back.alpha_cut = Label3D.ALPHA_CUT_DISCARD
 	back.position = Vector3(0, 0, -tm.depth * 0.5 - 0.01)
 	_glyph.add_child(back)
+	if CAPPED_GLYPHS.has(shown):
+		_cap = Label3D.new()
+		_cap.text = shown
+		_cap.font = FONT
+		_cap.font_size = FONT_SIZE
+		_cap.pixel_size = px
+		_cap.modulate = GameTune.GOLD
+		_cap.outline_size = 0
+		_cap.shaded = false
+		_cap.double_sided = false
+		_cap.alpha_cut = Label3D.ALPHA_CUT_DISCARD
+		_cap.position = Vector3(0, 0, tm.depth * 0.5 + 0.005)
+		_glyph.add_child(_cap)
 	var aabb: AABB = tm.get_aabb()
 	_glyph.position = Vector3(-aabb.get_center().x, -aabb.position.y, 0)
 	if with_halo:
@@ -141,6 +158,8 @@ func _process(delta: float) -> void:
 	if hint_pulse:
 		pulse = 0.5 + 0.5 * sin(_t * TAU / GameTune.HINT_PULSE_PERIOD_SEC)
 	_mat.set_shader_parameter("pulse", pulse)
+	if _cap:
+		_cap.modulate = GameTune.GOLD.lerp(Color(1, 1, 1), 0.45 * pulse)
 
 
 func _glyph_floor() -> float:

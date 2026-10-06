@@ -623,7 +623,9 @@ func _test_write_check() -> void:
 			b_correct_flagged += 1
 	print("  mirrored b flagged %d/10, correct b flagged %d/10" % [b_flagged, b_correct_flagged])
 	_ok("write: every mirrored b is flagged", b_flagged == 10, str(b_flagged))
-	_ok("write: no correct b is flagged as mirrored", b_correct_flagged == 0, str(b_correct_flagged))
+	_ok(
+		"write: no correct b is flagged as mirrored", b_correct_flagged == 0, str(b_correct_flagged)
+	)
 	# Third try: a rough but near letter counts as near.
 	var rough: Array[PackedVector2Array] = _child_letter(models["gp_a"], rng)
 	var rr: Dictionary = WriteCheck.judge(rough, models["gp_a"], [], 2, false)
