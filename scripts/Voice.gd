@@ -37,6 +37,9 @@ const LINES: Array[String] = [
 	"write_right",
 	"write_next",
 	"write_again",
+	"write_show_again",
+	"write_trace",
+	"write_alone",
 	"write_done",
 	"bridge_in",
 	"hook_sol",
@@ -53,6 +56,21 @@ const LINES: Array[String] = [
 	"bridge_word_lam",
 	"bridge_word_done",
 	"bridge_next",
+	"done_sol",
+	"done_sel",
+	"done_les",
+	"done_mat",
+	"done_baat",
+	"level_next",
+	"level_back",
+	"levels_intro",
+	"lamb_baa",
+	"mid_sol",
+	"mid_sel",
+	"mid_les",
+	"mid_mat",
+	"mid_baat",
+	"final_party",
 	"bridge_ask",
 	"bridge_right",
 	"bridge_done",
@@ -79,6 +97,7 @@ var scene: String = ""  # tag for the clip log (opening, hub, find, write, bridg
 var clip_log: Array[Dictionary] = []  # {scene, id, file, t} for every clip that started
 var sequence_errors: int = 0  # sequences with a sentence after a letter sound
 var refused: Array[String] = []  # ids that are not owner recordings or effects
+var missing: Array[String] = []  # listed recordings whose file is not there yet (skipped)
 var _player: AudioStreamPlayer
 var _queue: Array[String] = []
 var _clock: float = 0.0  # scaled game time
@@ -189,6 +208,11 @@ func say(ids: Array) -> float:
 		if not is_known(id):
 			refused.append(id)
 			push_error("Voice: refused clip %s (not an owner recording)" % id)
+			continue
+		if stream(id) == null:  # listed but not recorded yet: skipped, never a stand-in
+			if not missing.has(id):
+				missing.append(id)
+				push_warning("Voice: no recording for %s yet, skipped" % id)
 			continue
 		if after_sound and is_sentence(id):
 			bad_order = true
