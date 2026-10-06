@@ -1,14 +1,14 @@
 extends Node
-## Screenshot bot: plays the slice through real InputEventScreenTouch/Drag
-## events and saves PNGs to CAPTURE_DIR. Run under Xvfb (studio CLAUDE.md):
+## Screenshot bot: plays a first launch through real InputEventScreenTouch /
+## InputEventScreenDrag events and saves PNGs to CAPTURE_DIR. Run under Xvfb
+## (studio CLAUDE.md):
 ##   MWM_LES_FRESH=1 CAPTURE_DIR=/tmp/shots godot --audio-driver Dummy \
 ##     --display-driver x11 --resolution 1920x1080 res://tests/capture.tscn
-## CAPTURE_MODE=story|hub stops at the hub; listen|write|bridge stop after
-## that station (stations unlock in order, so earlier ones always run).
+## Prints every clip Voice starts, tagged with its scene.
+
+const SPEED: float = 2.0
 
 var out_dir: String = OS.get_environment("CAPTURE_DIR")
-var mode: String = OS.get_environment("CAPTURE_MODE")
-var start_at: String = OS.get_environment("CAPTURE_START")  # write|bridge: skip earlier stations
 var main: MainScene
 var _t0: int = 0
 var _shots: int = 0
@@ -19,422 +19,191 @@ func _ready() -> void:
 		out_dir = "user://shots"
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	_t0 = Time.get_ticks_msec()
+	Engine.time_scale = SPEED
 	Game.persist = false
 	Game.reset_progress()
-	if start_at != "":
-		Game.story_seen = true
-		Game.stations_done[0] = start_at != "listen"
-		Game.stations_done[1] = start_at == "bridge"
-	main = load("res://scenes/Main.tscn").instantiate() as MainScene
+	Voice.clip_started.connect(
+		func(id: String, _f: String, sc: String) -> void:
+			print(
+				(
+					"  clip [%s] %s at %.1fs (game clock %.1fs)"
+					% [sc, id, (Time.get_ticks_msec() - _t0) / 1000.0, Voice._clock]
+				)
+			)
+	)
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate() as MainScene
 	add_child(main)
-	if start_at == "":
-		await _opening_story()
-	await _until(func() -> bool: return main.mode == MainScene.Mode.HUB, 20.0, "hub")
-	await _until(func() -> bool: return not Voice.is_busy(), 10.0, "hub line")
-	await _frames(20)
-	await _shot("01_hub_next_find")
-	_report_hub()
-	if mode == "story" or mode == "hub":
-		_done()
+	await _opening()
+	if OS.get_environment("CAPTURE_STOP") == "opening":
+		get_tree().quit()
 		return
-	if mode == "things":
-		await _things_preview()
-		_done()
-		return
-	await _wait(MainScene.HUB_GHOST_AFTER_SEC + 0.8)
-	await _shot("01b_hub_ghost_taps_station")
-	if start_at == "" or start_at == "listen":
-		await _listen_station()
-	if mode == "listen":
-		_done()
-		return
-	if start_at != "bridge":
-		await _write_station()
-	if mode == "write":
-		_done()
-		return
-	await _bridge_station()
-	if mode == "bridge":
-		_done()
-		return
-	await _grownup()
-	await _parent()
-	_done()
-
-
-func _done() -> void:
-	print("VOICE SEQUENCE ERRORS (a clip after a slot): %d" % Voice.sequence_errors)
+	await _hub(0, "05_hub_find")
+	await _find()
+	await _hub(1, "")
+	await _write()
+	await _hub(2, "")
+	await _bridge()
+	await _until(func() -> bool: return main.mode == MainScene.Mode.END, 60.0, "end")
+	await _wait(0.5)
+	await _shot("15_end_goodnight")
+	print("VOICE refused %s, sequence errors %d" % [Voice.refused, Voice.sequence_errors])
 	print("CAPTURE DONE: %d shots in %.1fs" % [_shots, (Time.get_ticks_msec() - _t0) / 1000.0])
 	get_tree().quit()
 
 
-func _report_hub() -> void:
-	var lit: Array[int] = []
-	for i in 3:
-		if main.beacons[i].visible:
-			lit.append(i)
-	print("hub: lit stations %s, Pip on screen at %s" % [lit, main.pip.screen_pos()])
-
-
-# ---------------------------------------------------------------- story
-
-
-func _opening_story() -> void:
-	await _until(func() -> bool: return main.mode == MainScene.Mode.STORY, 10.0, "story")
-	var story: OpeningStory = main._story
-	# [beat, seconds after it starts, shot]
-	var marks: Array = [
-		["night", 2.5, "00a_story_night_island_sings"],
-		["shush", 0.6, "00b_story_hysj_ship_shush"],
-		["theft", 2.2, "00c_story_sounds_into_jar"],
-		["anchor", 0.8, "00d_story_grey_ship_anchored"],
-		["asleep", 1.2, "00e_story_hysj_asleep_by_jar"],
-		["pip_jar", 1.0, "00f_story_morning_pip_points_jar"],
-	]
-	for m: Array in marks:
-		var beat: String = str(m[0])
-		await _until(func() -> bool: return story.stage == beat, 40.0, "story " + beat)
-		await _wait(float(m[1]))
-		print("  story camera distance %.1f" % main.rig.distance)
-		await _shot(str(m[2]))
-	await _until(func() -> bool: return story.is_waiting_for_pip(), 30.0, "tap Pip")
+func _opening() -> void:
+	await _until(func() -> bool: return _stage() == "op_1", 20.0, "op_1")
 	await _wait(1.2)
-	await _shot("00g_story_tap_pip_ghost")
+	await _shot("01_opening_op1_pip")
+	await _until(func() -> bool: return _stage() == "op_2", 20.0, "op_2")
+	await _wait(2.0)
+	await _shot("02_opening_op2_lamb_on_islet")
+	await _until(func() -> bool: return _stage() == "op_3", 20.0, "op_3")
+	await _wait(2.0)
+	await _shot("03_opening_op3_gap")
+	await _until(func() -> bool: return _stage() == "op_4", 20.0, "op_4")
+	await _wait(1.6)
+	await _shot("03b_opening_op4_letters_over_gap")
+	await _until(
+		func() -> bool: return main.story != null and main.story.waiting_for_pip, 20.0, "op_5"
+	)
+	await _wait(0.9)
+	await _shot("04_opening_op5_ghost_on_pip")
 	await _tap(main.pip.screen_pos())
 
 
-# ---------------------------------------------------------------- stations
+func _stage() -> String:
+	return main.story.stage if main.story else ""
 
 
-func _tap_beacon(i: int) -> void:
+func _hub(i: int, shot: String) -> void:
+	await _until(
+		func() -> bool: return main.mode == MainScene.Mode.HUB and main._next == i, 60.0, "hub"
+	)
+	await _until(func() -> bool: return not Voice.is_busy(), 20.0, "hub line")
+	await _wait(0.6)
+	if shot != "":
+		await _shot(shot)
 	var b: Beacon = main.beacons[i]
 	await _tap(main.rig.cam.unproject_position(b.global_position))
-	await _until(
-		func() -> bool: return main.mode == MainScene.Mode.ACTIVITY, 10.0, "station %d" % i
-	)
+	await _until(func() -> bool: return main.mode == MainScene.Mode.STATION, 20.0, "station")
 
 
-func _listen_station() -> void:
-	await _tap_beacon(0)
-	var act: HorOgFinn = main.activities[0] as HorOgFinn
-	await _wait(1.6)
-	await _shot("02a_find_story_jar_on_ship")
-	var item_n: int = 0
-	var intro_n: int = 0
-	while true:
+func _find() -> void:
+	var f: HorOgFinn = main.stations[0] as HorOgFinn
+	var n: int = 0
+	while f.active:
 		var ok: bool = await _until(
-			func() -> bool:
-				return act.active or act.in_intro() or main.mode != MainScene.Mode.ACTIVITY,
-			40.0,
-			"listen item"
+			func() -> bool: return (not f.busy and not Voice.is_busy()) or not f.active,
+			60.0,
+			"find item"
 		)
-		if not ok or main.mode != MainScene.Mode.ACTIVITY:
+		if not ok or not f.active:
 			break
-		if act.in_intro():
-			await _until(func() -> bool: return act.active, 20.0, "intro ready")
-			await _wait(0.9)
-			if intro_n == 0:
-				await _shot("02b_find_intro_letter_pair_ghost")
-			intro_n += 1
-			await _tap(act.intro_screen_pos())
-			await _until(func() -> bool: return not act.in_intro(), 10.0, "intro done")
-			continue
-		await _until(func() -> bool: return not Voice.is_busy(), 10.0, "prompt")
-		await _frames(20)
-		if item_n == 0:
-			await _shot("02_listen_prompt")
-			_report_letters(act)
-			var wrong: Vector2 = act.letter_screen_pos(false)
-			if wrong.x >= 0.0:
-				await _tap(wrong)
-				await _wait(0.4)
-				await _shot("03_listen_wrong_wobble")
-				await _until(func() -> bool: return not act.frozen, 12.0, "wrong done")
-				await _wait(0.5)
-				await _shot("03b_listen_hint_jump_ring")
-				await _tap(act.letter_screen_pos(false))
-				await _until(func() -> bool: return not act.frozen, 12.0, "wrong 2 done")
-				await _wait(1.0)
-				await _shot("03c_listen_hint_ghost_hand")
-		var backs: int = act.backs_shown
-		await _tap(act.letter_screen_pos(true))
-		await _wait(0.2)
-		if item_n == 0:
-			await _shot("04_listen_right_pop")
-		await _until(func() -> bool: return act.flying, 5.0, "sound leaves the jar")
-		await _wait(0.55)
-		await _shot("04b_find_sound_flies_from_jar_%d" % item_n)
-		await _until(func() -> bool: return not act.flying, 5.0, "sound lands")
-		await _wait(0.9)
-		if act.backs_shown > backs:
-			await _shot("04c_find_thing_back_%s" % Game.found_today[Game.found_today.size() - 1])
-		item_n += 1
-		await _until(func() -> bool: return not act.active, 5.0, "item end")
-	print(
-		"listen station: %d items, %d letter intros, found %s" % [item_n, intro_n, Game.found_today]
-	)
-	await _until(func() -> bool: return main.mode != MainScene.Mode.ACTIVITY, 30.0, "restore")
-	await _wait(1.6)
-	await _shot("05_find_zone_restored")
-	await _until(func() -> bool: return main.mode == MainScene.Mode.HUB, 30.0, "hub again")
-	await _until(func() -> bool: return not Voice.is_busy(), 10.0, "hub line")
-	await _frames(20)
-	await _shot("06_hub_next_write")
-	_report_hub()
+		if n == 0:
+			await _shot("06_find_tiles_prompt")
+			for gl: GlowLetter in f.letters:
+				print(
+					(
+						"  find letter '%s': %.0f px tall at %s"
+						% [
+							gl.letter,
+							gl.glyph_screen_height(main.rig.cam),
+							gl.screen_pos(main.rig.cam)
+						]
+					)
+				)
+			var wrong: String = ""
+			for l: String in f.tile_letters():
+				if l != f.target:
+					wrong = l
+			await _tap(f.letter_screen_pos(wrong))
+			await _wait(0.25)
+			await _shot("07_find_wrong_answer")
+			await _until(func() -> bool: return not f.busy and not Voice.is_busy(), 30.0, "wrong")
+		var items: int = f.items_done
+		await _tap(f.letter_screen_pos(f.target))
+		if n == 0:
+			await _wait(0.2)
+			await _shot("08_find_right_answer")
+		await _until(func() -> bool: return f.items_done > items, 10.0, "right")
+		await _until(func() -> bool: return f.busy and Voice.is_busy() or not f.active, 5.0, "")
+		await _until(func() -> bool: return not Voice.is_busy() or not f.active, 10.0, "")
+		n += 1
 
 
-## CAPTURE_MODE=things: the Hør og finn view with every found thing out
-## (layout check for the ship, the jar and the thing spots).
-func _things_preview() -> void:
-	var act: HorOgFinn = main.activities[0] as HorOgFinn
-	var pose: Dictionary = act.camera_pose()
-	main.mode = MainScene.Mode.FLYING
-	await (
-		main.rig.fly_to(pose["target"], pose["distance"], pose["pitch"], pose["yaw"], 0.5).finished
-	)
-	for l: String in ["a", "s", "i", "l", "o", "m"]:
-		main.bring_back(l)
-	await _wait(1.6)
-	await _shot("t1_find_view_all_things")
-	await (
-		main
-		. rig
-		. fly_to(main.hub_pose()["target"], main.hub_pose()["distance"], 20.0, 0.0, 0.5)
-		. finished
-	)
-	await _wait(0.3)
-	await _shot("t2_hub_all_things")
-
-
-func _report_letters(act: HorOgFinn) -> void:
-	for gl: GlowLetter in act.letters:
-		print(
-			(
-				"  find letter '%s': %.0f px tall on screen at %s"
-				% [gl.letter, gl.glyph_screen_height(main.rig.cam), gl.screen_pos(main.rig.cam)]
-			)
-		)
-
-
-func _write_station() -> void:
-	await _tap_beacon(1)
-	var act: Sandskriving = main.activities[1] as Sandskriving
-	await _until(func() -> bool: return main.pip._pointing, 15.0, "Pip points at the bridge")
-	await _wait(1.0)
-	await _shot("07a_write_intro_pip_points_to_bridge")
-	await _until(func() -> bool: return act.phase == Sandskriving.Phase.WATCH, 20.0, "watch")
-	await _until(func() -> bool: return act.pad.model_progress > 0.55, 15.0, "model drawing")
-	await _shot("07_write_watch_model_pen_tip")
+func _write() -> void:
+	var w: Sandskriving = main.stations[1] as Sandskriving
 	var first: bool = true
-	var letters: int = 0
-	while main.mode == MainScene.Mode.ACTIVITY:
+	while w.active:
 		var ok: bool = await _until(
 			func() -> bool:
 				return (
-					(act.phase == Sandskriving.Phase.WRITE and act.active)
-					or act.payoff_shown
-					or main.mode != MainScene.Mode.ACTIVITY
+					(w.phase == Sandskriving.Phase.WATCH and w.pad.model_progress > 0.6)
+					or (w.phase == Sandskriving.Phase.WRITE and not Voice.is_busy())
+					or not w.active
 				),
-			40.0,
-			"write phase"
+			60.0,
+			"write"
 		)
-		if not ok or act.payoff_shown or main.mode != MainScene.Mode.ACTIVITY:
+		if not ok or not w.active:
 			break
-		await _until(func() -> bool: return not Voice.is_busy(), 10.0, "prompt")
-		if first:
-			await _shot("08_write_empty_sand")
-			# a scribble that is not the letter: the sand smooths, hint 1 = start dot
-			var c: Vector2 = act.pad.box.get_center()
-			await _drag([c + Vector2(-200, 120), c + Vector2(200, 120)])
-			await _until(
-				func() -> bool: return act.phase == Sandskriving.Phase.CHECK, 6.0, "check 1"
-			)
-			await _until(
-				func() -> bool: return act.pad.show_start_dot and act.active, 8.0, "start dot"
-			)
-			await _until(func() -> bool: return not Voice.is_busy(), 10.0, "after smooth")
-			await _shot("09_write_hint_start_dot")
-			first = false
-		# a sloppy child letter: bigger, shifted and wobbly, not a copy of the model
-		var strokes: Array[PackedVector2Array] = act.model_screen_strokes()
-		var k: int = 0
-		for st: PackedVector2Array in strokes:
+		if w.phase == Sandskriving.Phase.WATCH:
+			if first:
+				await _shot("09_write_pip_draws_model")
+			await _until(func() -> bool: return w.phase == Sandskriving.Phase.WRITE, 20.0, "")
+			continue
+		var count: int = w.written.size()
+		for st: PackedVector2Array in w.model_screen_strokes():
 			var wob: PackedVector2Array = PackedVector2Array()
+			var k: int = 0
 			for q: Vector2 in st:
-				wob.append(
-					q * 1.0 + Vector2(sin(float(k) * 0.7) * 14.0, cos(float(k) * 0.5) * 12.0)
-				)
+				wob.append(q + Vector2(sin(float(k) * 0.7) * 12.0, cos(float(k) * 0.5) * 10.0))
 				k += 1
 			await _drag(wob)
-		await _shot(
-			"10_write_child_letter" if letters == 0 else "10b_write_child_letter_%d" % letters
-		)
-		await _until(func() -> bool: return act.phase == Sandskriving.Phase.CHECK, 6.0, "check")
-		await _until(
-			func() -> bool:
-				return act.pad.compare_alpha > 0.8 or act.phase == Sandskriving.Phase.WRITE,
-			8.0,
-			"compare"
-		)
-		if letters == 0:
-			await _shot("11_write_compare")
-			await _wait(0.9)
-			await _shot("12_write_stone_lifts")
-			await _until(func() -> bool: return act.rolling, 15.0, "stone rolls")
-			await _wait(0.45)
-			await _shot("12a_write_stone_rolls_to_bridge")
-		letters += 1
-		await _until(
-			func() -> bool: return act.phase != Sandskriving.Phase.CHECK, 10.0, "after check"
-		)
-		await _until(func() -> bool: return not act.active, 6.0, "")
-	print("write station: %d letters accepted" % letters)
-	await _until(func() -> bool: return act.payoff_shown, 30.0, "stones by the bridge")
-	await _wait(0.8)
-	print("  payoff camera distance %.1f target %s" % [main.rig.distance, main.rig.target])
-	await _shot("12b_write_payoff_stones_by_bridge")
-	await _until(func() -> bool: return main.mode == MainScene.Mode.HUB, 30.0, "hub again")
-	await _until(func() -> bool: return not Voice.is_busy(), 10.0, "hub line")
-	await _frames(20)
-	await _shot("13_hub_next_bridge")
-	_report_hub()
-
-
-func _report_bridge(act: OrdBro) -> void:
-	var widths: Array[String] = []
-	for i in act.slots.size():
-		widths.append("%.0f" % act.slot_screen_width(i))
-	var stone_px: Array[String] = []
-	for st: Stone in act.stones:
-		if not st.placed:
-			stone_px.append("%.0f" % (st.screen_radius(main.rig.cam) * 2.0 / 1.5))
-	print(
-		(
-			"  bridge '%s': slot widths px %s, first empty slot %d, free stones %d (size px %s)"
-			% [act.word, widths, act.first_missing(), stone_px.size(), stone_px]
-		)
-	)
-	for n: int in [2, 3, 4, 6]:
-		print(
-			"  bridge layout for %d letters: narrowest slot %.0f px" % [n, act.min_slot_px_for(n)]
-		)
-
-
-func _bridge_station() -> void:
-	await _tap_beacon(2)
-	var act: OrdBro = main.activities[2] as OrdBro
-	var words: int = 0
-	while main.mode == MainScene.Mode.ACTIVITY:
-		var ok: bool = await _until(
-			func() -> bool: return act.is_modelling() or main.mode != MainScene.Mode.ACTIVITY,
-			40.0,
-			"bridge model"
-		)
-		if not ok or main.mode != MainScene.Mode.ACTIVITY:
-			break
-		if words == 0:
-			await _shot("14a_bridge_story_%s_waits" % act.word)
-		await _until(func() -> bool: return act.lit_slot() == 1, 15.0, "slot 2 lit")
-		await _wait(0.25)
-		if words == 0:
-			await _shot("14b_bridge_pip_sounds_out_slot_glow")
-		await _until(func() -> bool: return act.active, 20.0, "bridge item")
-		await _until(func() -> bool: return not Voice.is_busy(), 10.0, "prompt")
-		_report_bridge(act)
-		if words == 0:
-			await _shot("14_bridge_one_slot_empty")
-			await _wait(1.5)
-			await _shot("14c_bridge_ghost_hand_demo")
-		if words == 1:
-			await _shot("15_bridge_choice_of_two")
-			var wrong: Vector2 = act.stone_screen_pos_for_slot(act.first_missing(), false)
-			if wrong.x >= 0.0:
-				await _drag_stone(
-					wrong, act.slot_screen_pos(act.first_missing()), "15b_bridge_drag_wrong"
-				)
-				await _wait(0.45)
-				await _shot("16_bridge_wrong_wobble")
-				await _until(
-					func() -> bool: return not act.frozen and not Voice.is_busy(),
-					25.0,
-					"wrong done"
-				)
-				await _wait(0.4)
-				await _shot("16b_bridge_hint_right_stone_glows")
-		for si in range(act.first_missing(), act.graphemes.size()):
-			var from: Vector2 = act.stone_screen_pos_for_slot(si, true)
-			await _drag_stone(from, act.slot_screen_pos(si), "")
-			await _wait(0.5)
-		words += 1
-		await _wait(1.0)
-		if words == 1:
-			await _shot("17_bridge_word_done")
-			await _until(func() -> bool: return act.walking, 15.0, "picture walks")
+		if first:
+			await _shot("10_write_child_letter")
+			await _until(func() -> bool: return w.pad.compare_alpha > 0.8, 20.0, "compare")
+			await _until(func() -> bool: return w.lifted != null, 20.0, "lift")
 			await _wait(0.8)
-			await _shot("18_bridge_picture_crosses")
-		await _until(func() -> bool: return not act.active and not act.is_modelling(), 5.0, "")
+			await _shot("11_write_accepted_stone")
+			await _until(func() -> bool: return w.rolling, 20.0, "roll")
+			await _wait(0.35)
+			await _shot("11b_write_stone_rolls_to_bridge")
+		await _until(func() -> bool: return w.written.size() > count, 30.0, "stone")
+		first = false
+
+
+func _bridge() -> void:
+	var br: OrdBro = main.stations[2] as OrdBro
+	await _until(func() -> bool: return br.lit == 1, 40.0, "plank a lit")
+	await _wait(0.2)
+	await _shot("12_bridge_planks_light_l_a_m")
+	for k in br.missing.size():
 		await _until(
-			func() -> bool: return act.is_modelling() or main.mode != MainScene.Mode.ACTIVITY,
-			40.0,
-			"next word"
+			func() -> bool: return not br.busy and br.cur >= 0 and not Voice.is_busy(), 60.0, "ask"
 		)
-	print("bridge station: %d words built" % words)
-
-
-func _grownup() -> void:
-	await _until(func() -> bool: return main.mode == MainScene.Mode.GROWNUP, 40.0, "grown-up card")
-	await _frames(20)
-	await _shot("20_hub_all_zones_grownup_card")
-	var card: GrownupCard = main._overlay as GrownupCard
-	var btn: RoundButton = null
-	for c: Node in card.get_children():
-		if c is RoundButton and (c as RoundButton).hold_sec > 0.0:
-			btn = c as RoundButton
-	var at: Vector2 = btn.get_global_rect().get_center()
-	_touch(at, true)
+		var want: String = br.graphemes[br.cur]
+		await _shot("12b_bridge_ask_%s" % want)
+		var st: Stone = br.stone_for(want)
+		await _drag_stone(
+			st.screen_pos(main.rig.cam), br.slot_screen_pos(br.cur), "12c_bridge_drag_%s" % want
+		)
+		await _until(func() -> bool: return br.busy, 5.0, "drop")
+	await _until(func() -> bool: return br.lit == -2, 40.0, "bridge done")
+	await _wait(0.6)
+	await _shot("12d_bridge_done_all_lit")
+	await _until(func() -> bool: return br.walking, 40.0, "walk")
 	await _wait(0.9)
-	await _shot("21_grownup_holding")
+	await _shot("13_bridge_lamb_crossing")
 	await _wait(0.9)
-	_touch(at, false)
-	await _until(func() -> bool: return main.mode == MainScene.Mode.SUNSET, 20.0, "sunset")
-	await _wait(3.2)
-	await _shot("22_sunset")
-	await _tap(Vector2(960, 540))
-	await _until(func() -> bool: return main.mode == MainScene.Mode.HUB, 10.0, "new session")
-	await _frames(30)
-	await _shot("23_hub_restored")
+	await _shot("13b_bridge_lamb_crossing_later")
+	await _until(func() -> bool: return not br.walking, 20.0, "")
+	await _wait(0.3)
+	await _shot("14_bridge_lamb_home")
 
 
-func _parent() -> void:
-	await _tap(main.hud.parent_btn.get_global_rect().get_center())
-	await _until(func() -> bool: return main.mode == MainScene.Mode.PARENT, 5.0, "gate")
-	await _frames(10)
-	await _shot("24_parent_gate")
-	var gate: ParentGate = main._overlay as ParentGate
-	var hold: Vector2 = Vector2.ZERO
-	for c: Node in gate.get_children():
-		if c is RoundButton and (c as RoundButton).hold_sec > 0.0:
-			hold = (c as RoundButton).get_global_rect().get_center()
-	_touch(hold, true)
-	await _wait(GameTune.PARENT_HOLD_SEC + 0.3)
-	_touch(hold, false)
-	await _frames(5)
-	var keys: Dictionary = {}
-	for c: Node in gate.find_children("*", "RoundButton", true, false):
-		var b: RoundButton = c as RoundButton
-		if b.text != "":
-			keys[b.text] = b.get_global_rect().get_center()
-		elif b.icon == RoundButton.Icon.CHECK and b.hold_sec == 0.0:
-			keys["OK"] = b.get_global_rect().get_center()
-	for ch: String in str(gate.answer()):
-		await _tap(keys[ch])
-	await _shot("25_parent_gate_sum")
-	await _tap(keys["OK"])
-	await _frames(10)
-	await _shot("26_parent_page")
-
-
-# ---------------------------------------------------------------- input + util
+# ---------------------------------------------------------------- input and shots
 
 
 func _touch(pos: Vector2, pressed: bool) -> void:
@@ -478,20 +247,18 @@ func _drag(points: PackedVector2Array) -> void:
 
 
 func _drag_stone(from: Vector2, to: Vector2, mid_shot: String) -> void:
-	var pts: PackedVector2Array = PackedVector2Array()
-	for k in 25:
-		pts.append(from.lerp(to, float(k) / 24.0))
 	_touch(from, true)
 	await _frames(2)
 	var prev: Vector2 = from
-	for i in pts.size():
+	for i in 25:
+		var p: Vector2 = from.lerp(to, float(i) / 24.0)
 		var d: InputEventScreenDrag = InputEventScreenDrag.new()
-		d.position = pts[i]
-		d.relative = pts[i] - prev
-		prev = pts[i]
+		d.position = p
+		d.relative = p - prev
+		prev = p
 		Input.parse_input_event(d)
 		await _frames(1)
-		if i == 18 and mid_shot != "":
+		if i == 16 and mid_shot != "":
 			await _shot(mid_shot)
 	_touch(to, false)
 	await _frames(2)
@@ -501,7 +268,7 @@ func _until(cond: Callable, timeout_sec: float, what: String) -> bool:
 	var start: int = Time.get_ticks_msec()
 	while not bool(cond.call()):
 		if Time.get_ticks_msec() - start > int(timeout_sec * 1000.0):
-			if what != "":  # "" = optional wait, no report
+			if what != "":
 				print("TIMEOUT waiting for %s (mode %d)" % [what, main.mode])
 			return false
 		await get_tree().process_frame

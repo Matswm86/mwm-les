@@ -4,6 +4,8 @@ extends SceneTree
 ## Plays 50 items through the real LetterScreen (tile taps go through the same
 ## LetterTile.press() a touch calls) and checks, from the stream actually put
 ## on the audio player, that a letter never plays another letter's sound.
+## Then plays the whole game (opening, hub, the three stations, goodnight,
+## and a second session) through tests/full_flow_check.gd.
 
 const ITEMS: int = 50
 const SPEED: float = 25.0
@@ -57,10 +59,13 @@ func _run() -> void:
 		await _until(func() -> bool: return screen.items_done == n + 1 and cur != item)
 	await _until_ready()
 	_report()
-	var code: int = 1 if not failures.is_empty() else 0
 	screen.queue_free()
 	await _frames(3)
-	quit(code)
+	var flow: RefCounted = load("res://tests/full_flow_check.gd").new()
+	await flow.run(self)
+	failures.append_array(flow.failures)
+	print("OVERALL: %s" % ("PASS" if failures.is_empty() else "FAIL (%d)" % failures.size()))
+	quit(1 if not failures.is_empty() else 0)
 
 
 func _on_item(target: String, letters: Array[String]) -> void:
