@@ -5,7 +5,9 @@ extends RefCounted
 ## sun (sol), ice cream (is), lamb (lam), llama (lama), slime (slim),
 ## glue bottle (lim), salami (salami), and the things a found sound brings
 ## back in Hør og finn (docs/SCRIPT.md 2d): monkey in a palm (ape), cheese
-## (ost), mouse by a rock (mus). Placeholder primitives (docs/ASSETS.md).
+## (ost), mouse by a rock (mus); the bridge word pictures seal (sel), boat
+## (båt), a bowl of hay (mat) and an open book (les). Placeholder primitives
+## (docs/ASSETS.md).
 
 
 static func make(kind: String) -> Node3D:
@@ -30,6 +32,14 @@ static func make(kind: String) -> Node3D:
 			return _cheese()
 		"mouse":
 			return _mouse()
+		"seal":
+			return _seal()
+		"boat":
+			return _boat()
+		"food":
+			return _food()
+		"book":
+			return _book()
 	return null
 
 
@@ -443,3 +453,191 @@ static func _mouse() -> Node3D:
 	)
 	_face(p, h + Vector3(0, 0.05, 0.19), 0.08, 0.035)
 	return _finish(p)
+
+
+## A grey seal in the water: body and head up, flippers, whiskers; faces +z.
+## Its origin is the waterline, the lower body is under water.
+static func _seal() -> Node3D:
+	var p: Array = []
+	var grey: Color = Color(0.52, 0.56, 0.62)
+	var belly: Color = Color(0.74, 0.76, 0.78)
+	var dark: Color = Color(0.30, 0.33, 0.38)
+	p.append(
+		[
+			MeshKit.sphere(0.55, 16, 10),
+			MeshKit.xf(Vector3(0, 0.05, -0.35), Vector3(0.9, 0.7, 1.5)),
+			grey
+		]
+	)
+	p.append(
+		[
+			MeshKit.sphere(0.42, 16, 10),
+			MeshKit.xf(Vector3(0, 0.45, 0.25), Vector3(0.95, 1.2, 0.95)),
+			grey
+		]
+	)
+	p.append(
+		[
+			MeshKit.sphere(0.3, 14, 8),
+			MeshKit.xf(Vector3(0, 0.3, 0.5), Vector3(0.9, 1.1, 0.6)),
+			belly
+		]
+	)
+	var h: Vector3 = Vector3(0, 1.0, 0.35)
+	p.append([MeshKit.sphere(0.34, 16, 10), MeshKit.xf(h), grey])
+	p.append([MeshKit.sphere(0.17, 12, 8), MeshKit.xf(h + Vector3(0, -0.08, 0.27)), belly])
+	p.append([MeshKit.sphere(0.06, 8, 5), MeshKit.xf(h + Vector3(0, -0.02, 0.42)), dark])
+	for x: float in [-1.0, 1.0]:
+		p.append(
+			[
+				MeshKit.sphere(0.2, 10, 6),
+				MeshKit.xf(
+					Vector3(x * 0.45, 0.2, 0.35), Vector3(0.5, 0.25, 1.0), Vector3(0, 0, x * 35)
+				),
+				dark
+			]
+		)
+		for k in 2:
+			p.append(
+				[
+					MeshKit.cylinder(0.01, 0.01, 0.28, 4),
+					MeshKit.xf(
+						h + Vector3(x * 0.16, -0.08 + 0.05 * float(k), 0.37),
+						Vector3.ONE,
+						Vector3(0, 0, x * (80.0 + 12.0 * float(k)))
+					),
+					dark
+				]
+			)
+	_face(p, h + Vector3(0, 0.1, 0.27), 0.13, 0.055)
+	return _finish(p)
+
+
+## A small rowing boat with a red stripe and a mast with a white sail, the
+## hull along x. Its origin is the waterline.
+static func _boat() -> Node3D:
+	var p: Array = []
+	var hull: Color = Color(0.85, 0.35, 0.25)
+	var stripe: Color = Color(0.98, 0.96, 0.9)
+	p.append(
+		[
+			MeshKit.sphere(1.0, 20, 10),
+			MeshKit.xf(Vector3(0, 0.05, 0), Vector3(1.6, 0.45, 0.62)),
+			hull
+		]
+	)
+	p.append(
+		[
+			MeshKit.box(Vector3(2.9, 0.12, 1.05)),
+			MeshKit.xf(Vector3(0, 0.42, 0)),
+			GameTune.WOOD_LIGHT
+		]
+	)
+	p.append(
+		[
+			MeshKit.sphere(1.0, 20, 6),
+			MeshKit.xf(Vector3(0, 0.34, 0), Vector3(1.62, 0.08, 0.64)),
+			stripe
+		]
+	)
+	p.append(
+		[MeshKit.cylinder(0.05, 0.06, 2.2, 8), MeshKit.xf(Vector3(0.1, 1.5, 0)), GameTune.WOOD]
+	)
+	p.append(
+		[
+			MeshKit.box(Vector3(1.1, 1.5, 0.04)),
+			MeshKit.xf(Vector3(-0.5, 1.55, 0), Vector3.ONE, Vector3(0, 0, -4)),
+			stripe
+		]
+	)
+	p.append(
+		[
+			MeshKit.box(Vector3(0.5, 0.28, 0.04)),
+			MeshKit.xf(Vector3(0.38, 2.5, 0)),
+			Color(0.95, 0.3, 0.3)
+		]
+	)
+	return _finish(p)
+
+
+## Food for the lamb: a wooden bowl heaped with hay and a carrot or two.
+static func _food() -> Node3D:
+	var p: Array = []
+	var hay: Color = Color(0.93, 0.80, 0.38)
+	var hay_dark: Color = Color(0.82, 0.66, 0.26)
+	var carrot: Color = Color(1.0, 0.52, 0.12)
+	p.append(
+		[MeshKit.cylinder(0.75, 0.55, 0.45, 20), MeshKit.xf(Vector3(0, 0.23, 0)), GameTune.WOOD]
+	)
+	p.append(
+		[
+			MeshKit.cylinder(0.78, 0.78, 0.08, 20),
+			MeshKit.xf(Vector3(0, 0.46, 0)),
+			GameTune.WOOD_LIGHT
+		]
+	)
+	p.append([MeshKit.sphere(0.7, 16, 8), MeshKit.xf(Vector3(0, 0.5, 0), Vector3(1, 0.55, 1)), hay])
+	for k in 7:
+		var a: float = TAU * float(k) / 7.0
+		p.append(
+			[
+				MeshKit.cylinder(0.02, 0.03, 0.6, 4),
+				MeshKit.xf(
+					Vector3(cos(a) * 0.35, 0.78, sin(a) * 0.35),
+					Vector3.ONE,
+					Vector3(rad_to_deg(sin(a)) * 0.6, 0, rad_to_deg(cos(a)) * 0.6)
+				),
+				hay_dark
+			]
+		)
+	for c: Vector3 in [Vector3(0.25, 0.85, 0.3), Vector3(-0.3, 0.82, 0.15)]:
+		p.append(
+			[
+				MeshKit.cylinder(0.0, 0.08, 0.5, 8),
+				MeshKit.xf(c, Vector3.ONE, Vector3(70, 0, 20)),
+				carrot
+			]
+		)
+	return _finish(p)
+
+
+## An open picture book standing a little tilted toward the camera (+z).
+static func _book() -> Node3D:
+	var p: Array = []
+	var cover: Color = Color(0.20, 0.50, 0.80)
+	var page: Color = Color(0.99, 0.97, 0.90)
+	var ink: Color = Color(0.35, 0.40, 0.50)
+	for x: float in [-1.0, 1.0]:
+		p.append(
+			[
+				MeshKit.box(Vector3(0.75, 0.05, 1.0)),
+				MeshKit.xf(Vector3(x * 0.38, 0.0, 0), Vector3.ONE, Vector3(0, 0, -x * 8)),
+				cover
+			]
+		)
+		p.append(
+			[
+				MeshKit.box(Vector3(0.68, 0.06, 0.92)),
+				MeshKit.xf(Vector3(x * 0.36, 0.05, 0), Vector3.ONE, Vector3(0, 0, -x * 8)),
+				page
+			]
+		)
+		for k in 3:
+			p.append(
+				[
+					MeshKit.box(Vector3(0.48, 0.02, 0.05)),
+					MeshKit.xf(Vector3(x * 0.37, 0.09 + 0.03, -0.25 + 0.2 * float(k))),
+					ink
+				]
+			)
+	p.append(
+		[
+			MeshKit.sphere(0.12, 10, 6),
+			MeshKit.xf(Vector3(0.38, 0.12, 0.3), Vector3(1, 0.3, 1)),
+			GameTune.GOLD
+		]
+	)
+	var root: Node3D = _finish(p)
+	(root.get_child(0) as Node3D).rotation_degrees = Vector3(55, 0, 0)  # page faces up and to +z
+	(root.get_child(0) as Node3D).position = Vector3(0, 0.45, 0)
+	return root
