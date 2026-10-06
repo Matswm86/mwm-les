@@ -8,21 +8,44 @@ extends RefCounted
 ##   nothing refused, every file is in assets/audio/rec or an sfx_* file);
 ## - every letter prompt, tap and long-press plays only its own letter's files;
 ## - every scene plays its listed line ids, and only those;
-## - no sentence after a letter sound inside one sequence.
+## - no sentence after a letter sound inside one sequence;
+## - every stone written in the sand is laid in the bridge, none is left over;
+## - every bridge word's hook line plays right before its sounding-out clip,
+##   lam is always the last word, bridge_word_done + bridge_next between words;
+## - a letter written a second time comes after write_again, without a model.
 ## Prints the clip sequence per scene.
 
 const SPEED: float = 20.0
-const SESSIONS: int = 3
+const SESSIONS: int = 4
 ## Letters in play per session. Session 2 adds i (intro inside the station,
-## three tiles); session 3 has all six, so the bridge misses l, a and m.
-const SESSION_COUNT: Array[int] = [2, 3, 6]
+## three tiles); session 3 has the first six; session 4 all ten (å introduced).
+const SESSION_COUNT: Array[int] = [2, 3, 6, 10]
 const SENTENCES: Dictionary = {
 	"opening": ["op_1", "op_2", "op_3", "op_4", "op_5"],
 	"hub": ["hub_find", "hub_write", "hub_bridge", "hub_back", "hub_idle"],
 	"find": ["find_in", "intro_again", "find_ask", "find_right", "find_wrong", "find_done"],
-	"write": ["write_in", "write_turn", "write_retry", "write_right", "write_done"],
+	"write":
+	[
+		"write_in",
+		"write_turn",
+		"write_retry",
+		"write_right",
+		"write_next",
+		"write_again",
+		"write_done"
+	],
 	"bridge":
-	["bridge_in", "bridge_word_lam", "bridge_ask", "bridge_right", "bridge_done", "bridge_walk"],
+	[
+		"bridge_in",
+		"hook_lam",
+		"bridge_word_lam",
+		"bridge_ask",
+		"bridge_right",
+		"bridge_word_done",
+		"bridge_next",
+		"bridge_done",
+		"bridge_walk"
+	],
 	"end": ["end_bye"],
 }
 const OTHER_OK: Dictionary = {
@@ -30,7 +53,7 @@ const OTHER_OK: Dictionary = {
 	"hub": [],
 	"find": ["lyd_", "navn_", "intro_", "sfx_chime_", "sfx_tok"],
 	"write": ["lyd_", "sfx_chime_"],
-	"bridge": ["lyd_", "sfx_chime_", "sfx_tok"],
+	"bridge": ["lyd_", "sfx_chime_", "sfx_tok", "hook_", "bridge_word_"],
 	"end": [],
 }
 
@@ -72,6 +95,9 @@ func run(p_tree: SceneTree) -> void:
 		find.rules.count = maxi(find.rules.count, SESSION_COUNT[s])
 		if s == 2:
 			for l: String in ["i", "l", "o"]:
+				find.rules.mark_heard(l)
+		if s == 3:
+			for l: String in ["e", "t", "b"]:
 				find.rules.mark_heard(l)
 		await _hub_go(0, s == 0)
 		await _find()
@@ -224,10 +250,25 @@ func _find() -> void:
 func _on_write_step(name: String) -> void:
 	var w: Sandskriving = main.stations[1] as Sandskriving
 	if name == "model":
+		check(not w.from_memory, "a model drawn for %s, written before today" % w.letter)
+		check(not w.written.has(w.letter), "model for %s again today" % w.letter)
 		await _frames(1)
 		check(
 			_last_id() == Voice.held_id(w.letter), "model for %s played %s" % [w.letter, _last_id()]
 		)
+	if name == "again":
+		check(w.written.has(w.letter), "write_again for %s, not written yet today" % w.letter)
+		check(
+			w.written.size() > 0 and w.written[w.written.size() - 1] == w.letter,
+			"write_again for %s is not right after it" % w.letter
+		)
+		var n: int = Voice.clip_log.size()  # the step comes right before write_again starts
+		await _until(func() -> bool: return Voice.clip_log.size() >= n + 2, 10.0, "repeat clips")
+		check(
+			_id_at(n) == "write_again" and _id_at(n + 1) == Voice.held_id(w.letter),
+			"repeat of %s played %s, %s" % [w.letter, _id_at(n), _id_at(n + 1)]
+		)
+		counts["write_again"] = int(counts.get("write_again", 0)) + 1
 
 
 func _write(scribble_first: bool) -> void:
@@ -269,7 +310,9 @@ func _on_bridge_step(name: String) -> void:
 	var br: OrdBro = main.stations[2] as OrdBro
 	if name.begins_with("lit_"):
 		var i: int = int(name.trim_prefix("lit_"))
-		check(_last_id() == "bridge_word_lam", "plank %d lit outside the word clip" % i)
+		var clip: String = BridgeWords.word_clip(str(br.words[br.word_i]["id"]))
+		check(_last_id() == clip, "plank %d lit outside %s (%s)" % [i, clip, _last_id()])
+		check(br.word_of[i] == br.word_i, "plank %d lit for another word" % i)
 		counts["planks_lit"] = int(counts.get("planks_lit", 0)) + 1
 	if name == "walk":
 		check(_last_id() == "bridge_walk", "lamb walks during %s" % _last_id())
@@ -279,6 +322,7 @@ func _on_bridge_step(name: String) -> void:
 func _bridge() -> void:
 	var br: OrdBro = main.stations[2] as OrdBro
 	var plan: Dictionary = main.plan()
+	var b0: int = Voice.clip_log.size()
 	while br.active:
 		var ok: bool = await _until(
 			func() -> bool:
@@ -289,7 +333,8 @@ func _bridge() -> void:
 		if not ok or not br.active:
 			break
 		var want: String = br.graphemes[br.cur]
-		check((plan["missing"] as Array).has(want), "bridge asks %s, not missing" % want)
+		check(br.missing.has(br.cur), "bridge asks slot %d (%s), not missing" % [br.cur, want])
+		check(br.word_of[br.cur] == br.word_i, "bridge asks a slot of another word")
 		var last: int = Voice.clip_log.size() - 1
 		check(
 			_id_at(last) == Voice.held_id(want) and _id_at(last - 1) in ["bridge_ask"],
@@ -330,6 +375,59 @@ func _bridge() -> void:
 		await _until(func() -> bool: return br.cur == -1 or Voice.is_busy(), 10.0, "")
 	var walked: bool = main.lamb.global_position.distance_to(main.world.bridge_start) < 3.0
 	check(walked, "the lamb did not come over (at %s)" % main.lamb.global_position)
+	_check_bridge_plan(plan, br, b0)
+
+
+## Today's words, the stones and the order of the bridge lines.
+func _check_bridge_plan(plan: Dictionary, br: OrdBro, b0: int) -> void:
+	var w: Sandskriving = main.stations[1] as Sandskriving
+	var ids: Array[String] = []
+	var need: Array[String] = []
+	for wd: Dictionary in plan["words"]:
+		ids.append(str(wd["id"]))
+		for j: Variant in wd["missing"]:
+			need.append(str((wd["letters"] as Array)[int(j)]))
+	print("bridge: words %s, written %s, laid %s" % [ids, w.written, need])
+	check(ids.size() >= 2 and ids[ids.size() - 1] == "lam", "lam is not the last word: %s" % [ids])
+	check(ids.size() <= BridgeWords.MAX_STORY_WORDS + 1, "too many words %s" % [ids])
+	check(
+		need.size() <= BridgeWords.MAX_WRITE,
+		"more than %d letters to write" % BridgeWords.MAX_WRITE
+	)
+	var a: Array[String] = w.written.duplicate()
+	var b: Array[String] = need.duplicate()
+	a.sort()
+	b.sort()
+	check(a == b, "stones written %s, bridge uses %s" % [w.written, need])
+	for st: Stone in br.stones:
+		check(st.placed, "stone %s written but never laid in the bridge" % st.letter)
+	for i in br.slots.size():
+		check(br.slots[i] != null, "slot %d (%s) left empty" % [i, br.graphemes[i]])
+	var seen: Array[String] = []
+	var k: int = b0
+	while k < Voice.clip_log.size() and str(Voice.clip_log[k]["scene"]) == "bridge":
+		var id: String = _id_at(k)
+		if id.begins_with("hook_"):
+			var word: String = id.trim_prefix("hook_")
+			check(
+				_id_at(k + 1) == BridgeWords.word_clip(word),
+				"%s followed by %s, not its word clip" % [id, _id_at(k + 1)]
+			)
+			seen.append(word)
+		elif id.begins_with("bridge_word_") and id not in ["bridge_word_done"]:
+			check(
+				_id_at(k - 1) == "hook_" + id.trim_prefix("bridge_word_"),
+				"%s without its hook" % id
+			)
+		k += 1
+	check(seen == ids, "hooks played for %s, plan %s" % [seen, ids])
+	var lines: Array[String] = _ids_from(b0).slice(0, k - b0)
+	check(lines.count("bridge_word_done") == ids.size() - 1, "bridge_word_done count %s" % [lines])
+	check(lines.count("bridge_next") == ids.size() - 1, "bridge_next count")
+	var last_word: int = lines.rfind("bridge_word_lam")
+	check(last_word > lines.rfind("bridge_next"), "lam is not built last")
+	check(lines.find("bridge_done") > last_word, "bridge_done before lam")
+	counts["bridge_words"] = int(counts.get("bridge_words", 0)) + ids.size()
 
 
 # ---------------------------------------------------------------- report

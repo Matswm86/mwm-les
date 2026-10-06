@@ -3,8 +3,9 @@ extends Node3D
 ## MWM Les: the island, Pip, and the lamb on the little islet across the
 ## water. Pip's best friend, the lamb, cannot swim, so Pip and the child build
 ## a bridge of letters: find letters (Hør og finn), write them in the sand
-## where they become stones (Sandskriving), lay the stones as a bridge that
-## spells lam (Ordbroa). Then the lamb walks over. Every spoken line is one of
+## where they become stones (Sandskriving), lay the stones as a bridge of
+## words, up to two story words and lam last (Ordbroa, BridgeWords). Then the
+## lamb walks over. Every spoken line is one of
 ## the owner's own recordings (Voice autoload, docs/SCRIPT.md).
 ## First launch: the opening (op_1..op_5). Later launches: hub_back.
 
@@ -14,7 +15,6 @@ enum Mode { START, OPENING, HUB, FLYING, STATION, END }
 
 const SCENES: Array[String] = ["find", "write", "bridge"]
 const HUB_IDLE_SEC: float = 7.0
-const BRIDGE_WORD: String = "lam"
 const BEACON_SCALE: float = 1.6  # the lit station must read from across the island
 
 var mode: Mode = Mode.START
@@ -172,7 +172,13 @@ func _unhandled_input(event: InputEvent) -> void:
 					pip.giggle()
 					Voice.say(_hub_ids)
 		Mode.STATION:
-			if t and t.pressed and pip.hit(t.position) and not current is Sandskriving:
+			if (
+				t
+				and t.pressed
+				and pip.hit(t.position)
+				and not current is Sandskriving
+				and not current.claims_touch(t.position)
+			):
 				pip.giggle()
 				current.replay()
 				return
@@ -215,18 +221,36 @@ func _station(i: int) -> void:
 	await rig.fly_to(hp["target"], hp["distance"], hp["pitch"], 0.0).finished
 
 
-## What the bridge needs this session: the letters of `lam` the child has met
-## are missing from the bridge and get written in the sand. Only letters the
-## bridge uses are written, so every stone ends up in the bridge.
+## What the bridge needs this session (BridgeWords.plan): today's words, lam
+## last, and per word the letters the child has met, which are missing from
+## the bridge and get written in the sand (at most BridgeWords.MAX_WRITE).
+## Only letters the bridge uses are written, so every stone ends up in it.
 func plan() -> Dictionary:
 	if _plan.is_empty():
 		var known: Array[String] = (stations[0] as HorOgFinn).rules.letters()
-		var miss: Array[String] = []
-		for c: String in BRIDGE_WORD:
-			if known.has(c):
-				miss.append(c)
-		_plan = {"missing": miss, "stones": miss.duplicate()}
+		var ids: Array[String] = BridgeWords.pick(
+			known, Game.bridge_word_uses, Game.bridge_last_words, available_words()
+		)
+		Game.note_bridge_words(ids)
+		_plan = BridgeWords.plan(ids, known)
 	return _plan
+
+
+## Words whose hook and sounding-out clips exist and whose letter marks match
+## its letters. A word with a missing piece is skipped and logged.
+func available_words() -> Array[String]:
+	var out: Array[String] = []
+	for id: String in BridgeWords.WORDS:
+		var hook: String = BridgeWords.hook_clip(id)
+		var word: String = BridgeWords.word_clip(id)
+		var n: int = BridgeWords.letters_of(id).size()
+		if Voice.stream(hook) == null or Voice.stream(word) == null:
+			push_warning("Main: bridge word %s skipped, a clip is missing" % id)
+		elif Voice.marks(word).size() != n:
+			push_warning("Main: bridge word %s skipped, clip_marks has no %d marks" % [id, n])
+		else:
+			out.append(id)
+	return out
 
 
 # ---------------------------------------------------------------- end

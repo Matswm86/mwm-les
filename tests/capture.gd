@@ -5,6 +5,9 @@ extends Node
 ##   MWM_LES_FRESH=1 CAPTURE_DIR=/tmp/shots godot --audio-driver Dummy \
 ##     --display-driver x11 --resolution 1920x1080 res://tests/capture.tscn
 ## Prints every clip Voice starts, tagged with its scene.
+## CAPTURE_LETTERS=10 starts with that many letters in play (all but the last
+## already heard, so it gets its intro); CAPTURE_LAST_WORDS=sol,sel makes the
+## bridge pick other words (boat, food) than a fresh start does.
 
 const SPEED: float = 2.0
 
@@ -31,8 +34,19 @@ func _ready() -> void:
 				)
 			)
 	)
+	var last: String = OS.get_environment("CAPTURE_LAST_WORDS")
+	if last != "":
+		for w: String in last.split(","):
+			Game.bridge_last_words.append(w)
 	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate() as MainScene
 	add_child(main)
+	var n_letters: String = OS.get_environment("CAPTURE_LETTERS")
+	if n_letters != "":
+		var rules: LetterRules = (main.stations[0] as HorOgFinn).rules
+		rules.count = clampi(int(n_letters), LetterRules.START_COUNT, LetterRules.ORDER.size())
+		for k in rules.count - 1:
+			rules.heard.append(LetterRules.ORDER[k])
+	(main.stations[2] as OrdBro).step.connect(_on_bridge_step)
 	await _opening()
 	if OS.get_environment("CAPTURE_STOP") == "opening":
 		get_tree().quit()
@@ -135,11 +149,15 @@ func _find() -> void:
 func _write() -> void:
 	var w: Sandskriving = main.stations[1] as Sandskriving
 	var first: bool = true
+	var modelled: Array[String] = []
 	while w.active:
 		var ok: bool = await _until(
 			func() -> bool:
 				return (
-					(w.phase == Sandskriving.Phase.WATCH and w.pad.model_progress > 0.6)
+					(
+						w.phase == Sandskriving.Phase.WATCH
+						and w.pad.model_progress >= float(w.model.size()) - 0.02
+					)
 					or (w.phase == Sandskriving.Phase.WRITE and not Voice.is_busy())
 					or not w.active
 				),
@@ -149,10 +167,13 @@ func _write() -> void:
 		if not ok or not w.active:
 			break
 		if w.phase == Sandskriving.Phase.WATCH:
-			if first:
-				await _shot("09_write_pip_draws_model")
+			if not modelled.has(w.letter) and not w.from_memory:
+				modelled.append(w.letter)
+				await _shot("09_write_pip_draws_model_%s" % w.letter)
 			await _until(func() -> bool: return w.phase == Sandskriving.Phase.WRITE, 20.0, "")
 			continue
+		if w.from_memory:
+			await _shot("09c_write_again_from_memory_%s" % w.letter)
 		var count: int = w.written.size()
 		for st: PackedVector2Array in w.model_screen_strokes():
 			var wob: PackedVector2Array = PackedVector2Array()
@@ -174,25 +195,49 @@ func _write() -> void:
 		first = false
 
 
+## Shots at the bridge's named moments (runs beside _bridge, which lays the stones).
+func _on_bridge_step(name: String) -> void:
+	var br: OrdBro = main.stations[2] as OrdBro
+	var word: String = str(br.words[br.word_i]["id"]) if br.word_i >= 0 else ""
+	if name == "hook":
+		await _wait(1.0)
+		await _shot("12a_hook_%d_%s" % [br.word_i, word])
+	elif br.word_i >= 0 and name == "lit_%d" % (br.word_start[br.word_i] + 1):
+		await _wait(0.15)
+		await _shot("12b_planks_light_%s" % word)
+	elif name == "word_done":
+		await _wait(0.5)
+		await _shot("12e_word_done_%s" % word)
+	elif name == "next":
+		await _wait(1.0)
+		await _shot("12f_bridge_next_after_%s" % word)
+
+
 func _bridge() -> void:
 	var br: OrdBro = main.stations[2] as OrdBro
-	await _until(func() -> bool: return br.lit == 1, 40.0, "plank a lit")
-	await _wait(0.2)
-	await _shot("12_bridge_planks_light_l_a_m")
-	for k in br.missing.size():
-		await _until(
-			func() -> bool: return not br.busy and br.cur >= 0 and not Voice.is_busy(), 60.0, "ask"
+	var n: int = 0
+	while true:
+		var ok: bool = await _until(
+			func() -> bool:
+				return (not br.busy and br.cur >= 0 and not Voice.is_busy()) or br.lit == -2,
+			90.0,
+			"ask"
 		)
+		if not ok or br.lit == -2:
+			break
 		var want: String = br.graphemes[br.cur]
-		await _shot("12b_bridge_ask_%s" % want)
+		await _shot("12c_bridge_ask_%d_%s" % [n, LetterRules.glyph(want)])
 		var st: Stone = br.stone_for(want)
 		await _drag_stone(
-			st.screen_pos(main.rig.cam), br.slot_screen_pos(br.cur), "12c_bridge_drag_%s" % want
+			st.screen_pos(main.rig.cam),
+			br.slot_screen_pos(br.cur),
+			"12d_bridge_drag_%d_%s" % [n, LetterRules.glyph(want)]
 		)
 		await _until(func() -> bool: return br.busy, 5.0, "drop")
+		n += 1
 	await _until(func() -> bool: return br.lit == -2, 40.0, "bridge done")
 	await _wait(0.6)
-	await _shot("12d_bridge_done_all_lit")
+	await _shot("12g_bridge_done_all_lit")
 	await _until(func() -> bool: return br.walking, 40.0, "walk")
 	await _wait(0.9)
 	await _shot("13_bridge_lamb_crossing")

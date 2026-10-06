@@ -1,24 +1,33 @@
 class_name OrdBro
 extends Activity
-## Ordbroa: the child lays the letter stones as a bridge that spells `lam`, so
-## the lamb on the islet can walk over. Letters the child has not met yet lie
-## ready as planks; the ones written in the sand today are missing (Main.plan()).
-## Sound: bridge_in, bridge_word_lam (the l, a, m planks light at the measured
-## sound onsets, content/nb_reading/clip_marks.json), then for each missing
-## plank bridge_ask and the plank's held sound last. A stone plays its short
-## sound when touched. Right: chime, bridge_right. Wrong: the stone's short
-## sound, tok, the plank's held sound again. Then bridge_done, the letters
-## sink into the planks, and bridge_walk while the lamb crosses.
+## Ordbroa: the child lays the letter stones as a bridge of words, so the lamb
+## on the islet can walk over. Today's words come from Main.plan() (up to two
+## story words, lam always last). All their slots are laid out along the
+## bridge from the island side; a word's sockets appear when its turn comes,
+## so the bridge grows toward the islet word by word, and the islet end of the
+## deck is laid when lam is done. Letters the child has not met (or beyond
+## today's writing cap) lie ready as planks; the ones written today are missing.
+## Sound: bridge_in. Per word: hook_<w> while its picture shows, then
+## bridge_word_<w> (its planks light at the measured sound onsets,
+## content/nb_reading/clip_marks.json), then for each missing plank bridge_ask
+## and the plank's held sound last. A stone plays its short sound when
+## touched. Right: chime, bridge_right. Wrong: the stone's short sound, tok,
+## the plank's held sound again. A finished word that is not the last:
+## bridge_word_done, its letters sink into the planks, bridge_next. The last
+## word (lam): bridge_done, the letters sink, bridge_walk while the lamb crosses.
 
 signal slot_filled
-
-const WORD: String = "lam"
-const WORD_CLIP: String = "bridge_word_lam"
 const DRAG_START_PX: float = 18.0
 const STONE_LIFT: float = 0.9
 const IDLE_HINT_SEC: float = 9.0
 
-var graphemes: Array[String] = []
+var words: Array[Dictionary] = []  # today's words: {id, letters, missing (slot in word)}
+var word_i: int = -1  # the word being built now
+var word_start: Array[int] = []  # first slot of each word
+var graphemes: Array[String] = []  # every slot's letter, all words in bridge order
+var word_of: Array[int] = []  # slot -> word index
+var built: Array[String] = []  # words finished this visit
+var picture: Node3D  # the current word's hook picture
 var stones: Array[Stone] = []
 var slots: Array[Stone] = []  # filled plank per slot, null while empty
 var slot_pos: Array[Vector3] = []
@@ -28,9 +37,10 @@ var busy: bool = true
 var pitch_m: float = 1.4
 var walking: bool = false  # the lamb crosses (screenshot bot)
 var lit: int = -1  # slot lit by the sounding-out (-2 = all)
-var _sockets: Array[Node3D] = []
+var stone_scale: float = GameTune.BRIDGE_STONE_SCALE  # planks and letters shrink with the pitch
+var _sockets: Array[Node3D] = []  # per slot, null until its word starts or once filled
 var _socket_mats: Array[StandardMaterial3D] = []
-var _deck: MeshInstance3D
+var _decks: Array[MeshInstance3D] = []
 var _raft: MeshInstance3D
 var _drag: Stone
 var _drag_from: Vector2
@@ -63,20 +73,26 @@ func begin() -> void:
 	main.pip.home_offset = GameTune.PIP_BRIDGE_OFFSET
 	main.hide_pile()
 	var plan: Dictionary = main.plan()
+	words.clear()
 	graphemes.clear()
-	for c: String in WORD:
-		graphemes.append(c)
+	word_of.clear()
+	word_start.clear()
+	built.clear()
+	for w: Variant in plan["words"]:
+		var wd: Dictionary = w
+		words.append(wd)
+		word_start.append(graphemes.size())
+		for l: Variant in wd["letters"]:
+			graphemes.append(str(l))
+			word_of.append(words.size() - 1)
 	var n: int = graphemes.size()
 	_layout_slots(n)
-	_build_deck()
+	_build_deck(-0.4, _edge(0, true))  # the island end; the rest grows word by word
 	missing.clear()
 	for i in n:
 		slots.append(null)
-		_add_socket(i)
-		if (plan["missing"] as Array).has(graphemes[i]):
-			missing.append(i)
-		else:
-			_preplace(i)
+		_sockets.append(null)
+		_socket_mats.append(null)
 	var row: Array[String] = []
 	for l: Variant in plan["stones"]:
 		row.append(str(l))
@@ -90,21 +106,32 @@ func run() -> void:
 	await wait(0.9)
 	_mark("in")
 	await say_wait(["bridge_in"], 0.2)
-	await _sound_out()
-	for i: int in missing:
-		cur = i
-		_ask()
-		if Game.demo_due(activity_id()):
-			_show_ghost()
-		await slot_filled
+	for k in words.size():
+		await _build_word(k)
+		if k < words.size() - 1:
+			cur = -1
+			busy = true
+			lit = -3  # the finished word's planks
+			_mark("word_done")
+			main.burst(slot_pos[_word_mid(k)] + Vector3(0, 0.8, 0))
+			await say_wait(["bridge_word_done"], 0.2)
+			lit = -1
+			_sink_letters(k)
+			_drop_picture()
+			_build_deck(_edge(word_start[k + 1] - 1, false), _edge(word_start[k + 1], true))
+			_mark("next")
+			await say_wait(["bridge_next"], 0.2)
 	cur = -1
 	busy = true
+	_drop_picture()
+	var length: float = main.world.bridge_start.distance_to(main.world.bridge_end)
+	_build_deck(_edge(graphemes.size() - 1, false), length + 0.4)  # the bridge reaches the islet
 	lit = -2
 	_mark("done")
 	main.burst(slot_pos[slot_pos.size() / 2] + Vector3(0, 0.8, 0))
 	await say_wait(["bridge_done"], 0.2)
 	lit = -1
-	_sink_letters()
+	_sink_letters(words.size() - 1)
 	for st: Stone in stones:  # the spare stone and the raft go away too
 		if not st.placed:
 			create_tween().tween_property(st, "global_position:y", st.global_position.y - 2.0, 0.5)
@@ -127,32 +154,68 @@ func end() -> void:
 	_clear()
 
 
-## The word clip: each plank lights at its sound, all of them at the word.
-func _sound_out() -> void:
+## One word: its picture and story line, its sockets and ready planks, the
+## sounding-out, then each missing plank.
+func _build_word(k: int) -> void:
+	word_i = k
 	busy = true
-	var total: float = Voice.say([WORD_CLIP])
+	var id: String = str(words[k]["id"])
+	_show_picture(id)
+	_mark("hook")
+	await say_wait([BridgeWords.hook_clip(id)], 0.3)
+	missing.clear()
+	var miss: Array = words[k]["missing"]
+	for j in (words[k]["letters"] as Array).size():
+		var si: int = word_start[k] + j
+		_add_socket(si)
+		if miss.has(j):
+			missing.append(si)
+		else:
+			_preplace(si)
+	await wait(0.4)
+	await _sound_out(k)
+	for i: int in missing:
+		cur = i
+		_ask()
+		if Game.demo_due(activity_id()):
+			_show_ghost()
+		await slot_filled
+	built.append(id)
+
+
+## The word clip: each plank lights at its sound, all of them at the word.
+func _sound_out(k: int) -> void:
+	busy = true
+	var clip: String = BridgeWords.word_clip(str(words[k]["id"]))
+	var total: float = Voice.say([clip])
 	_mark("word")
-	var marks: Array[float] = Voice.marks(WORD_CLIP)
-	var n: int = graphemes.size()
+	var n: int = (words[k]["letters"] as Array).size()
+	var marks: Array[float] = Voice.marks(clip)
 	if marks.size() != n:
 		marks.clear()
 		for i in n:
-			marks.append(Voice.length(WORD_CLIP) * float(i) / float(n))
+			marks.append(Voice.length(clip) * float(i) / float(n))
 	var t0: float = 0.0
-	for i in n:
-		await wait(marks[i] - t0)
-		t0 = marks[i]
+	for j in n:
+		var i: int = word_start[k] + j
+		await wait(marks[j] - t0)
+		t0 = marks[j]
 		lit = i
 		if slots[i]:
 			slots[i].glyph.pop()
 		_mark("lit_%d" % i)
-	var w_at: float = Voice.word_at(WORD_CLIP)
+	var w_at: float = Voice.word_at(clip)
 	if w_at > t0:
 		await wait(w_at - t0)
 		t0 = w_at
-		lit = -2
+		lit = -3
 	await wait(maxf(total - t0, 0.0))
 	lit = -1
+
+
+## Lit by the sounding-out: slot i alone, the current word (-3), everything (-2).
+func _is_lit(i: int) -> bool:
+	return i == lit or lit == -2 or (lit == -3 and word_of[i] == word_i)
 
 
 func _ask() -> void:
@@ -203,6 +266,11 @@ func touch(event: InputEvent) -> void:
 			var p: Vector3 = main.rig.ground_point(d.position + Vector2(0, 40), STONE_LIFT)
 			_drag.global_position = p - Vector3(0, 0.3, 0)
 			_idle = 0.0
+
+
+## A stone under the finger wins over Pip next to the raft.
+func claims_touch(pos: Vector2) -> bool:
+	return not busy and _stone_at(pos) != null
 
 
 ## A finger lands on a stone: it says its short sound.
@@ -291,9 +359,9 @@ func _place(st: Stone, si: int) -> void:
 	slots[si] = st
 	_sockets[si].visible = false
 	st.home = slot_pos[si]
-	st.scale = Vector3.ONE * GameTune.BRIDGE_STONE_SCALE
+	st.scale = Vector3.ONE * stone_scale
 	create_tween().tween_property(st, "global_position", slot_pos[si], 0.25)
-	st.become_plank(pitch_m * GameTune.BRIDGE_SLOT_FILL / GameTune.BRIDGE_STONE_SCALE)
+	st.become_plank(pitch_m * GameTune.BRIDGE_SLOT_FILL / stone_scale)
 	main.burst(slot_pos[si] + Vector3(0, 0.6, 0))
 
 
@@ -316,7 +384,7 @@ func _show_ghost() -> void:
 func _glow() -> void:
 	for i in _sockets.size():
 		var sock: Node3D = _sockets[i]
-		if not sock.visible:
+		if sock == null or not sock.visible:
 			continue
 		var hm: ShaderMaterial = sock.get_meta("halo")
 		var dashes: MeshInstance3D = sock.get_meta("dashes")
@@ -324,7 +392,7 @@ func _glow() -> void:
 		var strength: float = 0.25 + 0.15 * k
 		var bright: float = 0.75
 		dashes.scale = Vector3.ONE
-		if i == lit or lit == -2:
+		if _is_lit(i):
 			strength = 1.0
 			bright = 1.0
 		elif i == cur and not busy:
@@ -337,7 +405,7 @@ func _glow() -> void:
 		)
 	for i in slots.size():
 		if slots[i] and slots[i].glyph:
-			slots[i].glyph.hint_pulse = i == lit or lit == -2
+			slots[i].glyph.hint_pulse = _is_lit(i)
 
 
 # ---------------------------------------------------------------- layout
@@ -347,53 +415,73 @@ func _bridge_dir() -> Vector3:
 	return (main.world.bridge_end - main.world.bridge_start).normalized()
 
 
+## Every slot of today's words along the bridge, centred, a short deck gap
+## between two words. With several words the pitch goes below
+## BRIDGE_PITCH_MIN_M (down to BRIDGE_PITCH_MULTI_MIN_M) and the planks and
+## letters shrink with it.
 func _layout_slots(n: int) -> void:
 	var a: Vector3 = main.world.bridge_start
 	var b: Vector3 = main.world.bridge_end
 	var length: float = a.distance_to(b)
+	var gaps: float = GameTune.BRIDGE_WORD_GAP_M * float(maxi(words.size() - 1, 0))
+	var floor_m: float = (
+		GameTune.BRIDGE_PITCH_MIN_M if words.size() <= 1 else GameTune.BRIDGE_PITCH_MULTI_MIN_M
+	)
 	pitch_m = clampf(
-		(length - 2.0 * GameTune.BRIDGE_END_MARGIN_M) / float(n),
-		GameTune.BRIDGE_PITCH_MIN_M,
+		(length - 2.0 * GameTune.BRIDGE_END_MARGIN_M - gaps) / float(n),
+		floor_m,
 		GameTune.BRIDGE_PITCH_MAX_M
 	)
-	var mid: Vector3 = (a + b) * 0.5
+	stone_scale = GameTune.BRIDGE_STONE_SCALE * minf(1.0, pitch_m / GameTune.BRIDGE_FULL_PITCH_M)
+	var total: float = pitch_m * float(n) + gaps
+	var x0: float = (length - total) * 0.5
 	slot_pos.clear()
 	for i in n:
-		var off: float = (float(i) - float(n - 1) * 0.5) * pitch_m
-		var p: Vector3 = mid + _bridge_dir() * off
+		var x: float = (
+			x0 + pitch_m * (float(i) + 0.5) + GameTune.BRIDGE_WORD_GAP_M * float(word_of[i])
+		)
+		var p: Vector3 = a + _bridge_dir() * x
 		p.y = GameTune.BRIDGE_DECK_Y
 		slot_pos.append(p)
 
 
-## Fixed deck boards from each end of the bridge to the letter planks.
-func _build_deck() -> void:
+## Distance along the bridge of slot i's island-side (or islet-side) edge.
+func _edge(i: int, near: bool) -> float:
+	var x: float = main.world.bridge_start.distance_to(slot_pos[i])
+	return x - pitch_m * 0.5 if near else x + pitch_m * 0.5
+
+
+func _word_mid(k: int) -> int:
+	return word_start[k] + (words[k]["letters"] as Array).size() / 2
+
+
+## Fixed deck boards between two distances along the bridge.
+func _build_deck(from_x: float, to_x: float) -> void:
 	var a: Vector3 = main.world.bridge_start
-	var b: Vector3 = main.world.bridge_end
 	var dir: Vector3 = _bridge_dir()
-	var first_edge: float = a.distance_to(slot_pos[0]) - pitch_m * 0.5
-	var last_edge: float = a.distance_to(slot_pos[slot_pos.size() - 1]) + pitch_m * 0.5
-	var total: float = a.distance_to(b)
 	var parts: Array = []
 	var yaw: float = rad_to_deg(atan2(-dir.z, dir.x))
-	var x: float = -0.4
-	while x < total + 0.4:
-		if x < first_edge - 0.1 or x > last_edge + 0.1:
-			var p: Vector3 = a + dir * x
-			p.y = GameTune.BRIDGE_DECK_Y - 0.04
-			var shade: Color = GameTune.WOOD_LIGHT if int(x * 3.0) % 2 == 0 else GameTune.WOOD
-			parts.append(
-				[
-					MeshKit.box(Vector3(0.3, 0.14, 1.5)),
-					MeshKit.xf(p, Vector3.ONE, Vector3(0, yaw, 0)),
-					shade
-				]
-			)
+	var x: float = from_x
+	while x < to_x - 0.1:
+		var p: Vector3 = a + dir * (x + 0.15)
+		p.y = GameTune.BRIDGE_DECK_Y - 0.04
+		var shade: Color = GameTune.WOOD_LIGHT if int(x * 3.0) % 2 == 0 else GameTune.WOOD
+		parts.append(
+			[
+				MeshKit.box(Vector3(0.3, 0.14, 1.5)),
+				MeshKit.xf(p, Vector3.ONE, Vector3(0, yaw, 0)),
+				shade
+			]
+		)
 		x += 0.36
 	if parts.is_empty():
 		return
-	_deck = MeshKit.instance(
+	var deck: MeshInstance3D = MeshKit.instance(
 		MeshKit.merge(parts), MeshKit.with_outline(MeshKit.toon(), 0.003), self
 	)
+	deck.scale = Vector3(1, 0.2, 1)
+	create_tween().tween_property(deck, "scale", Vector3.ONE, 0.3).set_trans(Tween.TRANS_BACK)
+	_decks.append(deck)
 
 
 ## An empty plank socket: a dark slot with a dashed gold outline and a glow.
@@ -442,18 +530,18 @@ func _add_socket(i: int) -> void:
 	halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.set_meta("halo", hm)
 	root.set_meta("dashes", dashes)
-	_sockets.append(root)
-	_socket_mats.append(mat)
+	_sockets[i] = root
+	_socket_mats[i] = mat
 
 
 func _preplace(i: int) -> void:
 	var st: Stone = Stone.new()
 	st.setup(graphemes[i], Game.skill_for_label(graphemes[i]))
 	add_child(st)
-	st.scale = Vector3.ONE * GameTune.BRIDGE_STONE_SCALE
+	st.scale = Vector3.ONE * stone_scale
 	st.global_position = slot_pos[i]
 	st.home = slot_pos[i]
-	st.become_plank(pitch_m * GameTune.BRIDGE_SLOT_FILL / GameTune.BRIDGE_STONE_SCALE)
+	st.become_plank(pitch_m * GameTune.BRIDGE_SLOT_FILL / stone_scale)
 	slots[i] = st
 	_sockets[i].visible = false
 
@@ -464,6 +552,8 @@ func _place_stones(letters: Array[String]) -> void:
 	var n: int = letters.size()
 	var gap: float = minf(GameTune.BRIDGE_STONE_GAP_PX, (vp.x - 360.0) / float(maxi(n, 1)))
 	var k_size: float = gap / GameTune.BRIDGE_STONE_GAP_PX
+	if k_size < 1.0:  # wide letters (m, b) would touch their neighbours
+		k_size *= GameTune.BRIDGE_STONE_CROWD_SCALE
 	var y: float = vp.y - GameTune.BRIDGE_STONE_ROW_FROM_BOTTOM_PX
 	var first: Vector3 = Vector3.ZERO
 	var last: Vector3 = Vector3.ZERO
@@ -528,10 +618,12 @@ func _place_lamb() -> void:
 	main.lamb.rotation.y = PI  # faces the main island, ready to come over
 
 
-## Every letter sinks into its plank, so the lamb never walks through one.
-func _sink_letters() -> void:
-	for st: Stone in slots:
-		if st and st.glyph:
+## The letters of word k sink into their planks, so the lamb never walks
+## through one; the planks stay as built bridge.
+func _sink_letters(k: int) -> void:
+	for i in slots.size():
+		var st: Stone = slots[i]
+		if word_of[i] == k and st and st.glyph:
 			var g: GlowLetter = st.glyph
 			var tw: Tween = create_tween()
 			tw.tween_property(g, "position:y", g.position.y - 1.6, 0.5).set_trans(Tween.TRANS_SINE)
@@ -571,12 +663,17 @@ func _clear() -> void:
 	stones.clear()
 	slots.clear()
 	for s: Node3D in _sockets:
-		s.queue_free()
+		if s:
+			s.queue_free()
 	_sockets.clear()
 	_socket_mats.clear()
-	if _deck:
-		_deck.queue_free()
-		_deck = null
+	for d: MeshInstance3D in _decks:
+		d.queue_free()
+	_decks.clear()
+	if picture:
+		picture.queue_free()
+		picture = null
+	word_i = -1
 	if _raft:
 		_raft.queue_free()
 		_raft = null
@@ -598,3 +695,78 @@ func stone_for(l: String) -> Stone:
 
 func slot_screen_pos(si: int) -> Vector2:
 	return main.rig.cam.unproject_position(slot_pos[si])
+
+
+# ---------------------------------------------------------------- word pictures
+
+
+## The picture that goes with word `id`'s story line pops up: the sun in the
+## sky, a seal and a boat in the water, food by the lamb, a book by Pip. lam:
+## the lamb itself hops.
+func _show_picture(id: String) -> void:
+	_drop_picture()
+	var kind: String = str((BridgeWords.WORDS.get(id, {}) as Dictionary).get("picture", ""))
+	if kind == "lamb":
+		var l: Node3D = main.lamb
+		var y0: float = l.global_position.y
+		var hop: Tween = create_tween()
+		for k in 2:
+			hop.tween_property(l, "global_position:y", y0 + 0.5, 0.18).set_trans(Tween.TRANS_SINE)
+			hop.tween_property(l, "global_position:y", y0, 0.18).set_trans(Tween.TRANS_SINE)
+		return
+	var pic: Node3D = Props.make(kind)
+	if pic == null:
+		return
+	add_child(pic)
+	var spot: Dictionary = GameTune.WORD_PICTURES.get(kind, {})
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var cam: Camera3D = main.rig.cam
+	var at: Vector2 = spot.get("screen", Vector2(0.5, 0.4))
+	var scr: Vector2 = Vector2(at.x * vp.x, at.y * vp.y)
+	var where: String = str(spot.get("on", "water"))
+	if where == "sky":
+		pic.global_position = (
+			cam.project_ray_origin(scr)
+			+ cam.project_ray_normal(scr) * float(spot.get("dist", 14.0))
+		)
+	elif where == "pip":
+		pic.global_position = (
+			cam.global_transform * (main.pip.home_offset + spot.get("off", Vector3.ZERO))
+		)
+	else:
+		var g: Vector3 = main.rig.ground_point(scr, 0.0)
+		if where == "ground":  # the ray meets the raised ground nearer than the sea level
+			for k in 3:
+				g = main.rig.ground_point(scr, main.world.ground_y(g))
+			g = main.world.on_ground(g.x, g.z)
+		pic.global_position = g
+	var face: Vector3 = cam.global_position - pic.global_position
+	pic.rotation.y = atan2(face.x, face.z) + deg_to_rad(float(spot.get("turn", 0.0)))
+	var size: float = float(spot.get("scale", 1.0))
+	pic.scale = Vector3.ONE * 0.01
+	(
+		create_tween()
+		. tween_property(pic, "scale", Vector3.ONE * size, 0.45)
+		. set_trans(Tween.TRANS_BACK)
+		. set_ease(Tween.EASE_OUT)
+	)
+	if kind == "boat":  # it sails slowly across the bay
+		var tw: Tween = create_tween()
+		var side: Vector3 = cam.global_basis.x
+		side.y = 0.0
+		tw.tween_property(
+			pic, "global_position", pic.global_position + side.normalized() * 2.5, 8.0
+		)
+	picture = pic
+
+
+func _drop_picture() -> void:
+	if picture == null:
+		return
+	var pic: Node3D = picture
+	picture = null
+	var tw: Tween = create_tween()
+	tw.tween_property(pic, "scale", Vector3.ONE * 0.01, 0.35).set_trans(Tween.TRANS_BACK).set_ease(
+		Tween.EASE_IN
+	)
+	tw.tween_callback(pic.queue_free)

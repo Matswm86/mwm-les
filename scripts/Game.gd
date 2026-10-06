@@ -16,6 +16,8 @@ var named_letters: Array[String] = []  # letters introduced by name (period 1, G
 var demos_seen: Array[String] = []  # activity templates whose ghost demo has run (GDD 6.0)
 var bridge_items_done: int = 0  # finished word bridges, drives the bridge scaffold
 var bridge_words_met: Array[String] = []  # bridge words whose story has been told once
+var bridge_word_uses: Dictionary = {}  # word id -> bridge visits it was built on (BridgeWords)
+var bridge_last_words: Array[String] = []  # the words of the last bridge visit
 var words_today: Array[String] = []
 var found_today: Array[String] = []  # sound labels found in Hør og finn this session
 var words_read_to_adult: Array[String] = []
@@ -58,6 +60,8 @@ func reset_progress() -> void:
 	demos_seen.clear()
 	bridge_items_done = 0
 	bridge_words_met.clear()
+	bridge_word_uses.clear()
+	bridge_last_words.clear()
 	words_today.clear()
 	found_today.clear()
 	practised_today.clear()
@@ -130,6 +134,14 @@ func note_answer(skill_ids: Array[String]) -> void:
 		practised_today[s] = int(practised_today.get(s, 0)) + 1
 
 
+## Today's bridge words: counted for the rotation, remembered as the last visit.
+func note_bridge_words(ids: Array[String]) -> void:
+	for id: String in ids:
+		bridge_word_uses[id] = int(bridge_word_uses.get(id, 0)) + 1
+	bridge_last_words = ids.duplicate()
+	save()
+
+
 func note_word_built(word: String) -> void:
 	if not words_today.has(word):
 		words_today.append(word)
@@ -183,6 +195,8 @@ func save() -> void:
 	d["demos_seen"] = demos_seen
 	d["bridge_items_done"] = bridge_items_done
 	d["bridge_words_met"] = bridge_words_met
+	d["bridge_word_uses"] = bridge_word_uses
+	d["bridge_last_words"] = bridge_last_words
 	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(d))
@@ -211,6 +225,12 @@ func _load() -> void:
 	bridge_items_done = int(dd.get("bridge_items_done", 0))
 	for w: Variant in dd.get("bridge_words_met", []):
 		bridge_words_met.append(str(w))
+	var wu: Variant = dd.get("bridge_word_uses", {})
+	if wu is Dictionary:
+		for k: Variant in wu:
+			bridge_word_uses[str(k)] = int((wu as Dictionary)[k])
+	for w2: Variant in dd.get("bridge_last_words", []):
+		bridge_last_words.append(str(w2))
 
 
 func _load_offline() -> void:

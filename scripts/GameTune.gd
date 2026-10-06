@@ -113,8 +113,22 @@ const BRIDGE_END_MARGIN_M: float = 0.35
 const BRIDGE_PITCH_MIN_M: float = 1.05
 const BRIDGE_PITCH_MAX_M: float = 1.7
 const BRIDGE_SLOT_FILL: float = 0.9  # plank/slot width as a share of the pitch
+const BRIDGE_PITCH_MULTI_MIN_M: float = 0.7  # several words share the bridge: smaller planks
+const BRIDGE_FULL_PITCH_M: float = 1.3  # below this pitch planks and letters shrink with it
+const BRIDGE_WORD_GAP_M: float = 0.3  # plain deck between two words
+## Where each bridge word's picture shows while its story line plays (OrdBro):
+## on = sky (along the ray, dist m), water or ground (under the screen point,
+## screen = fraction of the viewport), pip (camera-local, next to Pip).
+const WORD_PICTURES: Dictionary = {
+	"sun": {"on": "sky", "screen": Vector2(0.46, 0.13), "dist": 16.0, "scale": 1.2},
+	"seal": {"on": "water", "screen": Vector2(0.4, 0.42), "scale": 0.9},
+	"boat": {"on": "water", "screen": Vector2(0.42, 0.27), "scale": 0.8},
+	"food": {"on": "ground", "screen": Vector2(0.95, 0.4), "scale": 0.6},
+	"book": {"on": "pip", "off": Vector3(1.5, 0.2, 0.0), "scale": 0.8},
+}
 const BRIDGE_STONE_SCALE: float = 1.1
 const BRIDGE_STONE_GAP_PX: float = 340.0
+const BRIDGE_STONE_CROWD_SCALE: float = 0.85  # a crowded raft (narrower gaps) gets smaller stones
 const BRIDGE_STONE_ROW_FROM_BOTTOM_PX: float = 160.0
 const RAFT_Y: float = 0.3
 const PICTURE_FROM_RIGHT_PX: float = 290.0  # the waiting picture's feet on screen

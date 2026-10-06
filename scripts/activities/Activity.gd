@@ -44,6 +44,12 @@ func touch(_event: InputEvent) -> void:
 	pass
 
 
+## True when a press at `pos` is meant for this station (a stone under the
+## finger), so a tap near Pip there does not count as a tap on Pip.
+func claims_touch(_pos: Vector2) -> bool:
+	return false
+
+
 ## The speaker button: hear the sound the child is looking for again.
 func replay() -> void:
 	pass

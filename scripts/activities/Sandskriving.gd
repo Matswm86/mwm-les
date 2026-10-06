@@ -1,12 +1,15 @@
 class_name Sandskriving
 extends Activity
 ## Sandskriving, "watch then write". The child writes the letters that become
-## the bridge stones this session (Main.plan()). For each letter Pip's pen
-## draws the model while the letter's held sound plays, the model fades, the
-## child writes it with a finger. Lenient check (WriteCheck.judge; the third
+## the bridge stones this session (Main.plan(), every one is used on the
+## bridge). For a letter's first time Pip's pen draws the model while the
+## letter's held sound plays, the model fades, the child writes it with a
+## finger. The same letter again right after: write_again and its held sound,
+## then the child writes it from memory (no model). Lenient check (WriteCheck.judge; the third
 ## try only has to be near, the fourth any letter-sized ink). An accepted
 ## letter lifts out of the sand as a stone and rolls off toward the bridge.
-## Sound: write_in (first letter), [held sound while drawing], write_turn,
+## Sound: write_in (first letter) or write_next (a new letter after one),
+## [held sound while drawing], write_turn; a repeat: write_again + held sound.
 ## write_retry on a miss, write_right when accepted, write_done at the end.
 
 signal ink_done
@@ -20,6 +23,7 @@ var model: Array[PackedVector2Array] = []
 var to_write: Array[String] = []
 var written: Array[String] = []
 var attempts: int = 0
+var from_memory: bool = false  # this letter was written before today: no model
 var rolling: bool = false  # a stone is rolling to the bridge (screenshot bot)
 var lifted: Stone
 var _others: Array = []
@@ -60,7 +64,7 @@ func begin() -> void:
 func run() -> void:
 	active = true
 	for i in to_write.size():
-		await _write_one(to_write[i], i == 0)
+		await _write_one(to_write[i], i == 0, to_write.slice(0, i).has(to_write[i]))
 	phase = Phase.DONE
 	create_tween().tween_property(pad, "patch_alpha", 0.0, 0.4)
 	_mark("done")
@@ -80,13 +84,14 @@ func end() -> void:
 		pad.show_trace = false
 
 
-func _write_one(l: String, first: bool) -> void:
+func _write_one(l: String, first: bool, again: bool) -> void:
 	letter = l
 	var sk: String = Game.skill_for_label(l)
 	model = WriteCheck.strokes_from_json(Game.engine.pack.skill(sk).get("strokes", []))
 	pad.model = model
 	_others = other_models(sk)
 	attempts = 0
+	from_memory = again
 	pad.clear_ink()
 	pad.show_start_dot = false
 	pad.show_trace = false
@@ -94,9 +99,17 @@ func _write_one(l: String, first: bool) -> void:
 	if first:
 		_mark("in")
 		await say_wait(["write_in"], 0.2)
-	await _watch()
+	if again:
+		phase = Phase.WATCH
+		_mark("again")
+		await say_wait(["write_again", Voice.held_id(l)], 0.2)
+	else:
+		if not first:
+			_mark("next")
+			await say_wait(["write_next"], 0.2)
+		await _watch()
 	while true:
-		_start_write(attempts == 0)
+		_start_write(attempts == 0 and not again)
 		await ink_done
 		phase = Phase.CHECK
 		attempts += 1
