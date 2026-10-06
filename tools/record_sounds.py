@@ -118,15 +118,24 @@ class Handler(BaseHTTPRequestHandler):
             takes = [
                 {
                     **t,
-                    "word": f"Bokstavnavnet «{NAMES[t['letter']]}»" if t["name"] else GUIDE[t["letter"]][0],
-                    "tip": "Si navnet på bokstaven, tydelig, en gang." if t["name"] else GUIDE[t["letter"]][1],
+                    "word": f"Bokstavnavnet «{NAMES[t['letter']]}»"
+                    if t["name"]
+                    else GUIDE[t["letter"]][0],
+                    "tip": "Si navnet på bokstaven, tydelig, en gang."
+                    if t["name"]
+                    else GUIDE[t["letter"]][1],
                     "saved": (OUT / f"{t['id']}.wav").exists(),
                 }
                 for t in TAKES
             ]
             texts = script_text()
             takes += [
-                {"id": lid, "scene": scene, "line": texts[lid], "saved": (OUT / f"{lid}.wav").exists()}
+                {
+                    "id": lid,
+                    "scene": scene,
+                    "line": texts[lid],
+                    "saved": (OUT / f"{lid}.wav").exists(),
+                }
                 for scene, lid, _ in LINES
             ]
             self._send(
