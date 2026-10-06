@@ -16,6 +16,26 @@ static func strokes_from_json(raw: Array) -> Array[PackedVector2Array]:
 	return out
 
 
+## Share of the model's points (resampled) that have ink within `tol`
+## (strokes in the model's unit box): how much of the letter a trace covered.
+static func coverage(
+	ink: Array[PackedVector2Array], model: Array[PackedVector2Array], tol: float
+) -> float:
+	var pts: PackedVector2Array = resample(model, LearnBalance.WRITE_RESAMPLE_POINTS)
+	var all: PackedVector2Array = PackedVector2Array()
+	for st: PackedVector2Array in ink:
+		all.append_array(resample([st] as Array[PackedVector2Array], 64))
+	if pts.is_empty() or all.is_empty():
+		return 0.0
+	var hit: int = 0
+	for q: Vector2 in pts:
+		for r: Vector2 in all:
+			if q.distance_to(r) <= tol:
+				hit += 1
+				break
+	return float(hit) / float(pts.size())
+
+
 static func ink_length(strokes: Array[PackedVector2Array]) -> float:
 	var total: float = 0.0
 	for s: PackedVector2Array in strokes:

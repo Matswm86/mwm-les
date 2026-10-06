@@ -16,8 +16,9 @@ var named_letters: Array[String] = []  # letters introduced by name (period 1, G
 var demos_seen: Array[String] = []  # activity templates whose ghost demo has run (GDD 6.0)
 var bridge_items_done: int = 0  # finished word bridges, drives the bridge scaffold
 var bridge_words_met: Array[String] = []  # bridge words whose story has been told once
-var bridge_word_uses: Dictionary = {}  # word id -> bridge visits it was built on (BridgeWords)
-var bridge_last_words: Array[String] = []  # the words of the last bridge visit
+var level: int = 0  # the word level the play is at (BridgeWords.LEVELS)
+var learned: Array[String] = []  # letters introduced in a level (letter ids)
+var plays_done: int = 0  # whole plays finished; after the first, a play is review
 var words_today: Array[String] = []
 var found_today: Array[String] = []  # sound labels found in Hør og finn this session
 var words_read_to_adult: Array[String] = []
@@ -60,8 +61,9 @@ func reset_progress() -> void:
 	demos_seen.clear()
 	bridge_items_done = 0
 	bridge_words_met.clear()
-	bridge_word_uses.clear()
-	bridge_last_words.clear()
+	level = 0
+	learned.clear()
+	plays_done = 0
 	words_today.clear()
 	found_today.clear()
 	practised_today.clear()
@@ -134,12 +136,16 @@ func note_answer(skill_ids: Array[String]) -> void:
 		practised_today[s] = int(practised_today.get(s, 0)) + 1
 
 
-## Today's bridge words: counted for the rotation, remembered as the last visit.
-func note_bridge_words(ids: Array[String]) -> void:
-	for id: String in ids:
-		bridge_word_uses[id] = int(bridge_word_uses.get(id, 0)) + 1
-	bridge_last_words = ids.duplicate()
-	save()
+## A letter met in its level's intro.
+func learn(l: String) -> void:
+	if not learned.has(l):
+		learned.append(l)
+		save()
+
+
+## A replay of the whole play: every letter is known, nothing is shown again.
+func review() -> bool:
+	return plays_done > 0
 
 
 func note_word_built(word: String) -> void:
@@ -195,8 +201,9 @@ func save() -> void:
 	d["demos_seen"] = demos_seen
 	d["bridge_items_done"] = bridge_items_done
 	d["bridge_words_met"] = bridge_words_met
-	d["bridge_word_uses"] = bridge_word_uses
-	d["bridge_last_words"] = bridge_last_words
+	d["level"] = level
+	d["learned"] = learned
+	d["plays_done"] = plays_done
 	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(d))
@@ -225,12 +232,11 @@ func _load() -> void:
 	bridge_items_done = int(dd.get("bridge_items_done", 0))
 	for w: Variant in dd.get("bridge_words_met", []):
 		bridge_words_met.append(str(w))
-	var wu: Variant = dd.get("bridge_word_uses", {})
-	if wu is Dictionary:
-		for k: Variant in wu:
-			bridge_word_uses[str(k)] = int((wu as Dictionary)[k])
-	for w2: Variant in dd.get("bridge_last_words", []):
-		bridge_last_words.append(str(w2))
+	level = clampi(int(dd.get("level", 0)), 0, BridgeWords.LEVELS.size() - 1)
+	for l: Variant in dd.get("learned", []):
+		if LetterRules.ORDER.has(str(l)):
+			learned.append(str(l))
+	plays_done = int(dd.get("plays_done", 0))
 
 
 func _load_offline() -> void:

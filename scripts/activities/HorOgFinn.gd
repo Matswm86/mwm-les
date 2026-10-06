@@ -1,26 +1,26 @@
 class_name HorOgFinn
 extends Activity
-## Hør og finn: hear a letter sound, tap the letter that says it. The task
-## logic is LetterRules (tested in tests/test_letter_mapping.gd): a and s
-## first, one more letter after four right first tries, at most three tiles,
-## never the same target three times in a row. Here the letters stand on
-## round sand tiles on the beach.
+## Hør og finn: hear a letter sound, tap the letter that says it. The level's
+## word decides the task (Main.plan()): its letters stand on round sand tiles
+## on the beach, plus at most one letter learned before as a distractor.
+## Every letter of the word is asked ASKS_PER_LETTER times (once in a review
+## play), in a shuffled order that never asks the same letter twice in a row.
 ## Sound: find_in at the start. Each item: find_ask, then the target's held
 ## sound last (nothing after it). A tap plays the tapped letter's short
 ## sound. Right: a chime, and find_right after every right. Wrong: the
 ## tapped letter's short sound, tok, find_wrong, then the target's held sound.
-## A new letter: its intro take while its tile pulses, then intro_again and
-## its held sound (t, b: the short one) once more. Long-press any tile:
-## its name, then its held sound. find_done after ITEMS items.
+## The word's new letters, at the first item: each one's intro take while its
+## tile pulses, then intro_again and its held sound (t, b: the short one). Long-press any tile:
+## its name, then its held sound. find_done after the last item.
 
 signal item_started(target: String, letters: Array[String])
 signal prompt_played(target: String, ids: Array[String])
 signal item_finished
 
-const ITEMS: int = 10
+const ASKS_PER_LETTER: int = 2  # owner 2026-10-06: two slow repetitions per task
+const MAX_DISTRACTORS: int = 1
 const LONG_PRESS_SEC: float = 0.6
 const IDLE_REPEAT_SEC: float = 8.0
-const SAVE_PATH: String = "user://letters.json"  # shared with the one-screen letter game
 const RIGHT_LINE_EVERY: int = 1  # praise after every right answer (owner 2026-10-06)
 
 var rules: LetterRules = LetterRules.new()
@@ -30,6 +30,9 @@ var items_done: int = 0
 var rights: int = 0
 var busy: bool = true  # taps ignored (intro or feedback running)
 var found: Array[String] = []  # letters answered right this visit
+var queue: Array[String] = []  # this visit's targets in order
+var tile_set: Array[String] = []  # this visit's tiles: the word's letters + a distractor
+var new_letters: Array[String] = []  # introduced at the first item
 var last_wrong: String = ""  # screenshot bot
 var _tiles: Array[Node3D] = []
 var _missed: bool = false
@@ -68,17 +71,46 @@ func _right() -> Vector3:
 
 func begin() -> void:
 	super.begin()
-	_load()
-	rules.begin_visit()  # a new letter, if one is due, comes only at a visit start
+	var plan: Dictionary = main.plan()
+	var word: Array[String] = BridgeWords.letters_of(str(plan["word"]))
+	new_letters.clear()
+	for l: Variant in plan["new"]:
+		new_letters.append(str(l))
+	tile_set = word.duplicate()
+	var spare: Array[String] = []
+	for l: Variant in plan["learned"]:
+		if not tile_set.has(str(l)):
+			spare.append(str(l))
+	for k in mini(MAX_DISTRACTORS, spare.size()):
+		tile_set.append(spare.pop_at(rules.rng.randi_range(0, spare.size() - 1)))
+	queue = make_queue(word, 1 if Game.review() else ASKS_PER_LETTER, rules.rng)
 	items_done = 0
 	rights = 0
 	found.clear()
-	_demo = rules.heard.is_empty()  # the very first item ever: the ghost hand shows a tap
+	_demo = Game.learned.is_empty()  # the very first item ever: the ghost hand shows a tap
+
+
+## Every letter `times` times, shuffled, never the same letter twice in a row.
+static func make_queue(
+	word: Array[String], times: int, rng: RandomNumberGenerator
+) -> Array[String]:
+	var out: Array[String] = []
+	for t in times:
+		var round_l: Array[String] = word.duplicate()
+		for k in range(round_l.size() - 1, 0, -1):
+			var j: int = rng.randi_range(0, k)
+			var tmp: String = round_l[k]
+			round_l[k] = round_l[j]
+			round_l[j] = tmp
+		if not out.is_empty() and round_l.size() > 1 and round_l[0] == out[out.size() - 1]:
+			round_l.append(round_l.pop_front())
+		out.append_array(round_l)
+	return out
 
 
 func run() -> void:
 	active = true
-	while items_done < ITEMS:
+	while items_done < queue.size():
 		_next_item(items_done == 0)
 		await item_finished
 	busy = true
@@ -104,9 +136,15 @@ func _next_item(first: bool) -> void:
 	busy = true
 	_missed = false
 	last_wrong = ""
-	var intro: Array[String] = rules.pending_intro()
-	target = rules.pick_target()
-	_show(rules.pick_tiles(target, intro))
+	var intro: Array[String] = new_letters if first else ([] as Array[String])
+	target = queue[items_done]
+	var tiles: Array[String] = tile_set.duplicate()
+	for k in range(tiles.size() - 1, 0, -1):  # a new place for every tile each item
+		var j: int = rules.rng.randi_range(0, k)
+		var tmp: String = tiles[k]
+		tiles[k] = tiles[j]
+		tiles[j] = tmp
+	_show(tiles)
 	item_started.emit(target, tile_letters())
 	await wait(1.5)
 	if first:
@@ -120,7 +158,7 @@ func _next_item(first: bool) -> void:
 		if gl:
 			_pulse(gl, sec)
 		_mark("intro_" + l)
-		rules.mark_heard(l)
+		Game.learn(l)
 		await wait(sec + LetterRules.INTRO_GAP_SEC)
 		if my != _seq:
 			return
@@ -129,7 +167,6 @@ func _next_item(first: bool) -> void:
 		if gl:
 			_pulse(gl, again)
 		await wait(again + LetterRules.INTRO_GAP_SEC)
-	_save()
 	if my != _seq:
 		return
 	_prompt()
@@ -171,12 +208,10 @@ func tap(l: String) -> void:
 		gl.hint_pulse = true
 		gl.pop()
 		main.burst(gl.center_world())
-		rules.record(not _missed)
 		items_done += 1
 		rights += 1
 		if not found.has(l):
 			found.append(l)
-		_save()
 		await wait(sec + LetterRules.AFTER_CLIP_GAP_SEC)
 		if my != _seq:
 			return
@@ -362,19 +397,3 @@ func _clear() -> void:
 func letter_screen_pos(l: String) -> Vector2:
 	var gl: GlowLetter = letter_node(l)
 	return gl.screen_pos(main.rig.cam) if gl else Vector2(-1, -1)
-
-
-func _load() -> void:
-	if not Game.persist or not FileAccess.file_exists(SAVE_PATH):
-		return
-	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
-	if d is Dictionary:
-		rules.from_dict(d as Dictionary)
-
-
-func _save() -> void:
-	if not Game.persist:
-		return
-	var f: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if f:
-		f.store_string(JSON.stringify(rules.to_dict()))

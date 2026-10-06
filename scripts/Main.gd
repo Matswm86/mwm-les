@@ -3,9 +3,11 @@ extends Node3D
 ## MWM Les: the island, Pip, and the lamb on the little islet across the
 ## water. Pip's best friend, the lamb, cannot swim, so Pip and the child build
 ## a bridge of letters: find letters (Hør og finn), write them in the sand
-## where they become stones (Sandskriving), lay the stones as a bridge of
-## words, up to two story words and lam last (Ordbroa, BridgeWords). Then the
-## lamb walks over. Every spoken line is one of
+## where they become stones (Sandskriving), lay the stones in the bridge
+## (Ordbroa). One play is six word levels (BridgeWords.LEVELS: sol, sel, les,
+## mat, båt, lam); each level goes round the three stations with its word,
+## and the bridge grows by one word per level. After lam the lamb walks over.
+## Progress is saved per level. Every spoken line is one of
 ## the owner's own recordings (Voice autoload, docs/SCRIPT.md).
 ## First launch: the opening (op_1..op_5). Later launches: hub_back.
 
@@ -28,6 +30,8 @@ var stations: Array[Activity] = []
 var current: Activity
 var story: OpeningStory
 var sessions: int = 0
+var level: int = 0  # index into BridgeWords.LEVELS
+var picture: Node3D  # the level's story picture in the hub
 var _next: int = -1
 var _hub_ids: Array[String] = []
 var _hub_idle: float = 0.0
@@ -78,7 +82,7 @@ func hub_pose() -> Dictionary:
 
 func _start() -> void:
 	pip.snap_home()
-	var greet: String = "hub_back"
+	var greet: String = "level_back" if Game.level > 0 else "hub_back"
 	if not Game.story_seen:
 		greet = ""
 		mode = Mode.OPENING
@@ -90,18 +94,34 @@ func _start() -> void:
 		story = null
 		Game.story_seen = true
 		Game.save()
-	_session(greet)
+		if Game.plays_done == 0 and Game.level == 0:
+			greet = "levels_intro"  # "Seks ord skal vi bygge."
+	_play(greet)
 
 
-## One session: the three stations in order, then goodnight.
-func _session(greet: String) -> void:
+## One play: from the saved level to lam, each level the three stations in
+## order, then goodnight.
+func _play(greet: String) -> void:
 	sessions += 1
-	_plan = {}
-	for i in 3:
-		await _hub(i, greet)
-		greet = ""
-		await _station(i)
+	level = Game.level
+	while level < BridgeWords.LEVELS.size():
+		_plan = {}
+		for i in 3:
+			await _hub(i, greet)
+			greet = ""
+			await _station(i)
+		level += 1
+		if level < BridgeWords.LEVELS.size():
+			Game.level = level
+			Game.save()
+	Game.level = 0
+	Game.plays_done += 1
+	Game.save()
 	await _end()
+
+
+func word() -> String:
+	return BridgeWords.LEVELS[mini(level, BridgeWords.LEVELS.size() - 1)]
 
 
 # ---------------------------------------------------------------- hub
@@ -120,9 +140,15 @@ func _hub(i: int, greet: String) -> void:
 	_hub_ids.clear()
 	if greet != "":
 		_hub_ids.append(greet)
+	if i == 0:  # the level's story: the lamb calls, then the hook while its picture shows
+		_hub_ids.append("lamb_baa")
+		_lamb_hop()
+		_hub_ids.append(BridgeWords.hook_clip(word()))
+		_show_hub_picture()
 	_hub_ids.append(stations[i].hub_line())
 	Voice.say(_hub_ids)
 	await station_chosen
+	_drop_hub_picture()
 
 
 ## A spot on the camera ray to the beacon, close enough that Pip stays big,
@@ -221,36 +247,72 @@ func _station(i: int) -> void:
 	await rig.fly_to(hp["target"], hp["distance"], hp["pitch"], 0.0).finished
 
 
-## What the bridge needs this session (BridgeWords.plan): today's words, lam
-## last, and per word the letters the child has met, which are missing from
-## the bridge and get written in the sand (at most BridgeWords.MAX_WRITE).
-## Only letters the bridge uses are written, so every stone ends up in it.
+## This level: its word, the letters it brings in (`new`; none in a review
+## play) and the stones to write, one per letter of the word, all laid in it.
 func plan() -> Dictionary:
 	if _plan.is_empty():
-		var known: Array[String] = (stations[0] as HorOgFinn).rules.letters()
-		var ids: Array[String] = BridgeWords.pick(
-			known, Game.bridge_word_uses, Game.bridge_last_words, available_words()
-		)
-		Game.note_bridge_words(ids)
-		_plan = BridgeWords.plan(ids, known)
+		var id: String = word()
+		var learned: Array[String] = Game.learned.duplicate()
+		if Game.review():
+			learned = BridgeWords.learned_before(BridgeWords.LEVELS.size())
+		var ls: Array[String] = BridgeWords.letters_of(id)
+		var miss: Array[int] = []
+		for j in ls.size():
+			miss.append(j)
+		_plan = {
+			"level": level,
+			"word": id,
+			"new": BridgeWords.new_letters(id, learned),
+			"learned": learned,
+			"words": [{"id": id, "letters": ls, "missing": miss}],
+			"stones": ls.duplicate(),
+		}
 	return _plan
 
 
-## Words whose hook and sounding-out clips exist and whose letter marks match
-## its letters. A word with a missing piece is skipped and logged.
-func available_words() -> Array[String]:
-	var out: Array[String] = []
-	for id: String in BridgeWords.WORDS:
-		var hook: String = BridgeWords.hook_clip(id)
-		var word: String = BridgeWords.word_clip(id)
-		var n: int = BridgeWords.letters_of(id).size()
-		if Voice.stream(hook) == null or Voice.stream(word) == null:
-			push_warning("Main: bridge word %s skipped, a clip is missing" % id)
-		elif Voice.marks(word).size() != n:
-			push_warning("Main: bridge word %s skipped, clip_marks has no %d marks" % [id, n])
-		else:
-			out.append(id)
-	return out
+## The lamb hops twice on its islet while it calls.
+func _lamb_hop() -> void:
+	var y0: float = lamb.global_position.y
+	var tw: Tween = create_tween()
+	for k in 2:
+		tw.tween_property(lamb, "global_position:y", y0 + 0.45, 0.18).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(lamb, "global_position:y", y0, 0.18).set_trans(Tween.TRANS_SINE)
+
+
+## The level's picture pops up beside Pip in the hub while its hook plays
+## (lam has none: the lamb is on its islet).
+func _show_hub_picture() -> void:
+	_drop_hub_picture()
+	var kind: String = str((BridgeWords.WORDS.get(word(), {}) as Dictionary).get("picture", ""))
+	if kind == "lamb":
+		return
+	var pic: Node3D = Props.make(kind)
+	if pic == null:
+		return
+	add_child(pic)
+	pic.global_position = rig.cam.global_transform * GameTune.HUB_PICTURE_OFFSET
+	var face: Vector3 = rig.cam.global_position - pic.global_position
+	pic.rotation.y = atan2(face.x, face.z)
+	var spot: Dictionary = GameTune.WORD_PICTURES.get(kind, {})
+	var size: float = float(spot.get("scale", 1.0)) * GameTune.HUB_PICTURE_SCALE
+	pic.scale = Vector3.ONE * 0.01
+	(
+		create_tween()
+		. tween_property(pic, "scale", Vector3.ONE * size, 0.45)
+		. set_trans(Tween.TRANS_BACK)
+		. set_ease(Tween.EASE_OUT)
+	)
+	picture = pic
+
+
+func _drop_hub_picture() -> void:
+	if picture == null:
+		return
+	var pic: Node3D = picture
+	picture = null
+	var tw: Tween = create_tween()
+	tw.tween_property(pic, "scale", Vector3.ONE * 0.01, 0.3)
+	tw.tween_callback(pic.queue_free)
 
 
 # ---------------------------------------------------------------- end
@@ -274,7 +336,8 @@ func _end() -> void:
 	mode = Mode.END
 
 
-## A tap after goodnight: a new day, the lamb is back on its islet.
+## A tap after goodnight: a new play from level 1 (a review: every letter is
+## known), the lamb is back on its islet.
 func new_session() -> void:
 	if mode != Mode.END:
 		return
@@ -284,7 +347,7 @@ func new_session() -> void:
 	_clear_pile()
 	var hp: Dictionary = hub_pose()
 	await rig.fly_to(hp["target"], hp["distance"], hp["pitch"], 0.0).finished
-	_session("hub_back")
+	_play("hub_back")
 
 
 # ---------------------------------------------------------------- lamb and stones

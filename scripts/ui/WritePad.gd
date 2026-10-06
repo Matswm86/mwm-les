@@ -4,7 +4,9 @@ extends Control
 ## Pip's model letter stroke by stroke, the child's finger ink, the start-dot
 ## and trace hints, and the compare overlay. Input comes from the activity.
 
-const DOT_STEP_PX: float = 38.0
+const STRIPE_PX: float = 34.0  # length of one stripe of the trace path
+const TRACE_TRACK_PX: float = 70.0
+const TRACE_STRIPE_W_PX: float = 24.0
 
 var model: Array[PackedVector2Array] = []  # unit box, y down
 var model_progress: float = 0.0  # strokes drawn (1.5 = first done, half of second)
@@ -127,20 +129,31 @@ func _draw_dotted_circle(c: Vector2, r: float) -> void:
 		draw_circle(c + Vector2(cos(a), sin(a)) * r, 6.0, GameTune.INK)
 
 
+## The letter as a striped path in the sand: a pale track, gold and dark
+## stripes along it, and an arrow at each stroke's start.
 func _draw_trace() -> void:
 	for s: PackedVector2Array in model:
 		var pts: PackedVector2Array = _scaled(s)
+		if pts.size() < 2:
+			continue
+		draw_polyline(pts, Color(1, 0.97, 0.85, 0.55), TRACE_TRACK_PX, true)
 		var acc: float = 0.0
+		var on: int = 0
 		for i in range(1, pts.size()):
 			var a: Vector2 = pts[i - 1]
 			var b: Vector2 = pts[i]
 			var seg: float = a.distance_to(b)
-			while acc <= seg:
-				draw_circle(a.lerp(b, acc / maxf(seg, 0.001)), 9.0, Color(GameTune.INK, 0.45))
-				acc += DOT_STEP_PX
-			acc -= seg
-		if pts.size() >= 2:
-			_draw_arrow(pts[0], pts[1])
+			var u: float = 0.0
+			while u < seg:
+				var step: float = minf(STRIPE_PX - acc, seg - u)
+				var c: Color = GameTune.GOLD if on % 2 == 0 else Color(GameTune.INK, 0.7)
+				draw_line(a.lerp(b, u / seg), a.lerp(b, (u + step) / seg), c, TRACE_STRIPE_W_PX)
+				u += step
+				acc += step
+				if acc >= STRIPE_PX - 0.001:
+					acc = 0.0
+					on += 1
+		_draw_arrow(pts[0], pts[1])
 
 
 func _draw_arrow(a: Vector2, b: Vector2) -> void:

@@ -5,9 +5,10 @@ extends Node
 ##   MWM_LES_FRESH=1 CAPTURE_DIR=/tmp/shots godot --audio-driver Dummy \
 ##     --display-driver x11 --resolution 1920x1080 res://tests/capture.tscn
 ## Prints every clip Voice starts, tagged with its scene.
-## CAPTURE_LETTERS=10 starts with that many letters in play (all but the last
-## already heard, so it gets its intro); CAPTURE_LAST_WORDS=sol,sel makes the
-## bridge pick other words (boat, food) than a fresh start does.
+## CAPTURE_LEVEL=n starts at word level n (0 = sol, the opening plays; later
+## levels skip it, the earlier words' letters count as learned);
+## CAPTURE_LEVELS=k plays k levels and stops (default: to the end of the play).
+## Shot names start with the level (L1_ = sol ... L6_ = lam).
 
 const SPEED: float = 2.0
 
@@ -15,6 +16,7 @@ var out_dir: String = OS.get_environment("CAPTURE_DIR")
 var main: MainScene
 var _t0: int = 0
 var _shots: int = 0
+var _prefix: String = ""
 
 
 func _ready() -> void:
@@ -34,29 +36,35 @@ func _ready() -> void:
 				)
 			)
 	)
-	var last: String = OS.get_environment("CAPTURE_LAST_WORDS")
-	if last != "":
-		for w: String in last.split(","):
-			Game.bridge_last_words.append(w)
+	var start: int = int(OS.get_environment("CAPTURE_LEVEL"))
+	var n_env: String = OS.get_environment("CAPTURE_LEVELS")
+	var n_levels: int = int(n_env) if n_env != "" else BridgeWords.LEVELS.size() - start
+	if start > 0:
+		Game.story_seen = true
+		Game.level = start
+		Game.learned = BridgeWords.learned_before(start)
 	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate() as MainScene
 	add_child(main)
-	var n_letters: String = OS.get_environment("CAPTURE_LETTERS")
-	if n_letters != "":
-		var rules: LetterRules = (main.stations[0] as HorOgFinn).rules
-		rules.count = clampi(int(n_letters), LetterRules.START_COUNT, LetterRules.ORDER.size())
-		for k in rules.count - 1:
-			rules.heard.append(LetterRules.ORDER[k])
 	(main.stations[2] as OrdBro).step.connect(_on_bridge_step)
-	await _opening()
+	(main.stations[1] as Sandskriving).step.connect(_on_write_step)
+	if start == 0:
+		await _opening()
 	if OS.get_environment("CAPTURE_STOP") == "opening":
 		get_tree().quit()
 		return
-	await _hub(0, "05_hub_find")
-	await _find()
-	await _hub(1, "")
-	await _write()
-	await _hub(2, "")
-	await _bridge()
+	for k in n_levels:
+		_prefix = "L%d_" % (start + k + 1)
+		await _hub(0, "05_hub_hook_picture")
+		await _find()
+		await _hub(1, "")
+		await _write()
+		await _hub(2, "")
+		await _bridge()
+	if start + n_levels < BridgeWords.LEVELS.size():
+		print("CAPTURE DONE: %d shots in %.1fs" % [_shots, (Time.get_ticks_msec() - _t0) / 1000.0])
+		get_tree().quit()
+		return
+	_prefix = ""
 	await _until(func() -> bool: return main.mode == MainScene.Mode.END, 60.0, "end")
 	await _wait(0.5)
 	await _shot("15_end_goodnight")
@@ -66,6 +74,7 @@ func _ready() -> void:
 
 
 func _opening() -> void:
+	_prefix = "L0_"
 	await _until(func() -> bool: return _stage() == "op_1", 20.0, "op_1")
 	await _wait(1.2)
 	await _shot("01_opening_op1_pip")
@@ -150,6 +159,7 @@ func _write() -> void:
 	var w: Sandskriving = main.stations[1] as Sandskriving
 	var first: bool = true
 	var modelled: Array[String] = []
+	var traced: Array[String] = []
 	while w.active:
 		var ok: bool = await _until(
 			func() -> bool:
@@ -159,6 +169,7 @@ func _write() -> void:
 						and w.pad.model_progress >= float(w.model.size()) - 0.02
 					)
 					or (w.phase == Sandskriving.Phase.WRITE and not Voice.is_busy())
+					or (w.phase == Sandskriving.Phase.TRACE and not traced.has(w.letter))
 					or not w.active
 				),
 			60.0,
@@ -167,13 +178,26 @@ func _write() -> void:
 		if not ok or not w.active:
 			break
 		if w.phase == Sandskriving.Phase.WATCH:
-			if not modelled.has(w.letter) and not w.from_memory:
-				modelled.append(w.letter)
-				await _shot("09_write_pip_draws_model_%s" % w.letter)
-			await _until(func() -> bool: return w.phase == Sandskriving.Phase.WRITE, 20.0, "")
+			var key: String = "%s_%d" % [w.letter, w.shows]
+			if not modelled.has(key):
+				modelled.append(key)
+				await _shot("09_write_model_%s_show%d" % [LetterRules.glyph(w.letter), w.shows])
+			await _until(
+				func() -> bool:
+					return w.pad.model_progress < 0.5 or w.phase != Sandskriving.Phase.WATCH,
+				30.0,
+				""
+			)
 			continue
-		if w.from_memory:
-			await _shot("09c_write_again_from_memory_%s" % w.letter)
+		if w.phase == Sandskriving.Phase.TRACE:
+			traced.append(w.letter)
+			await _until(func() -> bool: return not Voice.is_busy(), 20.0, "trace line")
+			await _shot("09t_write_trace_stripes_%s" % LetterRules.glyph(w.letter))
+			for st: PackedVector2Array in w.model_screen_strokes():
+				await _drag(st)
+			await _shot("09u_write_trace_followed_%s" % LetterRules.glyph(w.letter))
+			await _until(func() -> bool: return w.traced, 20.0, "traced")
+			continue
 		var count: int = w.written.size()
 		for st: PackedVector2Array in w.model_screen_strokes():
 			var wob: PackedVector2Array = PackedVector2Array()
@@ -193,6 +217,13 @@ func _write() -> void:
 			await _shot("11b_write_stone_rolls_to_bridge")
 		await _until(func() -> bool: return w.written.size() > count, 30.0, "stone")
 		first = false
+
+
+func _on_write_step(name: String) -> void:
+	var w: Sandskriving = main.stations[1] as Sandskriving
+	if name == "alone":
+		await _wait(0.6)
+		await _shot("09w_write_alone_%s" % LetterRules.glyph(w.letter))
 
 
 ## Shots at the bridge's named moments (runs beside _bridge, which lays the stones).
@@ -219,11 +250,16 @@ func _bridge() -> void:
 	while true:
 		var ok: bool = await _until(
 			func() -> bool:
-				return (not br.busy and br.cur >= 0 and not Voice.is_busy()) or br.lit == -2,
+				return (
+					(not br.busy and br.cur >= 0 and not Voice.is_busy())
+					or br.lit == -2
+					or br.cur == -1 and br.missing.size() == n and n > 0
+					or not br.active
+				),
 			90.0,
 			"ask"
 		)
-		if not ok or br.lit == -2:
+		if not ok or br.lit == -2 or not br.active or (br.cur == -1 and n > 0):
 			break
 		var want: String = br.graphemes[br.cur]
 		await _shot("12c_bridge_ask_%d_%s" % [n, LetterRules.glyph(want)])
@@ -235,6 +271,9 @@ func _bridge() -> void:
 		)
 		await _until(func() -> bool: return br.busy, 5.0, "drop")
 		n += 1
+	if str(br.words[0]["id"]) != BridgeWords.LAST:
+		await _until(func() -> bool: return not br.active, 60.0, "level done")
+		return
 	await _until(func() -> bool: return br.lit == -2, 40.0, "bridge done")
 	await _wait(0.6)
 	await _shot("12g_bridge_done_all_lit")
@@ -333,6 +372,6 @@ func _shot(name: String) -> void:
 	await RenderingServer.frame_post_draw
 	var img: Image = get_viewport().get_texture().get_image()
 	img.resize(1280, 720, Image.INTERPOLATE_LANCZOS)
-	img.save_png(out_dir.path_join(name + ".png"))
+	img.save_png(out_dir.path_join(_prefix + name + ".png"))
 	_shots += 1
 	print("shot %s at %.1fs" % [name, (Time.get_ticks_msec() - _t0) / 1000.0])

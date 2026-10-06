@@ -94,6 +94,7 @@ const WRITE_COMPARE_SEC: float = 0.8  # accepted: model shown over the child's l
 const WRITE_SMOOTH_SEC: float = 0.4  # not accepted: sand smooths
 const TRACE_TOLERANCE: float = 0.22  # corridor half-width, only for the hint-3 trace overlay
 const TRACE_COVERAGE_DONE: float = 0.90
+const TRACE_MAX_TRIES: int = 3  # the striped trace counts after this many tries anyway
 # Activity extras (GDD 6.0)
 const GHOST_DEMO_FIRST_USE: bool = true
 # Drag and drop

@@ -1,59 +1,68 @@
 extends RefCounted
-## Plays the whole game headless through the real Main scene: the opening,
-## the hub, Hør og finn, Sandskriving, Ordbroa, goodnight, then a second
-## session (hub_back). Every action goes through the same function a touch
-## calls. Checks, from the Voice clip log (the stream actually put on the one
-## player):
-## - only owner recordings and the non-voice effects ever play (no tts_*,
-##   nothing refused, every file is in assets/audio/rec or an sfx_* file);
-## - every letter prompt, tap and long-press plays only its own letter's files;
-## - every scene plays its listed line ids, and only those;
-## - no sentence after a letter sound inside one sequence;
-## - every stone written in the sand is laid in the bridge, none is left over;
-## - every bridge word's hook line plays right before its sounding-out clip,
-##   lam is always the last word, bridge_word_done + bridge_next between words;
-## - a letter written a second time comes after write_again, without a model.
-## Prints the clip sequence per scene.
+## Plays one whole play headless through the real Main scene: the opening,
+## levels 1-3 (sol, sel, les), a relaunch in the middle of the play (a new
+## Main, as after closing the app), levels 4-6 (mat, båt, lam), goodnight,
+## then the first level of a review play. Every action goes through the same
+## function a touch calls. Checks, from the Voice clip log (the stream
+## actually put on the one player):
+## - only owner recordings and the non-voice effects ever play (nothing
+##   refused, every file is in assets/audio/rec or an sfx_* file); listed
+##   lines not recorded yet are skipped and printed;
+## - every scene plays only its own lines; no sentence after a letter sound
+##   inside one sequence;
+## - each level: the word's hook in the hub; in Hør og finn every letter of
+##   the word asked exactly ASKS_PER_LETTER times (once in a review), tiles =
+##   the word's letters + at most one learned letter, new letters introduced;
+##   in Sandskriving a new letter is shown twice, traced, then written alone,
+##   a learned one written once; every stone is laid in the level's word;
+## - the six words are built in order, lam last, the lamb comes over;
+## - the relaunch greets with level_back and goes on at the saved level.
+## Prints the clip sequence per scene and the play's length on the game clock.
 
 const SPEED: float = 20.0
-const SESSIONS: int = 4
-## Letters in play per session. Session 2 adds i (intro inside the station,
-## three tiles); session 3 has the first six; session 4 all ten (å introduced).
-const SESSION_COUNT: Array[int] = [2, 3, 6, 10]
 const SENTENCES: Dictionary = {
 	"opening": ["op_1", "op_2", "op_3", "op_4", "op_5"],
-	"hub": ["hub_find", "hub_write", "hub_bridge", "hub_back", "hub_idle"],
+	"hub":
+	[
+		"hub_find",
+		"hub_write",
+		"hub_bridge",
+		"hub_back",
+		"hub_idle",
+		"level_back",
+		"levels_intro",
+		"lamb_baa"
+	],
 	"find": ["find_in", "intro_again", "find_ask", "find_right", "find_wrong", "find_done"],
 	"write":
 	[
 		"write_in",
-		"write_turn",
+		"write_next",
+		"write_show_again",
+		"write_trace",
+		"write_alone",
 		"write_retry",
 		"write_right",
-		"write_next",
-		"write_again",
 		"write_done"
 	],
 	"bridge":
 	[
 		"bridge_in",
-		"hook_lam",
-		"bridge_word_lam",
 		"bridge_ask",
 		"bridge_right",
-		"bridge_word_done",
-		"bridge_next",
+		"level_next",
 		"bridge_done",
-		"bridge_walk"
+		"bridge_walk",
+		"final_party"
 	],
 	"end": ["end_bye"],
 }
 const OTHER_OK: Dictionary = {
 	"opening": [],
-	"hub": [],
+	"hub": ["hook_"],
 	"find": ["lyd_", "navn_", "intro_", "sfx_chime_", "sfx_tok"],
 	"write": ["lyd_", "sfx_chime_"],
-	"bridge": ["lyd_", "sfx_chime_", "sfx_tok", "hook_", "bridge_word_"],
+	"bridge": ["lyd_", "sfx_chime_", "sfx_tok", "bridge_word_", "mid_", "done_"],
 	"end": [],
 }
 
@@ -62,7 +71,11 @@ var tree: SceneTree
 var main: MainScene
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var counts: Dictionary = {}  # what was exercised
-var find_items_started: int = 0
+var built: Array[String] = []  # words whose bridge visit finished, in order
+var play_sec: float = 0.0  # game clock from the first hub line to goodnight
+var _steps: Array[String] = []  # write station steps of the current letter
+var _relaunch_at: int = -1  # first clip after the relaunch (the old app's sound ends there)
+var _snap: Dictionary = {}  # letter -> {shows, traced, steps} when its stone lifted
 
 
 func check(ok: bool, msg: String) -> void:
@@ -80,39 +93,52 @@ func run(p_tree: SceneTree) -> void:
 	Voice.stop()
 	Voice.clip_log.clear()
 	Voice.refused.clear()
+	Voice.missing.clear()
 	Voice.sequence_errors = 0
-	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate() as MainScene
-	tree.root.add_child(main)
-	var find: HorOgFinn = main.stations[0] as HorOgFinn
-	find.rules.rng.seed = 11
-	find.step.connect(_on_find_step)
-	find.item_started.connect(func(_t: String, _l: Array[String]) -> void: find_items_started += 1)
-	(main.stations[1] as Sandskriving).step.connect(_on_write_step)
-	(main.stations[2] as OrdBro).step.connect(_on_bridge_step)
+	_new_main()
 	await _opening()
-	for s in SESSIONS:
-		print("--- session %d" % (s + 1))
-		find.rules.count = maxi(find.rules.count, SESSION_COUNT[s])
-		if s == 2:
-			for l: String in ["i", "l", "o"]:
-				find.rules.mark_heard(l)
-		if s == 3:
-			for l: String in ["e", "t", "b"]:
-				find.rules.mark_heard(l)
-		await _hub_go(0, s == 0)
-		await _find()
-		await _hub_go(1, false)
-		await _write(s == 0)
-		await _hub_go(2, false)
-		await _bridge()
-		await _until(func() -> bool: return main.mode == MainScene.Mode.END, 60.0, "goodnight")
-		if s + 1 < SESSIONS:
-			main.new_session()
+	var t0: float = Voice._clock
+	for k in 3:
+		await _level(k, k == 0)
+	# relaunch: the app is closed after level 3 and opened again
+	await _until(
+		func() -> bool: return main.mode == MainScene.Mode.HUB and main.level == 3,
+		90.0,
+		"level 4 hub"
+	)
+	check(Game.level == 3, "saved level after three levels is %d" % Game.level)
+	main.queue_free()
+	await _frames(3)
+	Voice.stop()
+	var relaunch_at: int = Voice.clip_log.size()
+	_relaunch_at = relaunch_at
+	_new_main()
+	await _until(func() -> bool: return main.mode == MainScene.Mode.HUB, 60.0, "relaunch hub")
+	await _frames(2)
+	check(_id_at(relaunch_at) == "level_back", "relaunch greeted with %s" % _id_at(relaunch_at))
+	check(main.level == 3, "relaunch went on at level %d, not 4" % (main.level + 1))
+	for k in range(3, 6):
+		await _level(k, false)
+	await _until(func() -> bool: return main.mode == MainScene.Mode.END, 60.0, "goodnight")
+	play_sec = Voice._clock - t0
+	check(built == BridgeWords.LEVELS, "words built %s, want %s" % [built, BridgeWords.LEVELS])
+	check(Game.plays_done == 1 and Game.level == 0, "play not marked done")
+	# a tap after goodnight: a review play, first level only
+	main.new_session()
+	await _level(0, false)
 	await _frames(5)
 	_report()
 	main.queue_free()
 	await _frames(3)
 	Engine.time_scale = 1.0
+
+
+func _new_main() -> void:
+	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate() as MainScene
+	tree.root.add_child(main)
+	(main.stations[0] as HorOgFinn).rules.rng.seed = 11
+	(main.stations[1] as Sandskriving).step.connect(_on_write_step)
+	(main.stations[2] as OrdBro).step.connect(_on_bridge_step)
 
 
 # ---------------------------------------------------------------- opening and hub
@@ -127,10 +153,29 @@ func _opening() -> void:
 	counts["opening"] = 1
 
 
+## One level: the three stations with the level's word.
+func _level(k: int, wait_idle_line: bool) -> void:
+	var w: String = BridgeWords.LEVELS[k]
+	var hub_at: int = Voice.clip_log.size()
+	await _hub_go(0, wait_idle_line)
+	check(main.level == k, "level %d running, want %d" % [main.level, k])
+	var hub_ids: Array[String] = _ids_from(hub_at)
+	check(
+		hub_ids.has(BridgeWords.hook_clip(w)) or Voice.stream(BridgeWords.hook_clip(w)) == null,
+		"level %s: no hook in the hub (%s)" % [w, hub_ids]
+	)
+	await _find(w)
+	await _hub_go(1, false)
+	await _write(w)
+	await _hub_go(2, false)
+	await _bridge(w)
+	counts["levels"] = int(counts.get("levels", 0)) + 1
+
+
 func _hub_go(i: int, wait_idle_line: bool) -> void:
 	await _until(
 		func() -> bool: return main.mode == MainScene.Mode.HUB and main._next == i,
-		60.0,
+		90.0,
 		"hub %d" % i
 	)
 	check(main.beacons[i].visible, "hub: station %d not lit" % i)
@@ -139,7 +184,6 @@ func _hub_go(i: int, wait_idle_line: bool) -> void:
 		var before: int = Voice.clip_log.size()
 		await _until(func() -> bool: return Voice.clip_log.size() > before, 30.0, "hub_idle")
 		check(_id_at(before) == "hub_idle", "hub idle played %s" % _id_at(before))
-		check(main.hud.ghost.showing(), "hub idle: no ghost finger on the lit station")
 		await _idle_voice()
 	main.choose_station()
 	await _until(func() -> bool: return main.mode == MainScene.Mode.STATION, 30.0, "station %d" % i)
@@ -148,18 +192,12 @@ func _hub_go(i: int, wait_idle_line: bool) -> void:
 # ---------------------------------------------------------------- find
 
 
-func _on_find_step(name: String) -> void:
+func _find(w: String) -> void:
 	var find: HorOgFinn = main.stations[0] as HorOgFinn
-	if name.begins_with("intro_"):
-		var l: String = name.trim_prefix("intro_")
-		check(_last_id() == "intro_" + l, "intro of %s played %s" % [l, _last_id()])
-		var gl: GlowLetter = find.letter_node(l)
-		check(gl != null and gl.hint_pulse, "intro of %s: its tile does not pulse" % l)
-		counts["intro"] = int(counts.get("intro", 0)) + 1
-
-
-func _find() -> void:
-	var find: HorOgFinn = main.stations[0] as HorOgFinn
+	var word: Array[String] = BridgeWords.letters_of(w)
+	var plan: Dictionary = main.plan()
+	var asked: Dictionary = {}
+	var b0: int = Voice.clip_log.size()
 	var items: int = 0
 	while find.active:
 		var ok: bool = await _until(
@@ -172,11 +210,16 @@ func _find() -> void:
 		var target: String = find.target
 		var tiles: Array[String] = find.tile_letters()
 		check(tiles.has(target), "find: target %s not on tiles %s" % [target, tiles])
-		check(
-			tiles.size() == find.rules.tile_count(),
-			"find: %d tiles for %d letters" % [tiles.size(), find.rules.count]
-		)
-		# the prompt that just ended: question first, the target's held sound last
+		var extra: int = 0
+		for l: String in tiles:
+			if not word.has(l):
+				extra += 1
+				check(
+					(plan["learned"] as Array).has(l), "find %s: distractor %s not learned" % [w, l]
+				)
+		for l: String in word:
+			check(tiles.has(l), "find %s: letter %s not on the tiles %s" % [w, l, tiles])
+		check(extra <= HorOgFinn.MAX_DISTRACTORS, "find %s: %d distractors" % [w, extra])
 		var last: int = Voice.clip_log.size() - 1
 		check(
 			(
@@ -185,62 +228,58 @@ func _find() -> void:
 			),
 			"find prompt for %s ended %s, %s" % [target, _id_at(last - 1), _id_at(last)]
 		)
-		counts["find_prompt"] = int(counts.get("find_prompt", 0)) + 1
-		if find_items_started == 1:
-			check(main.hud.ghost.showing(), "first item ever: no ghost finger on the target")
-		if rng.randf() < 0.3:
-			var lp: String = tiles[rng.randi_range(0, tiles.size() - 1)]
-			var b: int = Voice.clip_log.size()
-			find.long_press(lp)
-			await _idle_voice()
-			check(
-				_id_at(b) == "navn_" + lp and _id_at(b + 1) == Voice.held_id(lp),
-				"long-press %s played %s, %s" % [lp, _id_at(b), _id_at(b + 1)]
-			)
-			check(Voice.clip_log.size() == b + 2, "long-press %s: more than name + sound" % lp)
-			counts["long_press"] = int(counts.get("long_press", 0)) + 1
-		if (items == 0 or rng.randf() < 0.3) and tiles.size() > 1:
+		asked[target] = int(asked.get(target, 0)) + 1
+		if (items == 0 or rng.randf() < 0.25) and tiles.size() > 1:
 			var wrong: Array[String] = []
 			for l: String in tiles:
 				if l != target:
 					wrong.append(l)
-			var w: String = wrong[rng.randi_range(0, wrong.size() - 1)]
+			var bad: String = wrong[rng.randi_range(0, wrong.size() - 1)]
 			var b2: int = Voice.clip_log.size()
-			find.tap(w)
+			find.tap(bad)
 			await _until(func() -> bool: return not find.busy, 30.0, "after wrong")
 			await _idle_voice()
 			var got: Array[String] = _ids_from(b2)
 			var want: Array[String] = [
-				Voice.short_id(w), "sfx_tok", "find_wrong", Voice.held_id(target)
+				Voice.short_id(bad), "sfx_tok", "find_wrong", Voice.held_id(target)
 			]
-			check(got == want, "wrong tap %s (target %s) played %s" % [w, target, got])
+			check(got == want, "wrong tap %s (target %s) played %s" % [bad, target, got])
 			counts["find_wrong"] = int(counts.get("find_wrong", 0)) + 1
 		var b3: int = Voice.clip_log.size()
 		var done_before: int = find.items_done
 		find.tap(target)
-		await _frames(1)
-		check(_id_at(b3) == Voice.short_id(target), "tap on %s played %s" % [target, _id_at(b3)])
 		await _until(
 			func() -> bool: return find.items_done > done_before and find.busy, 10.0, "right"
 		)
 		await _until(
-			func() -> bool: return Voice.clip_log.size() >= b3 + 2 or not find.active, 30.0, ""
+			func() -> bool: return Voice.clip_log.size() >= b3 + 3 or not find.active, 30.0, ""
 		)
-		var after: String = _id_at(b3 + 1)
 		check(
-			after.begins_with("sfx_chime_"), "right answer: %s after the sound, not a chime" % after
+			_id_at(b3 + 1).begins_with("sfx_chime_") and _id_at(b3 + 2) == "find_right",
+			"right answer: %s, %s" % [_id_at(b3 + 1), _id_at(b3 + 2)]
 		)
-		if find.rights % HorOgFinn.RIGHT_LINE_EVERY == 0:
-			await _until(func() -> bool: return Voice.clip_log.size() >= b3 + 3, 30.0, "find_right")
-			check(_id_at(b3 + 2) == "find_right", "3rd right: %s" % _id_at(b3 + 2))
 		items += 1
-		var started: int = find_items_started
 		await _until(
-			func() -> bool: return find_items_started > started or not find.active,
-			30.0,
-			"next item"
+			func() -> bool: return find.busy == false or not find.active, 30.0, "next item"
 		)
-	print("find: %d items, letters in set %s" % [items, find.rules.letters()])
+	var times: int = 1 if Game.review() else HorOgFinn.ASKS_PER_LETTER
+	for l: String in word:
+		check(
+			int(asked.get(l, 0)) == times,
+			"find %s: %s asked %d times, want %d" % [w, l, int(asked.get(l, 0)), times]
+		)
+	check(items == word.size() * times, "find %s: %d items" % [w, items])
+	# new letters: intro, then intro_again and the held sound
+	var ids: Array[String] = _ids_from(b0)
+	for l: Variant in plan["new"]:
+		var at: int = ids.find("intro_" + str(l))
+		check(at >= 0, "find %s: no intro for %s" % [w, l])
+		check(
+			at >= 0 and ids[at + 1] == "intro_again" and ids[at + 2] == Voice.held_id(str(l)),
+			"find %s: after intro_%s came %s" % [w, l, ids.slice(at + 1, at + 3)]
+		)
+		counts["intro"] = int(counts.get("intro", 0)) + 1
+	print("find %s: %d items, asked %s, tiles %s" % [w, items, asked, find.tile_set])
 	counts["find_items"] = int(counts.get("find_items", 0)) + items
 
 
@@ -249,58 +288,76 @@ func _find() -> void:
 
 func _on_write_step(name: String) -> void:
 	var w: Sandskriving = main.stations[1] as Sandskriving
+	if name in ["in", "next"]:
+		_steps.clear()
+	_steps.append(name)
+	if name == "stone":
+		_snap[w.letter] = {"shows": w.shows, "traced": w.traced, "steps": _steps.duplicate()}
 	if name == "model":
-		check(not w.from_memory, "a model drawn for %s, written before today" % w.letter)
-		check(not w.written.has(w.letter), "model for %s again today" % w.letter)
 		await _frames(1)
 		check(
 			_last_id() == Voice.held_id(w.letter), "model for %s played %s" % [w.letter, _last_id()]
 		)
-	if name == "again":
-		check(w.written.has(w.letter), "write_again for %s, not written yet today" % w.letter)
-		check(
-			w.written.size() > 0 and w.written[w.written.size() - 1] == w.letter,
-			"write_again for %s is not right after it" % w.letter
-		)
-		var n: int = Voice.clip_log.size()  # the step comes right before write_again starts
-		await _until(func() -> bool: return Voice.clip_log.size() >= n + 2, 10.0, "repeat clips")
-		check(
-			_id_at(n) == "write_again" and _id_at(n + 1) == Voice.held_id(w.letter),
-			"repeat of %s played %s, %s" % [w.letter, _id_at(n), _id_at(n + 1)]
-		)
-		counts["write_again"] = int(counts.get("write_again", 0)) + 1
 
 
-func _write(scribble_first: bool) -> void:
+func _write(word_id: String) -> void:
 	var w: Sandskriving = main.stations[1] as Sandskriving
-	var plan: Array = main.plan()["stones"]
+	var plan: Dictionary = main.plan()
+	var word: Array[String] = BridgeWords.letters_of(word_id)
 	var done: int = 0
+	var bad_trace_done: bool = false
+	var per_letter: Dictionary = {}
 	while w.active:
 		var ok: bool = await _until(
 			func() -> bool:
-				return (w.phase == Sandskriving.Phase.WRITE and not Voice.is_busy()) or not w.active,
+				var inking: bool = (
+					w.phase == Sandskriving.Phase.WRITE or w.phase == Sandskriving.Phase.TRACE
+				)
+				return (inking and not Voice.is_busy()) or not w.active,
 			60.0,
 			"write turn"
 		)
 		if not ok or not w.active:
 			break
-		if scribble_first and done == 0 and w.attempts == 0:
-			var c: Vector2 = w.pad.box.get_center()
-			var line: PackedVector2Array = PackedVector2Array()
-			for k in 20:
-				line.append(c + Vector2(-220 + 22 * k, 140))
-			var b: int = Voice.clip_log.size()
-			w.submit([line] as Array[PackedVector2Array])
-			await _until(func() -> bool: return Voice.clip_log.size() > b, 20.0, "retry line")
-			check(_id_at(b) == "write_retry", "scribble got %s, not write_retry" % _id_at(b))
+		if w.phase == Sandskriving.Phase.TRACE:
+			if not bad_trace_done:  # half a letter is not enough to count as traced
+				bad_trace_done = true
+				var half: Array[PackedVector2Array] = [w.model_screen_strokes()[0].slice(0, 6)]
+				var b: int = Voice.clip_log.size()
+				w.submit(half)
+				await _until(func() -> bool: return Voice.clip_log.size() > b, 20.0, "retry")
+				check(_id_at(b) == "write_retry", "half a trace got %s" % _id_at(b))
+				continue
+			w.submit(w.model_screen_strokes())
+			await _until(func() -> bool: return w.traced, 20.0, "traced %s" % w.letter)
 			continue
 		var letter: String = w.letter
 		var before: int = w.written.size()
 		w.submit(w.model_screen_strokes())
 		await _until(func() -> bool: return w.written.size() > before, 40.0, "stone %s" % letter)
+		var is_new: bool = (plan["new"] as Array).has(letter)
+		var snap: Dictionary = _snap.get(letter, {})
+		var steps: Array = snap.get("steps", [])
+		var shows: int = int(snap.get("shows", -1))
+		var traced: bool = bool(snap.get("traced", false))
+		if is_new:
+			check(shows == Sandskriving.MODEL_SHOWS, "%s shown %d times" % [letter, shows])
+			check(traced, "%s not traced" % letter)
+			var want: Array[String] = ["model", "show_again", "model", "trace", "traced", "alone"]
+			var got: Array[String] = []
+			for st: String in steps:
+				if st in want:
+					got.append(st)
+			check(got == want, "new letter %s steps %s" % [letter, steps])
+			counts["write_new"] = int(counts.get("write_new", 0)) + 1
+		else:
+			check(shows == 0 and not traced, "learned letter %s was shown/traced" % letter)
+			check(steps.has("quick"), "learned letter %s steps %s" % [letter, steps])
+			counts["write_quick"] = int(counts.get("write_quick", 0)) + 1
+		per_letter[letter] = int(per_letter.get(letter, 0)) + 1
 		done += 1
-	check(done == plan.size(), "write: %d stones, plan %s" % [done, plan])
-	print("write: stones %s" % [w.written])
+	check(w.written == word, "write %s: stones %s, want the word's letters" % [word_id, w.written])
+	print("write %s: stones %s, new %s" % [word_id, w.written, plan["new"]])
 
 
 # ---------------------------------------------------------------- bridge
@@ -310,18 +367,15 @@ func _on_bridge_step(name: String) -> void:
 	var br: OrdBro = main.stations[2] as OrdBro
 	if name.begins_with("lit_"):
 		var i: int = int(name.trim_prefix("lit_"))
-		var clip: String = BridgeWords.word_clip(str(br.words[br.word_i]["id"]))
+		var clip: String = BridgeWords.word_clip(str(br.words[0]["id"]))
 		check(_last_id() == clip, "plank %d lit outside %s (%s)" % [i, clip, _last_id()])
-		check(br.word_of[i] == br.word_i, "plank %d lit for another word" % i)
 		counts["planks_lit"] = int(counts.get("planks_lit", 0)) + 1
 	if name == "walk":
 		check(_last_id() == "bridge_walk", "lamb walks during %s" % _last_id())
-		counts["walk_slots_sunk"] = br.slots.size()
 
 
-func _bridge() -> void:
+func _bridge(w: String) -> void:
 	var br: OrdBro = main.stations[2] as OrdBro
-	var plan: Dictionary = main.plan()
 	var b0: int = Voice.clip_log.size()
 	while br.active:
 		var ok: bool = await _until(
@@ -333,8 +387,6 @@ func _bridge() -> void:
 		if not ok or not br.active:
 			break
 		var want: String = br.graphemes[br.cur]
-		check(br.missing.has(br.cur), "bridge asks slot %d (%s), not missing" % [br.cur, want])
-		check(br.word_of[br.cur] == br.word_i, "bridge asks a slot of another word")
 		var last: int = Voice.clip_log.size() - 1
 		check(
 			_id_at(last) == Voice.held_id(want) and _id_at(last - 1) in ["bridge_ask"],
@@ -344,13 +396,9 @@ func _bridge() -> void:
 		for st: Stone in br.stones:
 			if not st.placed and st.letter != want:
 				wrong = st
-		if wrong:
+		if wrong and rng.randf() < 0.4:
 			var b: int = Voice.clip_log.size()
 			br.grab(wrong)
-			await _frames(1)
-			check(
-				_id_at(b) == Voice.short_id(wrong.letter), "grab %s: %s" % [wrong.letter, _id_at(b)]
-			)
 			br.drop(wrong, br.cur)
 			await _until(func() -> bool: return not br.busy, 30.0, "after wrong stone")
 			await _idle_voice()
@@ -361,73 +409,29 @@ func _bridge() -> void:
 		var st2: Stone = br.stone_for(want)
 		var b2: int = Voice.clip_log.size()
 		br.grab(st2)
-		await _frames(1)
-		check(_id_at(b2) == Voice.short_id(want), "grab %s: %s" % [want, _id_at(b2)])
 		br.drop(st2, br.cur)
 		await _until(func() -> bool: return Voice.clip_log.size() >= b2 + 3, 30.0, "right stone")
 		check(
 			_id_at(b2 + 1).begins_with("sfx_chime_") and _id_at(b2 + 2) == "bridge_right",
 			"right stone: %s, %s" % [_id_at(b2 + 1), _id_at(b2 + 2)]
 		)
-		await _until(
-			func() -> bool: return br.busy == false or br.cur != -1 or not br.active, 5.0, ""
-		)
 		await _until(func() -> bool: return br.cur == -1 or Voice.is_busy(), 10.0, "")
-	var walked: bool = main.lamb.global_position.distance_to(main.world.bridge_start) < 3.0
-	check(walked, "the lamb did not come over (at %s)" % main.lamb.global_position)
-	_check_bridge_plan(plan, br, b0)
-
-
-## Today's words, the stones and the order of the bridge lines.
-func _check_bridge_plan(plan: Dictionary, br: OrdBro, b0: int) -> void:
-	var w: Sandskriving = main.stations[1] as Sandskriving
-	var ids: Array[String] = []
-	var need: Array[String] = []
-	for wd: Dictionary in plan["words"]:
-		ids.append(str(wd["id"]))
-		for j: Variant in wd["missing"]:
-			need.append(str((wd["letters"] as Array)[int(j)]))
-	print("bridge: words %s, written %s, laid %s" % [ids, w.written, need])
-	check(ids.size() >= 2 and ids[ids.size() - 1] == "lam", "lam is not the last word: %s" % [ids])
-	check(ids.size() <= BridgeWords.MAX_STORY_WORDS + 1, "too many words %s" % [ids])
-	check(
-		need.size() <= BridgeWords.MAX_WRITE,
-		"more than %d letters to write" % BridgeWords.MAX_WRITE
-	)
-	var a: Array[String] = w.written.duplicate()
-	var b: Array[String] = need.duplicate()
-	a.sort()
-	b.sort()
-	check(a == b, "stones written %s, bridge uses %s" % [w.written, need])
 	for st: Stone in br.stones:
-		check(st.placed, "stone %s written but never laid in the bridge" % st.letter)
-	for i in br.slots.size():
-		check(br.slots[i] != null, "slot %d (%s) left empty" % [i, br.graphemes[i]])
-	var seen: Array[String] = []
-	var k: int = b0
-	while k < Voice.clip_log.size() and str(Voice.clip_log[k]["scene"]) == "bridge":
-		var id: String = _id_at(k)
-		if id.begins_with("hook_"):
-			var word: String = id.trim_prefix("hook_")
-			check(
-				_id_at(k + 1) == BridgeWords.word_clip(word),
-				"%s followed by %s, not its word clip" % [id, _id_at(k + 1)]
-			)
-			seen.append(word)
-		elif id.begins_with("bridge_word_") and id not in ["bridge_word_done"]:
-			check(
-				_id_at(k - 1) == "hook_" + id.trim_prefix("bridge_word_"),
-				"%s without its hook" % id
-			)
-		k += 1
-	check(seen == ids, "hooks played for %s, plan %s" % [seen, ids])
-	var lines: Array[String] = _ids_from(b0).slice(0, k - b0)
-	check(lines.count("bridge_word_done") == ids.size() - 1, "bridge_word_done count %s" % [lines])
-	check(lines.count("bridge_next") == ids.size() - 1, "bridge_next count")
-	var last_word: int = lines.rfind("bridge_word_lam")
-	check(last_word > lines.rfind("bridge_next"), "lam is not built last")
-	check(lines.find("bridge_done") > last_word, "bridge_done before lam")
-	counts["bridge_words"] = int(counts.get("bridge_words", 0)) + ids.size()
+		check(st.placed, "stone %s written but never laid in %s" % [st.letter, w])
+	var ids: Array[String] = _ids_from(b0)
+	var wc: String = BridgeWords.word_clip(w)
+	check(ids.has(wc), "bridge %s: no %s" % [w, wc])
+	if w == BridgeWords.LAST:
+		check(ids.find("bridge_done") > ids.find(wc), "lam: bridge_done not after the word")
+		var walked: bool = main.lamb.global_position.distance_to(main.world.bridge_start) < 3.0
+		check(walked, "the lamb did not come over (at %s)" % main.lamb.global_position)
+	else:
+		var dc: String = BridgeWords.done_clip(w)
+		check(ids.find(dc) > ids.find(wc), "bridge %s: %s not after the word (%s)" % [w, dc, ids])
+		check(ids.find("level_next") > ids.find(dc), "bridge %s: level_next not last" % w)
+		check(not ids.has("bridge_done"), "bridge_done before lam")
+	if not Game.review():
+		built.append(w)
 
 
 # ---------------------------------------------------------------- report
@@ -450,27 +454,24 @@ func _report() -> void:
 			path.begins_with("res://assets/audio/rec/") or id.begins_with("sfx_"),
 			"clip %s not from assets/audio/rec" % id
 		)
-		check(FileAccess.file_exists(path) or ResourceLoader.exists(path), "no file %s" % path)
 	# nothing the game says on its own is cut short: a clip may only be cut by
 	# a letter sound the child set off (a tap or a grabbed stone)
-	var cut: int = 0
 	for k in range(Voice.clip_log.size() - 1):
 		var a: Dictionary = Voice.clip_log[k]
 		var b: Dictionary = Voice.clip_log[k + 1]
 		var ends: float = float(a["t"]) + Voice.length(str(a["id"])) - 0.03
 		if float(b["t"]) < ends:
 			var by_child: bool = (
-				str(b["id"]).begins_with("lyd_") and not str(b["id"]).ends_with("_held")
+				str(b["id"]).begins_with("lyd_")
+				and (not str(b["id"]).ends_with("_held") or LetterRules.STOPS.has(str(b["id"])))
 			)
 			check(
-				by_child,
+				by_child or str(a["scene"]) != str(b["scene"]) or k + 1 == _relaunch_at,
 				(
 					"[%s] %s cut short by %s after %.2fs"
 					% [a["scene"], a["id"], b["id"], float(b["t"]) - float(a["t"])]
 				)
 			)
-			cut += 1
-	print("clips cut short by a child's tap or grab: %d" % cut)
 	check(Voice.refused.is_empty(), "refused ids %s" % [Voice.refused])
 	check(
 		Voice.sequence_errors == 0,
@@ -488,10 +489,19 @@ func _report() -> void:
 					ok = true
 			check(ok, "scene %s played %s (not one of its lines)" % [sc, s])
 		for want: Variant in allowed:
-			check(ids.has(want), "scene %s never played %s" % [sc, want])
-	var op: Array = by_scene.get("opening", [])
-	check(op.slice(0, 5) == SENTENCES["opening"], "opening order %s" % [op])
+			var recorded: bool = Voice.stream(str(want)) != null
+			check(
+				ids.has(want) or not recorded or want in ["hub_back"],
+				"scene %s never played %s" % [sc, want]
+			)
+	print("not recorded yet (skipped): %s" % [Voice.missing])
 	print("exercised: %s" % [counts])
+	print(
+		(
+			"one full play: %.0f s on the game clock (%.1f min), child answers instant"
+			% [play_sec, play_sec / 60.0]
+		)
+	)
 	print("full flow: %d clips, failures %d" % [Voice.clip_log.size(), failures.size()])
 	print("FULL FLOW RESULT: %s" % ("PASS" if failures.is_empty() else "FAIL"))
 

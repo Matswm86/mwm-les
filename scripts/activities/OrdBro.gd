@@ -1,20 +1,18 @@
 class_name OrdBro
 extends Activity
-## Ordbroa: the child lays the letter stones as a bridge of words, so the lamb
-## on the islet can walk over. Today's words come from Main.plan() (up to two
-## story words, lam always last). All their slots are laid out along the
-## bridge from the island side; a word's sockets appear when its turn comes,
-## so the bridge grows toward the islet word by word, and the islet end of the
-## deck is laid when lam is done. Letters the child has not met (or beyond
-## today's writing cap) lie ready as planks; the ones written today are missing.
-## Sound: bridge_in. Per word: hook_<w> while its picture shows, then
+## Ordbroa: the child lays the level's letter stones as one word of the
+## bridge, so the lamb on the islet can come over at the last level. The
+## bridge grows toward the islet one word per level: the words of earlier
+## levels lie as plain deck (BRIDGE_LEVEL_SECTION per word; 18 full planks do
+## not fit on the bridge), the current word gets full-size planks right after
+## it, and at lam the deck reaches the islet.
+## Sound: bridge_in (first level), mid_<w> while the word's picture shows,
 ## bridge_word_<w> (its planks light at the measured sound onsets,
-## content/nb_reading/clip_marks.json), then for each missing plank bridge_ask
-## and the plank's held sound last. A stone plays its short sound when
-## touched. Right: chime, bridge_right. Wrong: the stone's short sound, tok,
-## the plank's held sound again. A finished word that is not the last:
-## bridge_word_done, its letters sink into the planks, bridge_next. The last
-## word (lam): bridge_done, the letters sink, bridge_walk while the lamb crosses.
+## content/nb_reading/clip_marks.json), then for each plank bridge_ask and the
+## plank's held sound last. A stone plays its short sound when touched. Right:
+## chime, bridge_right. Wrong: the stone's short sound, tok, the plank's held
+## sound again. Word done: done_<w>, its planks sink into the deck, level_next.
+## lam: bridge_done, bridge_walk while the lamb crosses, final_party.
 
 signal slot_filled
 const DRAG_START_PX: float = 18.0
@@ -87,7 +85,7 @@ func begin() -> void:
 			word_of.append(words.size() - 1)
 	var n: int = graphemes.size()
 	_layout_slots(n)
-	_build_deck(-0.4, _edge(0, true))  # the island end; the rest grows word by word
+	_build_deck(-0.4, _edge(0, true))  # the island end and the words of earlier levels
 	missing.clear()
 	for i in n:
 		slots.append(null)
@@ -104,25 +102,25 @@ func begin() -> void:
 func run() -> void:
 	active = true
 	await wait(0.9)
-	_mark("in")
-	await say_wait(["bridge_in"], 0.2)
-	for k in words.size():
-		await _build_word(k)
-		if k < words.size() - 1:
-			cur = -1
-			busy = true
-			lit = -3  # the finished word's planks
-			_mark("word_done")
-			main.burst(slot_pos[_word_mid(k)] + Vector3(0, 0.8, 0))
-			await say_wait(["bridge_word_done"], 0.2)
-			lit = -1
-			_sink_letters(k)
-			_drop_picture()
-			_build_deck(_edge(word_start[k + 1] - 1, false), _edge(word_start[k + 1], true))
-			_mark("next")
-			await say_wait(["bridge_next"], 0.2)
+	if main.level == 0:
+		_mark("in")
+		await say_wait(["bridge_in"], 0.2)
+	await _build_word(0)
 	cur = -1
 	busy = true
+	var last: bool = str(words[0]["id"]) == BridgeWords.LAST
+	if not last:
+		lit = -3
+		_mark("word_done")
+		main.burst(slot_pos[_word_mid(0)] + Vector3(0, 0.8, 0))
+		await say_wait([BridgeWords.done_clip(str(words[0]["id"]))], 0.2)
+		lit = -1
+		_drop_picture()
+		await _sink_word()
+		_mark("next")
+		await say_wait(["level_next"], 0.3)
+		active = false
+		return
 	_drop_picture()
 	var length: float = main.world.bridge_start.distance_to(main.world.bridge_end)
 	_build_deck(_edge(graphemes.size() - 1, false), length + 0.4)  # the bridge reaches the islet
@@ -131,8 +129,8 @@ func run() -> void:
 	main.burst(slot_pos[slot_pos.size() / 2] + Vector3(0, 0.8, 0))
 	await say_wait(["bridge_done"], 0.2)
 	lit = -1
-	_sink_letters(words.size() - 1)
-	for st: Stone in stones:  # the spare stone and the raft go away too
+	_sink_letters(0)
+	for st: Stone in stones:  # the raft goes away too
 		if not st.placed:
 			create_tween().tween_property(st, "global_position:y", st.global_position.y - 2.0, 0.5)
 	if _raft:
@@ -145,7 +143,25 @@ func run() -> void:
 	walking = false
 	await wait(maxf(0.0, sec - 2.0))
 	await Voice.wait_idle()
+	_mark("party")
+	for k in 3:
+		main.burst(main.lamb.global_position + Vector3(randf_range(-1, 1), 1.2, randf_range(-1, 1)))
+	main.pip.giggle()
+	await say_wait(["final_party"], 0.3)
 	active = false
+
+
+## The finished word's letters sink, its planks go down and the plain deck of
+## its section rises in their place: the bridge is one word longer.
+func _sink_word() -> void:
+	_sink_letters(0)
+	await wait(0.5)
+	for st: Stone in slots:
+		if st:
+			create_tween().tween_property(st, "global_position:y", st.global_position.y - 1.2, 0.5)
+	var x0: float = _level_x(main.level)
+	_build_deck(x0, x0 + _section_m())
+	await wait(0.6)
 
 
 func end() -> void:
@@ -162,7 +178,9 @@ func _build_word(k: int) -> void:
 	var id: String = str(words[k]["id"])
 	_show_picture(id)
 	_mark("hook")
-	await say_wait([BridgeWords.hook_clip(id)], 0.3)
+	await wait(0.5)
+	if id != BridgeWords.LAST:
+		await say_wait(["mid_" + id], 0.3)
 	missing.clear()
 	var miss: Array = words[k]["missing"]
 	for j in (words[k]["letters"] as Array).size():
@@ -415,34 +433,31 @@ func _bridge_dir() -> Vector3:
 	return (main.world.bridge_end - main.world.bridge_start).normalized()
 
 
-## Every slot of today's words along the bridge, centred, a short deck gap
-## between two words. With several words the pitch goes below
-## BRIDGE_PITCH_MIN_M (down to BRIDGE_PITCH_MULTI_MIN_M) and the planks and
-## letters shrink with it.
+## The level's word right after the deck of the earlier levels, at
+## BRIDGE_LEVEL_PITCH_M; the words before take BRIDGE_LEVEL_SECTION each, so
+## lam's planks end at the islet.
 func _layout_slots(n: int) -> void:
-	var a: Vector3 = main.world.bridge_start
-	var b: Vector3 = main.world.bridge_end
-	var length: float = a.distance_to(b)
-	var gaps: float = GameTune.BRIDGE_WORD_GAP_M * float(maxi(words.size() - 1, 0))
-	var floor_m: float = (
-		GameTune.BRIDGE_PITCH_MIN_M if words.size() <= 1 else GameTune.BRIDGE_PITCH_MULTI_MIN_M
-	)
-	pitch_m = clampf(
-		(length - 2.0 * GameTune.BRIDGE_END_MARGIN_M - gaps) / float(n),
-		floor_m,
-		GameTune.BRIDGE_PITCH_MAX_M
-	)
+	pitch_m = GameTune.BRIDGE_LEVEL_PITCH_M
 	stone_scale = GameTune.BRIDGE_STONE_SCALE * minf(1.0, pitch_m / GameTune.BRIDGE_FULL_PITCH_M)
-	var total: float = pitch_m * float(n) + gaps
-	var x0: float = (length - total) * 0.5
+	var x0: float = _level_x(main.level)
 	slot_pos.clear()
 	for i in n:
-		var x: float = (
-			x0 + pitch_m * (float(i) + 0.5) + GameTune.BRIDGE_WORD_GAP_M * float(word_of[i])
-		)
-		var p: Vector3 = a + _bridge_dir() * x
+		var p: Vector3 = main.world.bridge_start + _bridge_dir() * (x0 + pitch_m * (float(i) + 0.5))
 		p.y = GameTune.BRIDGE_DECK_Y
 		slot_pos.append(p)
+
+
+## Deck length one finished word adds to the bridge.
+func _section_m() -> float:
+	var length: float = main.world.bridge_start.distance_to(main.world.bridge_end)
+	var usable: float = length - 2.0 * GameTune.BRIDGE_END_MARGIN_M
+	var words_before_lam: int = BridgeWords.LEVELS.size() - 1
+	return maxf(0.3, (usable - 3.0 * GameTune.BRIDGE_LEVEL_PITCH_M) / float(words_before_lam))
+
+
+## Where level `k`'s word starts along the bridge.
+func _level_x(k: int) -> float:
+	return GameTune.BRIDGE_END_MARGIN_M + _section_m() * float(k)
 
 
 ## Distance along the bridge of slot i's island-side (or islet-side) edge.
@@ -640,6 +655,12 @@ func _lamb_home() -> void:
 	path.append(on)
 	for i in range(slot_pos.size() - 1, -1, -1):
 		path.append(slot_pos[i] + Vector3(0, 0.08, 0))
+	var x: float = _level_x(main.level) - 0.9
+	while x > 0.3:  # the deck of the earlier words, a hop per stretch
+		var q: Vector3 = main.world.bridge_start + _bridge_dir() * x
+		q.y = GameTune.BRIDGE_DECK_Y + 0.08
+		path.append(q)
+		x -= 0.9
 	var land: Vector3 = main.world.bridge_start - _bridge_dir() * 1.4
 	path.append(main.world.on_ground(land.x, land.z))
 	var tw: Tween = create_tween()

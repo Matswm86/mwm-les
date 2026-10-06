@@ -1,20 +1,23 @@
 class_name Sandskriving
 extends Activity
-## Sandskriving, "watch then write". The child writes the letters that become
-## the bridge stones this session (Main.plan(), every one is used on the
-## bridge). For a letter's first time Pip's pen draws the model while the
-## letter's held sound plays, the model fades, the child writes it with a
-## finger. The same letter again right after: write_again and its held sound,
-## then the child writes it from memory (no model). Lenient check (WriteCheck.judge; the third
-## try only has to be near, the fourth any letter-sized ink). An accepted
-## letter lifts out of the sand as a stone and rolls off toward the bridge.
-## Sound: write_in (first letter) or write_next (a new letter after one),
-## [held sound while drawing], write_turn; a repeat: write_again + held sound.
-## write_retry on a miss, write_right when accepted, write_done at the end.
+## Sandskriving, "watch then write". The child writes the letters of the
+## level's word (Main.plan()); every accepted letter becomes a stone that is
+## laid in that word on the bridge. A letter that is new in this level: Pip's
+## pen draws the model while its held sound plays, then once more after
+## write_show_again; then the letter lies striped in the sand and the child
+## follows the stripes with a finger (write_trace, accepted at
+## TRACE_COVERAGE_DONE coverage); then the sand is empty and the child writes
+## it alone (write_alone, lenient check: WriteCheck.judge, the third try only
+## has to be near, the fourth any letter-sized ink). A letter learned before
+## (and every letter in a review play): one quick write after write_alone and
+## its held sound. Sound: write_in (first letter) or write_next, write_retry
+## on a miss, write_right on every accepted letter, write_done at the end.
 
 signal ink_done
 
-enum Phase { IDLE, WATCH, WRITE, CHECK, DONE }
+enum Phase { IDLE, WATCH, TRACE, WRITE, CHECK, DONE }
+
+const MODEL_SHOWS: int = 2  # owner 2026-10-06: Pip shows a new letter two times, slowly
 
 var pad: WritePad
 var phase: Phase = Phase.IDLE
@@ -23,7 +26,10 @@ var model: Array[PackedVector2Array] = []
 var to_write: Array[String] = []
 var written: Array[String] = []
 var attempts: int = 0
-var from_memory: bool = false  # this letter was written before today: no model
+var shows: int = 0  # times the model was drawn for this letter
+var traced: bool = false  # the striped letter was followed for this letter
+var trace_tries: int = 0
+var new_set: Array[String] = []  # the letters this level brings in
 var rolling: bool = false  # a stone is rolling to the bridge (screenshot bot)
 var lifted: Stone
 var _others: Array = []
@@ -58,13 +64,16 @@ func begin() -> void:
 	pad.model_alpha = 0.0
 	create_tween().tween_property(pad, "patch_alpha", 1.0, 0.5)
 	to_write = main.plan()["stones"]
+	new_set.clear()
+	for l: Variant in main.plan()["new"]:
+		new_set.append(str(l))
 	written.clear()
 
 
 func run() -> void:
 	active = true
 	for i in to_write.size():
-		await _write_one(to_write[i], i == 0, to_write.slice(0, i).has(to_write[i]))
+		await _write_one(to_write[i], i == 0, new_set.has(to_write[i]))
 	phase = Phase.DONE
 	create_tween().tween_property(pad, "patch_alpha", 0.0, 0.4)
 	_mark("done")
@@ -84,14 +93,16 @@ func end() -> void:
 		pad.show_trace = false
 
 
-func _write_one(l: String, first: bool, again: bool) -> void:
+func _write_one(l: String, first: bool, is_new: bool) -> void:
 	letter = l
 	var sk: String = Game.skill_for_label(l)
 	model = WriteCheck.strokes_from_json(Game.engine.pack.skill(sk).get("strokes", []))
 	pad.model = model
 	_others = other_models(sk)
 	attempts = 0
-	from_memory = again
+	shows = 0
+	traced = false
+	trace_tries = 0
 	pad.clear_ink()
 	pad.show_start_dot = false
 	pad.show_trace = false
@@ -99,17 +110,25 @@ func _write_one(l: String, first: bool, again: bool) -> void:
 	if first:
 		_mark("in")
 		await say_wait(["write_in"], 0.2)
-	if again:
-		phase = Phase.WATCH
-		_mark("again")
-		await say_wait(["write_again", Voice.held_id(l)], 0.2)
 	else:
-		if not first:
-			_mark("next")
-			await say_wait(["write_next"], 0.2)
-		await _watch()
+		_mark("next")
+		await say_wait(["write_next"], 0.2)
+	if is_new:
+		for k in MODEL_SHOWS:
+			if k > 0:
+				_mark("show_again")
+				await say_wait(["write_show_again"], 0.2)
+			await _watch()
+		await _trace()
+		phase = Phase.WATCH
+		_mark("alone")
+		await say_wait(["write_alone"], 0.2)
+	else:
+		phase = Phase.WATCH
+		_mark("quick")
+		await say_wait(["write_alone", Voice.held_id(l)], 0.2)
 	while true:
-		_start_write(attempts == 0 and not again)
+		_start_write()
 		await ink_done
 		phase = Phase.CHECK
 		attempts += 1
@@ -117,6 +136,56 @@ func _write_one(l: String, first: bool, again: bool) -> void:
 			break
 		await _retry()
 	await _accepted()
+
+
+## The letter lies striped in the sand; the child follows the stripes with a
+## finger until the ink covers TRACE_COVERAGE_DONE of the letter (after
+## TRACE_MAX_TRIES tries it counts anyway, no endless loop). A chime, then on.
+func _trace() -> void:
+	pad.clear_ink()
+	pad.ink_alpha = 1.0
+	pad.show_trace = true
+	pad.show_start_dot = true
+	phase = Phase.TRACE
+	_since_up = -1.0
+	_mark("trace")
+	Voice.say(["write_trace"])
+	while true:
+		await ink_done
+		trace_tries += 1
+		var cov: float = trace_coverage(pad.ink)
+		if cov >= LearnBalance.TRACE_COVERAGE_DONE or trace_tries >= LearnBalance.TRACE_MAX_TRIES:
+			break
+		phase = Phase.CHECK
+		var tw: Tween = create_tween()
+		tw.tween_property(pad, "ink_alpha", 0.0, LearnBalance.WRITE_SMOOTH_SEC)
+		await say_wait(["write_retry"], 0.2)
+		pad.clear_ink()
+		pad.ink_alpha = 1.0
+		phase = Phase.TRACE
+	phase = Phase.CHECK
+	traced = true
+	_mark("traced")
+	main.pip.giggle()
+	var fade: Tween = create_tween()
+	fade.tween_property(pad, "ink_alpha", 0.0, 0.5)
+	await say_wait([Voice.chime_id()], 0.3)
+	pad.show_trace = false
+	pad.show_start_dot = false
+	pad.clear_ink()
+	pad.ink_alpha = 1.0
+
+
+## Share of the model (resampled) that has finger ink within TRACE_TOLERANCE
+## of the letter's height.
+func trace_coverage(ink: Array[PackedVector2Array]) -> float:
+	var unit: Array[PackedVector2Array] = []
+	for st: PackedVector2Array in ink:
+		var t: PackedVector2Array = PackedVector2Array()
+		for q: Vector2 in st:
+			t.append((q - pad.box.position) / pad.box.size.y)
+		unit.append(t)
+	return WriteCheck.coverage(unit, model, LearnBalance.TRACE_TOLERANCE)
 
 
 ## Stroke models of every other letter in the pack: the child's letter must
@@ -134,6 +203,7 @@ static func other_models(target: String) -> Array:
 ## Pip points at the sand; the pen draws the model in time with the held sound.
 func _watch() -> void:
 	phase = Phase.WATCH
+	shows += 1
 	main.pip.point_at(main.world.write_patch + Vector3(1.5, 0.5, 0))
 	_mark("model")
 	await draw_model()
@@ -166,18 +236,16 @@ func draw_model() -> void:
 		await tw.finished
 
 
-func _start_write(first_try: bool) -> void:
+func _start_write() -> void:
 	phase = Phase.WRITE
 	pad.clear_ink()
 	pad.ink_alpha = 1.0
-	if first_try:
-		Voice.say(["write_turn"])
 	_since_up = -1.0
 	_mark("turn")
 
 
 func touch(event: InputEvent) -> void:
-	if phase != Phase.WRITE:
+	if phase != Phase.WRITE and phase != Phase.TRACE:
 		return
 	if event is InputEventScreenTouch:
 		var t: InputEventScreenTouch = event as InputEventScreenTouch
@@ -193,7 +261,8 @@ func touch(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
-	if phase == Phase.WRITE and _since_up >= 0.0 and not _finger_down:
+	var inking: bool = phase == Phase.WRITE or phase == Phase.TRACE
+	if inking and _since_up >= 0.0 and not _finger_down:
 		_since_up += delta
 		if _since_up >= LearnBalance.WRITE_DONE_IDLE_SEC:
 			_since_up = -1.0
@@ -203,7 +272,7 @@ func _process(delta: float) -> void:
 
 ## The test and the screenshot bot hand in a whole letter here.
 func submit(ink: Array[PackedVector2Array]) -> void:
-	if phase != Phase.WRITE:
+	if phase != Phase.WRITE and phase != Phase.TRACE:
 		return
 	pad.ink = ink
 	pad.queue_redraw()
