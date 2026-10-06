@@ -25,6 +25,7 @@ var _base_y: float = 0.0
 
 func setup(text: String, height: float = GameTune.LETTER_HEIGHT_M, with_halo: bool = true) -> void:
 	letter = text
+	var shown: String = LetterRules.glyph(text)  # the id "aa" shows as å
 	height_m = height
 	_t = randf() * 10.0
 	_glyph = Node3D.new()
@@ -32,7 +33,7 @@ func setup(text: String, height: float = GameTune.LETTER_HEIGHT_M, with_halo: bo
 	var em: float = height_m * 1.25
 	var px: float = em / float(FONT_SIZE)
 	var tm: TextMesh = TextMesh.new()
-	tm.text = text
+	tm.text = shown
 	tm.font = FONT
 	tm.font_size = FONT_SIZE
 	tm.pixel_size = px
@@ -46,7 +47,7 @@ func setup(text: String, height: float = GameTune.LETTER_HEIGHT_M, with_halo: bo
 	_body.material_override = _mat
 	_glyph.add_child(_body)
 	var back: Label3D = Label3D.new()
-	back.text = text
+	back.text = shown
 	back.font = FONT
 	back.font_size = FONT_SIZE
 	back.pixel_size = px

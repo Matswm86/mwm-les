@@ -4,7 +4,11 @@ extends RefCounted
 ## Pure logic, no nodes and no sound, so the headless test can drive it.
 ## All numbers for the one-screen letter game live in the consts here.
 
-const ORDER: Array[String] = ["a", "s", "i", "l", "o", "m"]
+## Letter ids. File ids spell å as "aa" (lyd_aa, intro_aa); glyph() gives what is shown.
+const ORDER: Array[String] = ["a", "s", "i", "l", "o", "m", "e", "t", "b", "aa"]
+const GLYPHS: Dictionary = {"aa": "å"}
+## Stops cannot be held: they have a short take only, played wherever a held sound would be.
+const STOPS: Array[String] = ["t", "b"]
 const START_COUNT: int = 2  # a and s
 const STREAK_TO_ADD: int = 8  # correct first tries in a row before the next letter is due
 const MAX_TILES: int = 3
@@ -22,6 +26,19 @@ var focus: Array[String] = []  # targets that come first (a letter just introduc
 var heard: Array[String] = []  # letters whose held sound has been played in an intro
 var recent: Array[String] = []  # last targets, newest last
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+
+## What a letter id looks like on screen ("aa" -> "å").
+static func glyph(l: String) -> String:
+	return str(GLYPHS.get(l, l))
+
+
+## The letter id for a shown glyph or a label ("å" -> "aa").
+static func id_of(text: String) -> String:
+	for k: Variant in GLYPHS:
+		if str(GLYPHS[k]) == text:
+			return str(k)
+	return text
 
 
 func letters() -> Array[String]:

@@ -116,9 +116,11 @@ func most_practised() -> String:
 	return best
 
 
+## Skill id for a letter id or its glyph ("aa" and "å" both give gp_aa).
 func skill_for_label(text: String) -> String:
+	var shown: String = LetterRules.glyph(text)
 	for s: Dictionary in engine.pack.skills:
-		if str(s.get("label", "")) == text:
+		if str(s.get("label", "")) == shown:
 			return str(s["id"])
 	return ""
 

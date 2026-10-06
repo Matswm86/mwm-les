@@ -12,7 +12,7 @@ signal clip_started(id: String, file: String, scene: String)
 const REC_PATH: String = "res://assets/audio/rec/%s.wav"
 const SFX_PATH: String = "res://assets/audio/%s.wav"
 const MARKS_PATH: String = "res://content/nb_reading/clip_marks.json"
-const LETTERS: Array[String] = ["a", "s", "i", "l", "o", "m"]
+const LETTERS: Array[String] = LetterRules.ORDER
 ## Every recorded sentence the game may play (letter clips are built from LETTERS).
 const LINES: Array[String] = [
 	"op_1",
@@ -25,6 +25,7 @@ const LINES: Array[String] = [
 	"hub_bridge",
 	"hub_back",
 	"hub_idle",
+	"intro_again",
 	"find_in",
 	"find_ask",
 	"find_right",
@@ -34,9 +35,24 @@ const LINES: Array[String] = [
 	"write_turn",
 	"write_retry",
 	"write_right",
+	"write_next",
+	"write_again",
 	"write_done",
 	"bridge_in",
+	"hook_sol",
+	"hook_sel",
+	"hook_baat",
+	"hook_mat",
+	"hook_les",
+	"hook_lam",
+	"bridge_word_sol",
+	"bridge_word_sel",
+	"bridge_word_baat",
+	"bridge_word_mat",
+	"bridge_word_les",
 	"bridge_word_lam",
+	"bridge_word_done",
+	"bridge_next",
 	"bridge_ask",
 	"bridge_right",
 	"bridge_done",
@@ -96,7 +112,9 @@ static func is_known(id: String) -> bool:
 	if LINES.has(id) or SFX.has(id):
 		return true
 	for l: String in LETTERS:
-		if id in ["lyd_" + l, "lyd_%s_held" % l, "navn_" + l, "intro_" + l]:
+		if id in ["lyd_" + l, "navn_" + l, "intro_" + l]:
+			return true
+		if id == "lyd_%s_held" % l and not LetterRules.STOPS.has(l):
 			return true
 	return false
 
@@ -110,7 +128,10 @@ static func short_id(l: String) -> String:
 	return "lyd_" + l
 
 
+## The held take; t and b have none, so their short take stands in.
 static func held_id(l: String) -> String:
+	if LetterRules.STOPS.has(l):
+		return short_id(l)
 	return "lyd_%s_held" % l
 
 

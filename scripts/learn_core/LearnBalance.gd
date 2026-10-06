@@ -77,6 +77,7 @@ const WRITE_STEM_MIN_WIDTH_FRAC: float = 0.5  # narrower ink has no bowl to chec
 const WRITE_STEM_MODEL_ASPECT: float = 0.8  # only round models (a, o, m) get the stem check
 const WRITE_TIE_MARGIN: float = 0.003  # a near-tie with another letter goes to the target
 const WRITE_MIN_INK_FRAC: float = 0.4  # ink length >= 40% of model arc length (after size fit)
+const WRITE_MAX_INK_FRAC: float = 2.5  # more ink than this (a letter gone over twice is ~2) = a scribble
 const WRITE_MIN_SIZE_PX: float = 40.0  # smaller ink is a tap, not a letter
 const WRITE_NEAR_MAX: float = 0.30  # third try: accepted if anywhere near
 const WRITE_NEAR_ATTEMPT: int = 3  # the try that only has to be near

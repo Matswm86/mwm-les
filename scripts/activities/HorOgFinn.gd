@@ -9,7 +9,8 @@ extends Activity
 ## sound last (nothing after it). A tap plays the tapped letter's short
 ## sound. Right: a chime, and find_right after every right. Wrong: the
 ## tapped letter's short sound, tok, find_wrong, then the target's held sound.
-## A new letter: its intro take while its tile pulses. Long-press any tile:
+## A new letter: its intro take while its tile pulses, then intro_again and
+## its held sound (t, b: the short one) once more. Long-press any tile:
 ## its name, then its held sound. find_done after ITEMS items.
 
 signal item_started(target: String, letters: Array[String])
@@ -123,7 +124,8 @@ func _next_item(first: bool) -> void:
 		await wait(sec + LetterRules.INTRO_GAP_SEC)
 		if my != _seq:
 			return
-		var again: float = Voice.say([Voice.held_id(l)])  # the new sound once more on its own
+		# "Hør en gang til." and the new sound once more on its own
+		var again: float = Voice.say(["intro_again", Voice.held_id(l)])
 		if gl:
 			_pulse(gl, again)
 		await wait(again + LetterRules.INTRO_GAP_SEC)

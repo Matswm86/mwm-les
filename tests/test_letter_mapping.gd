@@ -47,7 +47,7 @@ func _run() -> void:
 		_check_tiles(item)
 		if rng.randf() < 0.15:
 			screen.replay()
-			_check(clips[-1] == "lyd_%s_held.wav" % item["target"], "replay played %s" % clips[-1])
+			_check(clips[-1] == _held_file(item["target"]), "replay played %s" % clips[-1])
 			await _frames(2)
 		if rng.randf() < 0.1 and item["tiles"].size() > 1:
 			var wrong: Array = item["tiles"].filter(
@@ -87,7 +87,7 @@ func _on_prompt(target: String, file: String) -> void:
 	cur["prompts"].append(file)
 	_check(target == cur["target"], "prompt target %s != item target %s" % [target, cur["target"]])
 	_check(
-		file == "lyd_%s_held.wav" % cur["target"],
+		file == _held_file(cur["target"]),
 		"item %d prompt %s for target %s" % [cur["n"], file, cur["target"]]
 	)
 	_check(clips[-1] == file, "player log %s != prompt %s" % [clips[-1], file])
@@ -96,9 +96,9 @@ func _on_prompt(target: String, file: String) -> void:
 	if cur["intro"].is_empty() and cur["prompts"].size() == 1:
 		cur["intro"] = intro
 		for f: String in intro:
-			var l: String = f.trim_prefix("lyd_").trim_suffix("_held.wav")
+			var l: String = f.trim_prefix("lyd_").trim_suffix(".wav").trim_suffix("_held")
 			_check(
-				f.ends_with("_held.wav") and cur["tiles"].has(l),
+				f == _held_file(l) and cur["tiles"].has(l),
 				"intro clip %s not a shown tile's held sound" % f
 			)
 
@@ -115,8 +115,14 @@ func _check_tiles(item: Dictionary) -> void:
 	)
 	for t: LetterTile in screen.tiles:
 		_check(
-			t.label.text == t.letter, "tile label %s != tile letter %s" % [t.label.text, t.letter]
+			t.label.text == LetterRules.glyph(t.letter),
+			"tile label %s != tile letter %s" % [t.label.text, t.letter]
 		)
+
+
+## The held take of a letter; t and b have none and play their short take.
+func _held_file(l: String) -> String:
+	return ("lyd_%s.wav" if LetterRules.STOPS.has(l) else "lyd_%s_held.wav") % l
 
 
 func _tap(letter: String) -> void:

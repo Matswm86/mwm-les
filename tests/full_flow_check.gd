@@ -19,7 +19,7 @@ const SESSION_COUNT: Array[int] = [2, 3, 6]
 const SENTENCES: Dictionary = {
 	"opening": ["op_1", "op_2", "op_3", "op_4", "op_5"],
 	"hub": ["hub_find", "hub_write", "hub_bridge", "hub_back", "hub_idle"],
-	"find": ["find_in", "find_ask", "find_right", "find_wrong", "find_done"],
+	"find": ["find_in", "intro_again", "find_ask", "find_right", "find_wrong", "find_done"],
 	"write": ["write_in", "write_turn", "write_retry", "write_right", "write_done"],
 	"bridge":
 	["bridge_in", "bridge_word_lam", "bridge_ask", "bridge_right", "bridge_done", "bridge_walk"],

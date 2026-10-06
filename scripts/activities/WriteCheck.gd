@@ -283,7 +283,9 @@ static func judge(
 	var limit: float = (
 		LearnBalance.WRITE_MATCH_MAX + LearnBalance.WRITE_MATCH_LOOSEN_STEP * float(hint_level)
 	)
-	var enough_ink: bool = ink_frac >= LearnBalance.WRITE_MIN_INK_FRAC
+	var enough_ink: bool = (
+		ink_frac >= LearnBalance.WRITE_MIN_INK_FRAC and ink_frac <= LearnBalance.WRITE_MAX_INK_FRAC
+	)
 	var is_mirror: bool = false
 	if orient_check and enough_ink:
 		var mir: Array[PackedVector2Array] = mirrored(model)

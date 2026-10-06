@@ -4,7 +4,9 @@ extends SceneTree
 ## Replays scripted answer sequences and checks the numbers in GDD 5.2-5.6.
 
 const PACK_DIR: String = "res://content/nb_reading"
-const WRITE_LETTERS: Array[String] = ["gp_a", "gp_s", "gp_i", "gp_l", "gp_o", "gp_m"]
+const WRITE_LETTERS: Array[String] = [
+	"gp_a", "gp_s", "gp_i", "gp_l", "gp_o", "gp_m", "gp_e", "gp_t", "gp_b", "gp_aa"
+]
 const FIXTURES_PER_LETTER: int = 12
 
 var _passed: int = 0
@@ -49,7 +51,15 @@ func _engine(seed_value: int = 7) -> LearnEngine:
 
 func _test_pack() -> void:
 	var e: LearnEngine = _engine()
-	_ok("pack loads 6 gated sounds", e.pack.unlock_order.size() == 6, str(e.pack.unlock_order))
+	_ok(
+		"pack loads 10 gated sounds",
+		e.pack.unlock_order.size() == LetterRules.ORDER.size(),
+		str(e.pack.unlock_order)
+	)
+	var labels: Array[String] = []
+	for sid: String in e.pack.unlock_order:
+		labels.append(LetterRules.id_of(str(e.pack.skill(sid).get("label", ""))))
+	_ok("pack order is the game's letter order", labels == LetterRules.ORDER, str(labels))
 	_ok("pack first group is a pair", e.pack.first_group_size == 2)
 	var words: Array[Dictionary] = e.pack.items_for_activity("ordbro")
 	_ok("pack has bridge words", words.size() >= 3, str(words.size()))
@@ -513,7 +523,11 @@ func _test_write_check() -> void:
 	var pos_ok: int = 0
 	var neg_total: int = 0
 	var neg_ok: int = 0
-	for sid: String in WRITE_LETTERS:
+	for li in WRITE_LETTERS.size():
+		var sid: String = WRITE_LETTERS[li]
+		# own streams per letter and per check: a new or changed letter model never
+		# reshuffles the fixtures of the other letters
+		rng.seed = 2026 + li
 		var model: Array[PackedVector2Array] = models[sid]
 		var others: Array = _others(models, sid)
 		var orient: bool = LearnBalance.ORIENT_CHECK_LETTERS.has(_label_of(e, sid))
@@ -544,6 +558,7 @@ func _test_write_check() -> void:
 		)
 		var rejected: int = 0
 		var tried: int = 0
+		rng.seed = 5026 + li
 		for oid: String in WRITE_LETTERS:
 			if oid == sid:
 				continue
@@ -555,6 +570,7 @@ func _test_write_check() -> void:
 					rejected += 1
 				else:
 					print("  accepted %s as %s: %s" % [oid, sid, r2])
+		rng.seed = 7026 + li
 		for k in 8:
 			tried += 1
 			var r3: Dictionary = WriteCheck.judge(_scribble(rng, k), model, others, 0, orient)
@@ -576,6 +592,7 @@ func _test_write_check() -> void:
 		)
 	)
 	# Mirrored s: flagged (gentle response), never accepted as a plain s.
+	rng.seed = 2026
 	var model_s: Array[PackedVector2Array] = models["gp_s"]
 	var mirror_flagged: int = 0
 	var correct_flagged: int = 0
@@ -591,6 +608,22 @@ func _test_write_check() -> void:
 	print("  mirrored s flagged %d/10, correct s flagged %d/10" % [mirror_flagged, correct_flagged])
 	_ok("write: every mirrored s is flagged", mirror_flagged == 10, str(mirror_flagged))
 	_ok("write: no correct s is flagged as mirrored", correct_flagged == 0, str(correct_flagged))
+	# Mirrored b (a d): flagged, never accepted as b.
+	var model_b: Array[PackedVector2Array] = models["gp_b"]
+	var b_flagged: int = 0
+	var b_correct_flagged: int = 0
+	for k in 10:
+		var d_ink: Array[PackedVector2Array] = _child_letter(WriteCheck.mirrored(model_b), rng)
+		var rd: Dictionary = WriteCheck.judge(d_ink, model_b, _others(models, "gp_b"), 0, true)
+		if bool(rd["mirrored"]) and not bool(rd["accepted"]):
+			b_flagged += 1
+		var b_ink: Array[PackedVector2Array] = _child_letter(model_b, rng)
+		var rb: Dictionary = WriteCheck.judge(b_ink, model_b, _others(models, "gp_b"), 0, true)
+		if bool(rb["mirrored"]):
+			b_correct_flagged += 1
+	print("  mirrored b flagged %d/10, correct b flagged %d/10" % [b_flagged, b_correct_flagged])
+	_ok("write: every mirrored b is flagged", b_flagged == 10, str(b_flagged))
+	_ok("write: no correct b is flagged as mirrored", b_correct_flagged == 0, str(b_correct_flagged))
 	# Third try: a rough but near letter counts as near.
 	var rough: Array[PackedVector2Array] = _child_letter(models["gp_a"], rng)
 	var rr: Dictionary = WriteCheck.judge(rough, models["gp_a"], [], 2, false)

@@ -24,8 +24,11 @@ func _ready() -> void:
 	add_child(_player)
 
 
-## Plays the held (long) sound of a letter. Returns its length in seconds.
+## Plays the held (long) sound of a letter (t and b: their short take, they
+## have no held one). Returns its length in seconds.
 func held(letter: String) -> float:
+	if LetterRules.STOPS.has(letter):
+		return short(letter)
 	return _play(HELD_PATH % letter, 0.0)
 
 

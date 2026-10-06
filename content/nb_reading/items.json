@@ -80,6 +80,58 @@
    ]
   },
   {
+   "id": "g_e",
+   "kind": "grapheme",
+   "text": "e",
+   "skills": [
+    "gp_e"
+   ],
+   "audio": "lyd_e",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_t",
+   "kind": "grapheme",
+   "text": "t",
+   "skills": [
+    "gp_t"
+   ],
+   "audio": "lyd_t",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_b",
+   "kind": "grapheme",
+   "text": "b",
+   "skills": [
+    "gp_b"
+   ],
+   "audio": "lyd_b",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
+   "id": "g_aa",
+   "kind": "grapheme",
+   "text": "å",
+   "skills": [
+    "gp_aa"
+   ],
+   "audio": "lyd_aa",
+   "activities": [
+    "hor_og_finn",
+    "skriv"
+   ]
+  },
+  {
    "id": "w_is",
    "kind": "word",
    "text": "is",
