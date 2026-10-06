@@ -71,6 +71,10 @@ const WRITE_TAIL_WEIGHT: float = 0.5
 const WRITE_ROTATIONS_DEG: Array[float] = [-12.0, -6.0, 0.0, 6.0, 12.0]  # slant is not an error
 const WRITE_DOT_MAX_FRAC: float = 0.22  # a stroke this small (of the letter size) up top is a dot
 const WRITE_DOT_MISMATCH: float = 0.05  # dot present/missing vs the model
+const WRITE_STEM_MISMATCH: float = 0.05  # right-side stem (a) present/missing vs the model
+const WRITE_STEM_CORNER_FRAC: float = 0.11  # ink this close to the box's bottom-right corner = a stem
+const WRITE_STEM_MIN_WIDTH_FRAC: float = 0.5  # narrower ink has no bowl to check
+const WRITE_STEM_MODEL_ASPECT: float = 0.8  # only round models (a, o, m) get the stem check
 const WRITE_TIE_MARGIN: float = 0.003  # a near-tie with another letter goes to the target
 const WRITE_MIN_INK_FRAC: float = 0.4  # ink length >= 40% of model arc length (after size fit)
 const WRITE_MIN_SIZE_PX: float = 40.0  # smaller ink is a tap, not a letter

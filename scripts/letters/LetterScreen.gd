@@ -60,6 +60,7 @@ func next_item() -> void:
 	var my: int = _seq
 	busy = true
 	_missed = false
+	rules.begin_visit()  # this screen has no stations: every item is a visit
 	var intro: Array[String] = rules.pending_intro()
 	target = rules.pick_target()
 	_show_tiles(rules.pick_tiles(target, intro))

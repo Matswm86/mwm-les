@@ -7,7 +7,7 @@ extends Activity
 ## round sand tiles on the beach.
 ## Sound: find_in at the start. Each item: find_ask, then the target's held
 ## sound last (nothing after it). A tap plays the tapped letter's short
-## sound. Right: a chime, and find_right on every third right. Wrong: the
+## sound. Right: a chime, and find_right after every right. Wrong: the
 ## tapped letter's short sound, tok, find_wrong, then the target's held sound.
 ## A new letter: its intro take while its tile pulses. Long-press any tile:
 ## its name, then its held sound. find_done after ITEMS items.
@@ -16,11 +16,11 @@ signal item_started(target: String, letters: Array[String])
 signal prompt_played(target: String, ids: Array[String])
 signal item_finished
 
-const ITEMS: int = 6
+const ITEMS: int = 10
 const LONG_PRESS_SEC: float = 0.6
 const IDLE_REPEAT_SEC: float = 8.0
 const SAVE_PATH: String = "user://letters.json"  # shared with the one-screen letter game
-const RIGHT_LINE_EVERY: int = 3
+const RIGHT_LINE_EVERY: int = 1  # praise after every right answer (owner 2026-10-06)
 
 var rules: LetterRules = LetterRules.new()
 var target: String = ""
@@ -68,6 +68,7 @@ func _right() -> Vector3:
 func begin() -> void:
 	super.begin()
 	_load()
+	rules.begin_visit()  # a new letter, if one is due, comes only at a visit start
 	items_done = 0
 	rights = 0
 	found.clear()
@@ -106,7 +107,7 @@ func _next_item(first: bool) -> void:
 	target = rules.pick_target()
 	_show(rules.pick_tiles(target, intro))
 	item_started.emit(target, tile_letters())
-	await wait(0.9)
+	await wait(1.5)
 	if first:
 		_mark("in")
 		await say_wait(["find_in"], 0.3)
@@ -120,6 +121,12 @@ func _next_item(first: bool) -> void:
 		_mark("intro_" + l)
 		rules.mark_heard(l)
 		await wait(sec + LetterRules.INTRO_GAP_SEC)
+		if my != _seq:
+			return
+		var again: float = Voice.say([Voice.held_id(l)])  # the new sound once more on its own
+		if gl:
+			_pulse(gl, again)
+		await wait(again + LetterRules.INTRO_GAP_SEC)
 	_save()
 	if my != _seq:
 		return
@@ -178,9 +185,12 @@ func tap(l: String) -> void:
 		await say_wait(ids, 0.2)
 		if my != _seq:
 			return
+		await wait(LetterRules.CORRECT_PAUSE_SEC)
+		if my != _seq:
+			return
 		for g: GlowLetter in letters:
 			g.sink(4.0)
-		await wait(0.5)
+		await wait(0.8)
 		if my != _seq:
 			return
 		item_finished.emit()

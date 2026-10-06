@@ -49,7 +49,7 @@ func _run() -> void:
 			screen.replay()
 			_check(clips[-1] == "lyd_%s_held.wav" % item["target"], "replay played %s" % clips[-1])
 			await _frames(2)
-		if rng.randf() < 0.3 and item["tiles"].size() > 1:
+		if rng.randf() < 0.1 and item["tiles"].size() > 1:
 			var wrong: Array = item["tiles"].filter(
 				func(l: String) -> bool: return l != item["target"]
 			)

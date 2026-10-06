@@ -216,8 +216,8 @@ func _station(i: int) -> void:
 
 
 ## What the bridge needs this session: the letters of `lam` the child has met
-## are missing from the bridge and get written in the sand; one more known
-## letter is written too as a spare stone while fewer than three are missing.
+## are missing from the bridge and get written in the sand. Only letters the
+## bridge uses are written, so every stone ends up in the bridge.
 func plan() -> Dictionary:
 	if _plan.is_empty():
 		var known: Array[String] = (stations[0] as HorOgFinn).rules.letters()
@@ -225,13 +225,7 @@ func plan() -> Dictionary:
 		for c: String in BRIDGE_WORD:
 			if known.has(c):
 				miss.append(c)
-		var stones: Array[String] = miss.duplicate()
-		if miss.size() < BRIDGE_WORD.length():
-			for l: String in known:
-				if not BRIDGE_WORD.contains(l):
-					stones.append(l)
-					break
-		_plan = {"missing": miss, "stones": stones}
+		_plan = {"missing": miss, "stones": miss.duplicate()}
 	return _plan
 
 

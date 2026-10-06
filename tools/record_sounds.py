@@ -9,16 +9,23 @@ import json
 import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import unquote
 
 OUT = Path(__file__).resolve().parents[1] / "recorded"
 PORT = 8765
 
-NAMES = {"a": "a", "s": "ess", "i": "i", "l": "ell", "o": "o", "m": "em"}
+NAMES = {
+    "a": "a", "s": "ess", "i": "i", "l": "ell", "o": "o", "m": "em",
+    "e": "e", "t": "te", "b": "be", "å": "å",
+}
+LETTERS = "asilometbå"
+STOPS = "tb"  # t and b cannot be held: they get a short take only
 TAKES = [
     {"id": f"lyd_{k}{suffix}", "letter": k, "held": held, "name": False}
     for held, suffix in ((False, ""), (True, "_held"))
-    for k in "asilom"
-] + [{"id": f"navn_{k}", "letter": k, "held": False, "name": True} for k in "asilom"]
+    for k in LETTERS
+    if not (held and k in STOPS)
+] + [{"id": f"navn_{k}", "letter": k, "held": False, "name": True} for k in LETTERS]
 GUIDE = {
     "a": ("a som i ape", "Munnen åpen. Bare lyden, ikke et ord."),
     "s": ("s som i sol", "Hvesing som en slange. Ikke «ess»."),
@@ -26,6 +33,10 @@ GUIDE = {
     "l": ("l som i lam", "Tunga bak tennene. Ikke «ell»."),
     "o": ("o som i ost (lyden u)", "Runde lepper. Lyden er u, som i ost."),
     "m": ("m som i mus", "Leppene lukket, nynn. Ikke «em»."),
+    "e": ("e som i sel", "Lang e, smil litt. Ikke «ei»."),
+    "t": ("t som i mat", "Kort pust med tunga bak tennene. Ikke «te»."),
+    "b": ("b som i båt", "Kort, leppene spretter opp. Ikke «be»."),
+    "å": ("å som i båt", "Runde lepper, lang lyd."),
 }
 
 # Pip's lines. Draft wording; the owner edits the text on the page, edits go to recorded/script.json.
@@ -46,6 +57,11 @@ LINES = [
     ("Ny bokstav", "intro_l", "Denne bokstaven heter ell. Den sier lll."),
     ("Ny bokstav", "intro_o", "Denne bokstaven heter o. Den sier uuu, som i ost."),
     ("Ny bokstav", "intro_m", "Denne bokstaven heter em. Den sier mmm."),
+    ("Ny bokstav", "intro_e", "Denne bokstaven heter e. Den sier eee."),
+    ("Ny bokstav", "intro_t", "Denne bokstaven heter te. Den sier t."),
+    ("Ny bokstav", "intro_b", "Denne bokstaven heter be. Den sier b."),
+    ("Ny bokstav", "intro_å", "Denne bokstaven heter å. Den sier ååå."),
+    ("Ny bokstav", "intro_again", "Hør en gang til."),
     ("Finn bokstaven", "find_in", "Her i sanden ligger det bokstaver. Hør godt etter!"),
     ("Finn bokstaven", "find_ask", "Hvilken bokstav sier dette?"),
     ("Finn bokstaven", "find_right", "Ja! Den fant du."),
@@ -55,9 +71,24 @@ LINES = [
     ("Skriv i sanden", "write_turn", "Nå er det din tur. Skriv med fingeren."),
     ("Skriv i sanden", "write_retry", "Nesten! Prøv en gang til."),
     ("Skriv i sanden", "write_right", "Så fint! Den blir en stein til broa."),
+    ("Skriv i sanden", "write_again", "Skriv den en gang til."),
+    ("Skriv i sanden", "write_next", "Nå skriver vi en bokstav til."),
     ("Skriv i sanden", "write_done", "Nå har vi nok steiner. Vi tar dem med til broa."),
     ("Broa", "bridge_in", "Nå bygger vi broa. Hver stein er en bokstav."),
     ("Broa", "bridge_word_lam", "Vi skal skrive lam. Hør: lll, aaa, mmm. Lam!"),
+    ("Ord", "hook_sol", "Se, sola skinner!"),
+    ("Ord", "bridge_word_sol", "Vi skal skrive sol. Hør: sss, ooo, lll. Sol!"),
+    ("Ord", "hook_sel", "Se! En sel svømmer i vannet."),
+    ("Ord", "bridge_word_sel", "Vi skal skrive sel. Hør: sss, eee, lll. Sel!"),
+    ("Ord", "hook_båt", "Se der! En båt på sjøen."),
+    ("Ord", "bridge_word_båt", "Vi skal skrive båt. Hør: b, ååå, t. Båt!"),
+    ("Ord", "hook_mat", "Lammet er sultent. Det trenger mat."),
+    ("Ord", "bridge_word_mat", "Vi skal skrive mat. Hør: mmm, aaa, t. Mat!"),
+    ("Ord", "hook_les", "Jeg har en bok. Jeg liker å lese."),
+    ("Ord", "bridge_word_les", "Vi skal skrive les. Hør: lll, eee, sss. Les!"),
+    ("Ord", "hook_lam", "Og så det viktigste ordet. Det er lammet sitt ord!"),
+    ("Broa", "bridge_word_done", "Ja! Der står det et ord."),
+    ("Broa", "bridge_next", "Broa er ikke lang nok ennå. Vi lager ett ord til!"),
     ("Broa", "bridge_ask", "Hvilken bokstav mangler?"),
     ("Broa", "bridge_right", "Ja! Der passet den."),
     ("Broa", "bridge_done", "Broa er ferdig! Der står det lam."),
@@ -144,7 +175,7 @@ class Handler(BaseHTTPRequestHandler):
                 "text/html; charset=utf-8",
             )
         elif self.path.startswith("/wav/"):
-            f = OUT / (Path(self.path.split("?")[0]).name + ".wav")
+            f = OUT / (Path(unquote(self.path.split("?")[0])).name + ".wav")
             if f.exists():
                 self._send(200, f.read_bytes(), "audio/wav")
             else:
@@ -153,7 +184,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, b"", "text/plain")
 
     def do_POST(self) -> None:
-        tid = Path(self.path).name
+        tid = Path(unquote(self.path)).name
         if self.path.startswith("/text/") and tid in {lid for _, lid, _ in LINES}:
             OUT.mkdir(exist_ok=True)
             edits = json.loads(SCRIPT.read_text()) if SCRIPT.exists() else {}
@@ -204,7 +235,7 @@ button.on{background:var(--rec);border-color:var(--rec)}
 textarea{width:100%;box-sizing:border-box;font:17px/1.4 system-ui;border:1px solid var(--line);border-radius:6px;padding:6px 8px;resize:vertical}
 </style></head><body><main>
 <h1>MWM Les: lydopptak</h1>
-<p>Seks lyder, hver to ganger: kort (cirka et halvt sekund) og lang (hold lyden jevnt i cirka to sekunder).
+<p>Ti lyder: kort, og lang der lyden kan holdes (t og b er bare korte): kort (cirka et halvt sekund) og lang (hold lyden jevnt i cirka to sekunder).
 Si bare lyden, aldri bokstavnavnet. Trykk Ta opp, si lyden, trykk Stopp. Hør på opptaket, og ta det på nytt hvis det ikke er riktig.</p>
 <p>Stille rom, 20 til 30 cm fra mikrofonen.</p>
 <section><h2>Korte lyder</h2></section><div id="short" style="display:grid;gap:10px"></div>

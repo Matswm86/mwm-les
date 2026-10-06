@@ -105,18 +105,42 @@ static func mirrored(model: Array[PackedVector2Array]) -> Array[PackedVector2Arr
 ## after fitting position and size. Order-, direction- and stroke-count-free;
 ## the best of a few small rotations, so a slanted letter is not punished.
 ## A separate dot (i) is a part of the letter: having one or not when the
-## model does adds WRITE_DOT_MISMATCH.
+## model does adds WRITE_DOT_MISMATCH. Ink with a stem at the bottom right
+## (a) against a round model without one (o) adds WRITE_STEM_MISMATCH.
 static func distance(ink: Array[PackedVector2Array], model: Array[PackedVector2Array]) -> float:
 	var n: int = LearnBalance.WRITE_RESAMPLE_POINTS
 	var model_pts: PackedVector2Array = resample(model, n)
 	var box: Rect2 = bounds(model_pts)
 	var best: float = INF
+	var best_ink: Array[PackedVector2Array] = ink
 	for deg: float in LearnBalance.WRITE_ROTATIONS_DEG:
 		var fitted: Array[PackedVector2Array] = fit_to(rotated(ink, deg), box)
-		best = minf(best, _shape_distance(resample(fitted, n), model_pts))
+		var d: float = _shape_distance(resample(fitted, n), model_pts)
+		if d < best:
+			best = d
+			best_ink = fitted
 	if has_dot(ink) != has_dot(model):
 		best += LearnBalance.WRITE_DOT_MISMATCH
+	var round_model: bool = box.size.x >= box.size.y * LearnBalance.WRITE_STEM_MODEL_ASPECT
+	# a stem where the model has none (an a written for o); a missed stem is
+	# left to the shape distance, so a wobbly a is not punished twice
+	if round_model and has_right_stem(best_ink) and not has_right_stem(model):
+		best += LearnBalance.WRITE_STEM_MISMATCH
 	return best
+
+
+## Ink reaches the bottom-right corner of the letter's box: where the stem of
+## a ends. An o stays well away from its box corners.
+static func has_right_stem(strokes: Array[PackedVector2Array]) -> bool:
+	var pts: PackedVector2Array = resample(strokes, LearnBalance.WRITE_RESAMPLE_POINTS * 2)
+	var b: Rect2 = bounds(pts)
+	var side: float = maxf(b.size.x, b.size.y)
+	if side <= 0.0 or b.size.x < side * LearnBalance.WRITE_STEM_MIN_WIDTH_FRAC:
+		return false  # thin letters (l, i) have no bowl to tell apart
+	for q: Vector2 in pts:
+		if q.distance_to(b.end) <= side * LearnBalance.WRITE_STEM_CORNER_FRAC:
+			return true
+	return false
 
 
 static func rotated(ink: Array[PackedVector2Array], deg: float) -> Array[PackedVector2Array]:

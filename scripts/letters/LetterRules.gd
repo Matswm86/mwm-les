@@ -6,15 +6,19 @@ extends RefCounted
 
 const ORDER: Array[String] = ["a", "s", "i", "l", "o", "m"]
 const START_COUNT: int = 2  # a and s
-const STREAK_TO_ADD: int = 4  # correct first tries in a row before the next letter
+const STREAK_TO_ADD: int = 8  # correct first tries in a row before the next letter is due
 const MAX_TILES: int = 3
 const MAX_SAME_TARGET: int = 2  # never the same target 3 times in a row
-const CORRECT_PAUSE_SEC: float = 1.0  # after the chime, before the next item
-const AFTER_CLIP_GAP_SEC: float = 0.15  # silence between two clips in a row
-const INTRO_GAP_SEC: float = 0.35  # between letters in the first-time intro
+const FOCUS_AFTER_INTRO: int = 2  # the first targets after an intro are the new letter
+const NEWEST_WEIGHT: int = 2  # the newest letter is this many times as likely as the others
+const CORRECT_PAUSE_SEC: float = 1.5  # after the chime, before the next item
+const AFTER_CLIP_GAP_SEC: float = 0.4  # silence between two clips in a row
+const INTRO_GAP_SEC: float = 1.0  # between an intro take and the sound heard again
 
 var count: int = START_COUNT
 var streak: int = 0
+var due: bool = false  # enough first tries: the next letter comes at the next visit start
+var focus: Array[String] = []  # targets that come first (a letter just introduced)
 var heard: Array[String] = []  # letters whose held sound has been played in an intro
 var recent: Array[String] = []  # last targets, newest last
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -37,13 +41,39 @@ func pending_intro() -> Array[String]:
 	return out
 
 
+## Call at the start of a visit: adds the next letter if it is due (at most
+## one new letter per visit, never in the middle of one). Returns it or "".
+func begin_visit() -> String:
+	if not due or count >= ORDER.size():
+		return ""
+	due = false
+	count += 1
+	return ORDER[count - 1]
+
+
 func mark_heard(l: String) -> void:
-	if not heard.has(l):
-		heard.append(l)
+	if heard.has(l):
+		return
+	heard.append(l)
+	if count > START_COUNT:  # a and s come together; later letters get their own run
+		for k in FOCUS_AFTER_INTRO - 1:  # the intro item itself already asks for it
+			focus.append(l)
 
 
 func pick_target() -> String:
+	var pending: Array[String] = pending_intro()
+	if count > START_COUNT and not pending.is_empty():
+		focus.push_front(pending[pending.size() - 1])  # the item that introduces a letter asks for it
+	if not focus.is_empty():
+		var f: String = focus.pop_front()
+		recent.append(f)
+		if recent.size() > 4:
+			recent.pop_front()
+		return f
 	var pool: Array[String] = letters()
+	if count > START_COUNT:
+		for k in NEWEST_WEIGHT - 1:
+			pool.append(ORDER[count - 1])
 	if recent.size() >= MAX_SAME_TARGET:
 		var last: String = recent[recent.size() - 1]
 		var all_same: bool = true
@@ -51,7 +81,8 @@ func pick_target() -> String:
 			if recent[k] != last:
 				all_same = false
 		if all_same:
-			pool.erase(last)
+			while pool.has(last):
+				pool.erase(last)
 	var t: String = pool[rng.randi_range(0, pool.size() - 1)]
 	recent.append(t)
 	if recent.size() > 4:
@@ -79,26 +110,25 @@ func pick_tiles(target: String, must: Array[String]) -> Array[String]:
 	return out
 
 
-## Call once per item when the right tile is tapped. Returns the letter that
-## was added to the set, or "".
-func record(first_try: bool) -> String:
+## Call once per item when the right tile is tapped. After STREAK_TO_ADD
+## first tries in a row the next letter is due (added by begin_visit).
+func record(first_try: bool) -> void:
 	if not first_try:
 		streak = 0
-		return ""
+		return
 	streak += 1
 	if streak >= STREAK_TO_ADD and count < ORDER.size():
-		count += 1
+		due = true
 		streak = 0
-		return ORDER[count - 1]
-	return ""
 
 
 func to_dict() -> Dictionary:
-	return {"count": count, "heard": heard}
+	return {"count": count, "heard": heard, "due": due}
 
 
 func from_dict(d: Dictionary) -> void:
 	count = clampi(int(d.get("count", START_COUNT)), START_COUNT, ORDER.size())
+	due = bool(d.get("due", false))
 	heard.clear()
 	for v: Variant in d.get("heard", []):
 		if ORDER.has(str(v)):
