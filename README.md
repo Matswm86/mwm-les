@@ -36,23 +36,19 @@ one-off key: uninstall that version once before installing a newer one.
 
 ## How to play
 
-The child taps one of the glowing stations on the island. Each station is a short
-activity, and finishing it brings that part of the island back to colour.
+Pip the narwhal's best friend, a lamb, stands on a little islet across the water and
+cannot swim. Pip wants to build a bridge of letters, and the child helps. On the first
+launch Pip tells this in a short opening; the child taps Pip to start. Pip then swims
+to one lit station at a time.
 
 | Activity | What the child does | Based on |
 |---|---|---|
-| Hør og finn (listen and find) | Pip says a sound; the child taps the gold letter that makes it. The sound flies out of Kaptein Hysj's jar back to the island, and the first time each sound is found its thing appears (ape, sol, is, lam, ost, mus). A wrong letter says its own sound and wobbles. | Systematic letter-sound teaching |
-| Sandskriving (sand writing) | Pip writes the letter stroke by stroke and says its sound, then the child writes it from memory in the sand. The letter becomes a stone that rolls off to the bridge. | Handwriting from memory, not tracing |
-| Ordbroa (the word bridge) | The child drags letter stones onto a bridge to build `lam`, `lama` or `is`; Pip sounds the word out while the planks light, and the lamb comes over. | Moveable alphabet, connected blending |
+| Hør og finn (listen and find) | Pip asks which letter says a sound, then plays the sound. The child taps the letter on the sand tiles; a tapped letter says its own sound. A new letter is introduced by name and sound while its tile glows. Press and hold a letter to hear its name and sound. | Systematic letter-sound teaching |
+| Sandskriving (sand writing) | Pip writes the letter in the sand while its sound plays, then the child writes it with a finger. An accepted letter lifts out as a stone and rolls off to the bridge. | Handwriting from memory, not tracing |
+| Ordbroa (the word bridge) | Pip says `lam` and sounds it out while the planks light up, then asks which letter is missing. The child drags the right stone into the gap. When the bridge is done the letters sink into the planks and the lamb walks over. | Moveable alphabet, connected blending |
 
-After about 12 minutes Pip gets sleepy. The child reads the day's words to a grown-up,
-who holds the **Voksen: Hørt!** button, and Pip suggests one thing to do away from the
-screen. Wrong answers never end anything: the material shows the mistake and the child
-tries again. Hints grow step by step and fade as the child gets better.
-
-**Parent area:** hold the button in the top-left corner for 3 seconds and solve a
-sum. It shows how far the child has come with each sound, plus tips for reading
-together.
+Then Pip says goodnight. A tap starts a new day. Wrong answers never end anything: the
+letter says its own sound and the child hears the right sound again.
 
 ## Status
 
@@ -70,17 +66,14 @@ story, is in [docs/GDD.md](docs/GDD.md).
 - The cel-shaded look comes from a toon light shader (`shaders/toon.gdshader`) with a
   two-tone shadow, an outline shell on things the child can touch, and unshaded gold
   letters with a halo.
-- Every spoken line is its own sound file, one per line id in `docs/SCRIPT.md`
-  (mono, -18 LUFS), so the app never needs the internet. **The current files are
-  placeholders** made by `tools/make_voice.py` from `tools/voice_lines.tsv` while the
-  final voice is chosen; a real recording replaces `assets/audio/tts_<id>.mp3` under the
-  same name. A sound such as [s] is always its own clip after a short pause, never
-  spliced into a sentence.
+- Every spoken line is a real person's recording (`assets/audio/rec/`, one file per
+  line id in `docs/SCRIPT.md`), so the app never needs the internet and uses no
+  synthetic voice. The `Voice` autoload is the only sound source: one player, so two
+  clips never overlap, and it refuses any file that is not one of these recordings or
+  a short sound effect. A letter sound always comes last in a sequence.
 
 ## Credits
 
-- Placeholder voice (until the final voice is chosen): Microsoft Finn and Pernille
-  (nb-NO), generated with [edge-tts](https://github.com/rany2/edge-tts).
 - Hero: [KayKit Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0)
   by Kay Lousberg (CC0). Full asset list and licences: [docs/ASSETS.md](docs/ASSETS.md).
 - Font: [Andika](https://software.sil.org/andika/) by SIL, designed for beginning
