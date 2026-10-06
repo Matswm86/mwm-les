@@ -1,88 +1,71 @@
 class_name MainScene
 extends Node3D
-## Enhjørningenga, first playable slice: the island hub with three lit
-## stations, the station visits (engine -> activity -> engine), colour
-## restoration, the read-to-a-grown-up step and the parent gate. Owns Hysj's
-## ship in the bay and the things found sounds bring back (docs/SCRIPT.md).
+## MWM Les: the island, Pip, and the lamb on the little islet across the
+## water. Pip's best friend, the lamb, cannot swim, so Pip and the child build
+## a bridge of letters: find letters (Hør og finn), write them in the sand
+## where they become stones (Sandskriving), lay the stones as a bridge that
+## spells lam (Ordbroa). Then the lamb walks over. Every spoken line is one of
+## the owner's own recordings (Voice autoload, docs/SCRIPT.md).
+## First launch: the opening (op_1..op_5). Later launches: hub_back.
 
-enum Mode { INTRO, HUB, FLYING, ACTIVITY, GROWNUP, PARENT, SUNSET, STORY }
+signal station_chosen
 
-const STATIONS: Array[String] = ["hor_og_finn", "skriv", "ordbro"]
-const NEXT_LINES: Array[String] = ["hub_next_find", "hub_next_write", "hub_next_bridge"]
-const HUB_GHOST_AFTER_SEC: float = 7.0
+enum Mode { START, OPENING, HUB, FLYING, STATION, END }
 
-var mode: Mode = Mode.INTRO
+const SCENES: Array[String] = ["find", "write", "bridge"]
+const HUB_IDLE_SEC: float = 7.0
+const BRIDGE_WORD: String = "lam"
+const BEACON_SCALE: float = 1.6  # the lit station must read from across the island
+
+var mode: Mode = Mode.START
 var world: World
 var rig: CameraRig
 var pip: Pip
-var hero: Hero
-var unicorn: Unicorn
-var ship: Ship
-var things: Dictionary = {}  # sound label -> the thing it brought back this session
+var lamb: Node3D
 var hud: Hud
 var beacons: Array[Beacon] = []
-var activities: Array[Activity] = []
+var stations: Array[Activity] = []
 var current: Activity
-var current_station: int = -1
-var visits_done: Array[bool] = [false, false, false]
-var _overlay: Control
-var _visit_abort: bool = false
-var _story: OpeningStory
-var _hub_idle: float = 0.0
+var story: OpeningStory
+var sessions: int = 0
 var _next: int = -1
+var _hub_ids: Array[String] = []
+var _hub_idle: float = 0.0
+var _plan: Dictionary = {}
+var _pile: Array[Stone] = []
 
 
 func _ready() -> void:
 	world = World.new()
 	add_child(world)
+	world.set_colour_all(1.0)  # the island is always in full colour
 	rig = CameraRig.new()
 	add_child(rig)
-	hero = Hero.new()
-	add_child(hero)
-	hero.global_position = world.knight_spot
-	hero.face(world.knight_spot + Vector3(-0.6, 0, 1.0))
-	# the unicorn is a silent island animal: no part in the story
-	unicorn = Unicorn.new()
-	add_child(unicorn)
-	unicorn.stripes = Unicorn.STRIPES
-	unicorn.global_position = world.unicorn_spot
-	unicorn.rotation.y = deg_to_rad(-20.0)
-	ship = Ship.new()
-	add_child(ship)
-	anchor_ship()
+	var hp: Dictionary = hub_pose()
+	rig.set_pose(hp["target"], hp["distance"], hp["pitch"], 0.0)
+	lamb = Props.make("lamb")
+	add_child(lamb)
+	reset_lamb()
 	pip = Pip.new()
 	add_child(pip)
 	pip.cam = rig.cam
 	hud = Hud.new()
 	add_child(hud)
+	hud.hide_all()
 	hud.replay_pressed.connect(_on_replay)
-	hud.home_pressed.connect(_on_home)
-	hud.parent_pressed.connect(open_parent_gate)
-	hud.story_pressed.connect(_replay_story)
 	for i in 3:
 		var b: Beacon = Beacon.new()
 		b.station = i
 		add_child(b)
-		var c: Vector3 = world.zone_centers[i]
-		b.global_position = c + Vector3(0, 3.2, 0)
+		b.global_position = world.zone_centers[i] + Vector3(0, 3.2, 0)
+		b.scale = Vector3.ONE * BEACON_SCALE
+		b.visible = false
 		beacons.append(b)
-	activities = [HorOgFinn.new(), Sandskriving.new(), OrdBro.new()]
-	for a: Activity in activities:
+	stations = [HorOgFinn.new(), Sandskriving.new(), OrdBro.new()]
+	for a: Activity in stations:
 		a.main = self
-		a.hints = Game.engine.hints if a.scored() else HintLadder.new()
 		add_child(a)
-		a.answered.connect(_on_answered)
-		a.disengaged.connect(_on_disengaged)
-	for i in 3:
-		if Game.restored[i]:
-			world.set_zone_now(i, 1.0)
-	if Game.story_seen:
-		_intro()
-	else:
-		_play_story(false)
-
-
-# ---------------------------------------------------------------- hub
+	_start.call_deferred()
 
 
 func hub_pose() -> Dictionary:
@@ -93,60 +76,53 @@ func hub_pose() -> Dictionary:
 	}
 
 
-func _intro() -> void:
-	mode = Mode.INTRO
-	hud.hide_all()
-	var hp: Dictionary = hub_pose()
-	rig.set_pose(hp["target"] + Vector3(0, 6, -10), float(hp["distance"]) * 1.6, 12.0, -18.0)
+func _start() -> void:
 	pip.snap_home()
-	var tw: Tween = rig.fly_to(
-		hp["target"], hp["distance"], hp["pitch"], 0.0, GameTune.CAM_INTRO_SEC
-	)
-	await tw.finished
-	pip.giggle()
-	await get_tree().create_timer(Voice.say(["hub_hello"]) + 0.2).timeout
-	_enter_hub()
+	var greet: String = "hub_back"
+	if not Game.story_seen:
+		greet = ""
+		mode = Mode.OPENING
+		Voice.scene = "opening"
+		story = OpeningStory.new()
+		story.main = self
+		add_child(story)
+		await story.play()
+		story = null
+		Game.story_seen = true
+		Game.save()
+	_session(greet)
 
 
-## The opening story (GDD 9). First launch: it plays through and only a tap
-## on Pip ends it. From the hub button it can be replayed and skipped.
-func _play_story(replay: bool) -> void:
-	mode = Mode.STORY
-	for b: Beacon in beacons:
-		b.visible = false
-	_story = OpeningStory.new()
-	_story.main = self
-	_story.skippable = Game.story_seen
-	add_child(_story)
-	await _story.play()
-	_story = null
-	Game.story_seen = true
-	Game.save()
-	if not replay:
-		pip.giggle()
-	_enter_hub()
-
-
-func _replay_story() -> void:
-	if mode != Mode.HUB:
-		return
-	hud.hide_all()
-	_play_story(true)
-
-
-## Only the next station is lit; Pip swims over to it and says why.
-func _enter_hub() -> void:
-	mode = Mode.HUB
-	hud.show_hub()
-	_hub_idle = 0.0
-	_next = Game.next_station(visits_done)
+## One session: the three stations in order, then goodnight.
+func _session(greet: String) -> void:
+	sessions += 1
+	_plan = {}
 	for i in 3:
-		beacons[i].visible = i == _next
-	if _next < 0:
-		pip.go_home()
-		return
-	pip.guide_to(_guide_spot(beacons[_next]))
-	Voice.say([NEXT_LINES[_next]], true)
+		await _hub(i, greet)
+		greet = ""
+		await _station(i)
+	await _end()
+
+
+# ---------------------------------------------------------------- hub
+
+
+## Only station i is lit; Pip swims over to it and says why.
+func _hub(i: int, greet: String) -> void:
+	mode = Mode.HUB
+	Voice.scene = "hub"
+	hud.hide_all()
+	_next = i
+	_hub_idle = 0.0
+	for k in 3:
+		beacons[k].visible = k == i
+	pip.guide_to(_guide_spot(beacons[i]))
+	_hub_ids.clear()
+	if greet != "":
+		_hub_ids.append(greet)
+	_hub_ids.append(stations[i].hub_line())
+	Voice.say(_hub_ids)
+	await station_chosen
 
 
 ## A spot on the camera ray to the beacon, close enough that Pip stays big,
@@ -157,11 +133,22 @@ func _guide_spot(b: Beacon) -> Vector3:
 	return cam_pos + dir * 11.0 - rig.cam.global_basis.x * 1.9 - Vector3(0, 1.1, 0)
 
 
+## The child taps the lit station (touch path and test).
+func choose_station() -> void:
+	if mode != Mode.HUB:
+		return
+	hud.ghost.stop()
+	station_chosen.emit()
+
+
 func _process(delta: float) -> void:
-	if mode != Mode.HUB or _next < 0 or hud.ghost.showing():
+	if mode != Mode.HUB:
+		return
+	if Voice.is_busy():
+		_hub_idle = 0.0
 		return
 	_hub_idle += delta
-	if _hub_idle >= HUB_GHOST_AFTER_SEC and not Voice.is_busy():
+	if _hub_idle >= HUB_IDLE_SEC:
 		_hub_idle = 0.0
 		var b: Beacon = beacons[_next]
 		hud.ghost.tap(func() -> Vector2: return rig.cam.unproject_position(b.global_position))
@@ -171,373 +158,150 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		return
+	var t: InputEventScreenTouch = event as InputEventScreenTouch
 	match mode:
-		Mode.STORY:
-			if _story:
-				_story.touch(event)
+		Mode.OPENING:
+			if story:
+				story.touch(event)
 		Mode.HUB:
-			_hub_touch(event)
-		Mode.ACTIVITY:
-			var t: InputEventScreenTouch = event as InputEventScreenTouch
-			if t and t.pressed and pip.hit(t.position):
+			if t and t.pressed:
+				_hub_idle = 0.0
+				if beacons[_next].hit(rig.cam, t.position):
+					choose_station()
+				elif pip.hit(t.position):
+					pip.giggle()
+					Voice.say(_hub_ids)
+		Mode.STATION:
+			if t and t.pressed and pip.hit(t.position) and not current is Sandskriving:
 				pip.giggle()
-				Voice.repeat_prompt()
+				current.replay()
 				return
 			if current:
 				current.touch(event)
-		Mode.SUNSET:
-			var t2: InputEventScreenTouch = event as InputEventScreenTouch
-			if t2 and t2.pressed:
-				_new_session()
+		Mode.END:
+			if t and t.pressed and not Voice.is_busy():
+				new_session()
 
 
-func _hub_touch(event: InputEvent) -> void:
-	var t: InputEventScreenTouch = event as InputEventScreenTouch
-	if t == null or not t.pressed:
-		return
-	_hub_idle = 0.0
-	hud.ghost.stop()
-	for i in 3:
-		if beacons[i].hit(rig.cam, t.position):
-			start_station(i)
-			return
-	if pip.hit(t.position):
+func _on_replay() -> void:
+	if mode == Mode.STATION and current:
 		pip.giggle()
-		if _next >= 0:
-			Voice.repeat_prompt()
-		else:
-			Voice.say(["hub_pip"])
-		return
-	var hp: Vector2 = rig.cam.unproject_position(hero.global_position + Vector3(0, 0.8, 0))
-	if t.position.distance_to(hp) < 150.0:
-		hero.cheer()
+		current.replay()
 
 
 # ---------------------------------------------------------------- stations
 
 
-func start_station(i: int) -> void:
-	if mode != Mode.HUB:
-		return
+func _station(i: int) -> void:
 	mode = Mode.FLYING
-	current_station = i
-	current = activities[i]
-	var act: Activity = current
+	current = stations[i]
 	for b: Beacon in beacons:
 		b.visible = false
 	hud.hide_all()
 	Voice.stop()
 	pip.go_home()
-	Voice.sfx("whoosh")
-	var pose: Dictionary = act.camera_pose()
+	var pose: Dictionary = current.camera_pose()
+	Voice.scene = SCENES[i]
 	await rig.fly_to(pose["target"], pose["distance"], pose["pitch"], pose.get("yaw", 0.0)).finished
-	mode = Mode.ACTIVITY
-	hud.show_activity()
-	_visit_abort = false
-	act.begin_visit()
-	var n: int = int(GameTune.ITEMS_PER_VISIT[STATIONS[i]])
-	var max_choices: int = int(GameTune.MAX_CHOICES[STATIONS[i]])
-	if not Game.stations_done[i]:
-		max_choices = mini(max_choices, 2)  # the very first visit: two choices
-	var used: Array[String] = []
-	var finished_all: bool = true
-	var first: Dictionary = act.adjust_task(Game.engine.next_task(STATIONS[i], max_choices, used))
-	if not first.is_empty():
-		await act.story_intro(first)
-	for k in n:
-		var task: Dictionary = (
-			first
-			if k == 0
-			else act.adjust_task(Game.engine.next_task(STATIONS[i], max_choices, used))
-		)
-		if task.is_empty():
-			break
-		var it: Dictionary = task["item"]
-		used.append(str(it["id"]))
-		var level: int = 0
-		if act.scored():
-			level = maxi(Game.engine.begin_item(str(task["skill"])), int(task["hint_start"]))
-		act.start_item(it, task, level)
-		await act.item_done
-		if act.scored():
-			Game.engine.finish_item()
-		if _visit_abort:
-			finished_all = false
-			break
-	if finished_all and not _visit_abort:
-		await act.story_payoff()
-		Game.stations_done[i] = true
-	act.end_visit()
-	Game.save()
-	if finished_all and not _visit_abort:
-		await _restore(i)
+	mode = Mode.STATION
+	hud.replay_btn.visible = i != 1  # writing has no sound to hear again
+	current.begin()
+	await current.run()
+	current.end()
+	hud.hide_all()
 	current = null
 	mode = Mode.FLYING
+	var hp: Dictionary = hub_pose()
+	await rig.fly_to(hp["target"], hp["distance"], hp["pitch"], 0.0).finished
+
+
+## What the bridge needs this session: the letters of `lam` the child has met
+## are missing from the bridge and get written in the sand; one more known
+## letter is written too as a spare stone while fewer than three are missing.
+func plan() -> Dictionary:
+	if _plan.is_empty():
+		var known: Array[String] = (stations[0] as HorOgFinn).rules.letters()
+		var miss: Array[String] = []
+		for c: String in BRIDGE_WORD:
+			if known.has(c):
+				miss.append(c)
+		var stones: Array[String] = miss.duplicate()
+		if miss.size() < BRIDGE_WORD.length():
+			for l: String in known:
+				if not BRIDGE_WORD.contains(l):
+					stones.append(l)
+					break
+		_plan = {"missing": miss, "stones": stones}
+	return _plan
+
+
+# ---------------------------------------------------------------- end
+
+
+func _end() -> void:
+	mode = Mode.FLYING
+	Voice.scene = "end"
 	hud.hide_all()
-	await (
-		rig.fly_to(hub_pose()["target"], hub_pose()["distance"], hub_pose()["pitch"], 0.0).finished
-	)
-	if _visit_abort:
-		_enter_hub()
-		return
-	visits_done[i] = true
-	if _session_should_end():
-		_grownup_step()
-	else:
-		_enter_hub()
-
-
-func _restore(i: int) -> void:
-	var c: Vector3 = world.zone_centers[i]
-	await rig.fly_to(c + Vector3(0, 0.5, -1.5), 16.0, 34.0, 0.0, 1.2).finished
-	world.restore_zone(i)
-	Game.restored[i] = true
-	Game.save()
-	Voice.sfx("fanfare")
-	Voice.say(["hub_restore"])
-	hero.cheer()
-	await get_tree().create_timer(GameTune.ZONE_RESTORE_SEC + 0.6).timeout
-
-
-func _session_should_end() -> bool:
-	var all_done: bool = visits_done[0] and visits_done[1] and visits_done[2]
-	var cap: float = LearnBalance.SESSION_SOFT_END_SEC - LearnBalance.GROWNUP_CARD_BEFORE_END_SEC
-	return all_done or Game.session_seconds() >= cap
-
-
-func _on_answered(
-	item_id: StringName,
-	skill_ids: Array[StringName],
-	correct: bool,
-	hint_level: int,
-	first_attempt: bool,
-	_latency: float
-) -> void:
-	var ids: Array[String] = []
-	for s: StringName in skill_ids:
-		ids.append(str(s))
-	Game.note_answer(ids)
-	var choices: int = current.last_choices if current else 2
-	var r: Dictionary = Game.engine.record_answer(
-		str(item_id), ids, correct, hint_level, first_attempt, choices
-	)
-	if bool(r.get("break", false)) and current:
-		_movement_break()
-
-
-func _on_disengaged(item_id: StringName) -> void:
-	Game.engine.record_disengaged(str(item_id))
-	Voice.say(["pause_taps"])
-	if current:
-		current.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.length("pause_taps"))
-
-
-## Movement break stub (GDD 5.3/6.9): Pip invites a short shake, objects rest.
-## Waits for the current line so nothing is ever played after a sound slot.
-func _movement_break() -> void:
-	var act: Activity = current
-	var ids: Array = ["pause_move_1", "pause_move_2"]
-	await Voice.wait_idle()
-	if act != current:
-		return
-	pip.giggle()
-	act.freeze_for(GameTune.FREEZE_AFTER_RANDOM_TAPS_SEC + Voice.say(ids))
-
-
-func _on_replay() -> void:
-	pip.giggle()
-	Voice.repeat_prompt()
-
-
-func _on_home() -> void:
-	if mode != Mode.ACTIVITY or current == null:
-		return
-	_visit_abort = true
-	Voice.stop()
-	current.active = false
-	current.item_done.emit()
-
-
-# ---------------------------------------------------------------- end of session
-
-
-func _grownup_step() -> void:
-	mode = Mode.GROWNUP
-	hud.hide_all()
-	var card: GrownupCard = GrownupCard.new()
-	card.words = Game.grownup_words()
-	hud.add_overlay(card)
-	_overlay = card
-	Voice.say(["grown_read"], true)
-	card.heard.connect(func() -> void: _end_grownup(true))
-	card.no_adult.connect(func() -> void: _end_grownup(false))
-
-
-func _end_grownup(heard: bool) -> void:
-	if _overlay:
-		_overlay.queue_free()
-		_overlay = null
-	if heard:
-		Game.words_read_to_adult = Game.words_today.duplicate()
-		Voice.sfx("fanfare")
-		Voice.say(["grown_thanks"])
-	else:
-		Voice.say(["grown_later"])
-	await Voice.wait_idle()
-	_sunset()
-
-
-## Yawn, today's sound, one offline idea, goodbye, warm light (SCRIPT.md
-## scene 7). A new session needs a fresh tap.
-func _sunset() -> void:
-	mode = Mode.SUNSET
+	for b: Beacon in beacons:
+		b.visible = false
 	create_tween().tween_method(world.set_sunset, 0.0, 1.0, 3.0)
-	_sunset_lines()
-	rig.fly_to(
-		hub_pose()["target"] + Vector3(0, 2, -6),
-		float(hub_pose()["distance"]) * 1.15,
-		14.0,
-		0.0,
-		3.0
-	)
-	Game.save()
-
-
-## Each sequence ends on its slot; the next one starts after a pause.
-func _sunset_lines() -> void:
-	var sound: String = Game.most_practised()
-	var parts: Array = [["end_yawn"]]
-	if sound != "":
-		parts.append(["end_today", Game.phoneme_clip(sound)])
-	var line: Dictionary = Game.pick_offline_line()
-	if not line.is_empty():
-		parts.append(line.get("audio", []))
-	parts.append(["end_bye"])
-	for ids: Array in parts:
-		if mode != Mode.SUNSET:
-			return
-		await get_tree().create_timer(Voice.say(ids) + 0.4).timeout
-
-
-func _new_session() -> void:
-	create_tween().tween_method(world.set_sunset, 1.0, 0.0, 1.0)
-	Voice.stop()
-	visits_done = [false, false, false]
-	Game.words_today.clear()
-	Game.practised_today.clear()
-	Game.found_today.clear()
-	_clear_things()
-	ship.fill_jar()
-	Game.engine.model.start_session()
+	var hp: Dictionary = hub_pose()
 	await (
-		rig.fly_to(hub_pose()["target"], hub_pose()["distance"], hub_pose()["pitch"], 0.0).finished
+		rig
+		. fly_to(hp["target"] + Vector3(4, 1, -4), float(hp["distance"]) * 0.8, 14.0, 0.0, 2.5)
+		. finished
 	)
-	_enter_hub()
+	pip.giggle()
+	await Voice.say_wait(["end_bye"], 0.3)
+	mode = Mode.END
 
 
-# ---------------------------------------------------------------- parent area
-
-
-func open_parent_gate() -> void:
-	if mode != Mode.HUB:
+## A tap after goodnight: a new day, the lamb is back on its islet.
+func new_session() -> void:
+	if mode != Mode.END:
 		return
-	mode = Mode.PARENT
-	hud.hide_all()
-	var gate: ParentGate = ParentGate.new()
-	hud.add_overlay(gate)
-	_overlay = gate
-	gate.closed.connect(_close_overlay)
-	gate.passed.connect(_open_parent_page)
+	mode = Mode.FLYING
+	create_tween().tween_method(world.set_sunset, 1.0, 0.0, 1.0)
+	reset_lamb()
+	_clear_pile()
+	var hp: Dictionary = hub_pose()
+	await rig.fly_to(hp["target"], hp["distance"], hp["pitch"], 0.0).finished
+	_session("hub_back")
 
 
-func _open_parent_page() -> void:
-	if _overlay:
-		_overlay.queue_free()
-	var page: ParentPage = ParentPage.new()
-	hud.add_overlay(page)
-	_overlay = page
-	page.closed.connect(_close_overlay)
+# ---------------------------------------------------------------- lamb and stones
 
 
-func _close_overlay() -> void:
-	if _overlay:
-		_overlay.queue_free()
-		_overlay = null
-	_enter_hub()
+func reset_lamb() -> void:
+	var at: Vector3 = world.thing_spots.get("l", GameTune.ISLET_CENTER)
+	lamb.global_position = at
+	lamb.scale = Vector3.ONE * float(GameTune.THING_SCALES.get("l", 0.75))
+	lamb.rotation.y = PI  # looks across the water toward the island
 
 
-# ---------------------------------------------------------------- ship and found things
+## A written stone rolls in and lies by the bridge until it is laid.
+func add_to_pile(st: Stone) -> void:
+	st.reparent(self)
+	var b: Vector3 = world.bridge_start
+	var d: Vector3 = (world.bridge_end - b).normalized()
+	var c: Vector3 = b - d * 1.6 + Vector3(-d.z, 0, d.x) * 1.5
+	var k: int = _pile.size()
+	var spot: Vector3 = c + Vector3(1.4 * float(k % 3) - 1.4, 0, 1.25 * floorf(float(k) / 3.0))
+	st.global_basis = Basis()
+	st.scale = Vector3.ONE * GameTune.PILE_STONE_SCALE
+	st.global_position = world.on_ground(spot.x, spot.z)
+	_pile.append(st)
 
 
-## The ship at anchor in the bay, Hysj asleep by the full jar.
-func anchor_ship() -> void:
-	ship.global_position = world.ship_anchor
-	ship.rotation.y = world.ship_yaw
-	ship.fill_jar()
-	ship.sleep()
+func hide_pile() -> void:
+	for st: Stone in _pile:
+		st.visible = false
 
 
-## A found sound comes back (SCRIPT.md 2d). The first time this session its
-## thing appears; later it only hops. Returns the thing (or null).
-func bring_back(label: String) -> Node3D:
-	if things.has(label):
-		var t: Node3D = things[label]
-		var y0: float = t.position.y
-		var tw: Tween = t.create_tween()
-		tw.tween_property(t, "position:y", y0 + 0.6, 0.18).set_trans(Tween.TRANS_SINE)
-		tw.tween_property(t, "position:y", y0, 0.22).set_trans(Tween.TRANS_BOUNCE).set_ease(
-			Tween.EASE_OUT
-		)
-		return t
-	var kind: String = str(
-		Game.engine.pack.skill(Game.skill_for_label(label)).get("back_thing", "")
-	)
-	var thing: Node3D = Props.make(kind)
-	if thing == null:
-		return null
-	add_child(thing)
-	things[label] = thing
-	var at: Vector3 = world.thing_spots.get(label, world.zone_centers[0])
-	var sc: float = float(GameTune.THING_SCALES.get(label, 0.75))
-	thing.global_position = at
-	thing.rotation.y = deg_to_rad(GameTune.FIND_CAM_YAW_DEG)
-	if label == "l":
-		thing.rotation.y = deg_to_rad(-90.0)  # the lamb looks toward the bridge
-	thing.scale = Vector3.ONE * 0.01
-	var grow: Tween = thing.create_tween()
-	grow.tween_property(thing, "scale", Vector3.ONE * sc, 0.5).set_trans(Tween.TRANS_BACK).set_ease(
-		Tween.EASE_OUT
-	)
-	if label == "s":  # the sun comes up
-		thing.global_position = at - Vector3(0, 6.0, 0)
-		grow.parallel().tween_property(thing, "global_position", at, 1.4).set_trans(
-			Tween.TRANS_SINE
-		)
-	burst(at + Vector3(0, 1.0, 0))
-	return thing
-
-
-func thing_spot(label: String) -> Vector3:
-	return world.thing_spots.get(label, world.zone_centers[0])
-
-
-func hide_things() -> void:
-	for t: Node3D in things.values():
-		t.visible = false
-
-
-func show_things() -> void:
-	for t: Node3D in things.values():
-		t.visible = true
-
-
-func _clear_things() -> void:
-	for t: Node3D in things.values():
-		t.queue_free()
-	things.clear()
-
-
-# ---------------------------------------------------------------- effects
+func _clear_pile() -> void:
+	for st: Stone in _pile:
+		st.queue_free()
+	_pile.clear()
 
 
 func burst(at: Vector3) -> void:
@@ -559,7 +323,6 @@ func burst(at: Vector3) -> void:
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	m.albedo_color = GameTune.GOLD
-	m.emission_enabled = false
 	q.material = m
 	p.mesh = q
 	add_child(p)

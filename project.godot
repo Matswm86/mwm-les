@@ -6,7 +6,7 @@ config_version=5
 
 config/name="MWM Les"
 config/description="A 3D reading adventure for children aged 4-7. Norwegian (bokmål). No ads, no tracking."
-run/main_scene="res://scenes/LetterScreen.tscn"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6", "Mobile")
 
 [autoload]

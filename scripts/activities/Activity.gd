@@ -1,41 +1,24 @@
 class_name Activity
 extends Node3D
-## Base for mini-game templates (GDD 5.1 contract). The station runner calls
-## start_item(); the activity reports `answered` / `disengaged` and emits
-## `item_done` when the item has ended on a success.
+## Base for the three stations on the island. Main flies the camera to
+## camera_pose(), calls begin(), awaits run() and then calls end(). Touches
+## arrive through touch(); the speaker button calls replay(). All sound goes
+## through the Voice autoload (owner recordings only).
 
-signal answered(
-	item_id: StringName,
-	skill_ids: Array[StringName],
-	correct: bool,
-	hint_level: int,
-	first_attempt: bool,
-	latency_sec: float
-)
-signal disengaged(item_id: StringName)
-signal item_done
+signal step(name: String)  # a named moment, for the screenshot bot and the test
 
 var main: MainScene
-var hints: HintLadder
-var item: Dictionary = {}
-var format: Dictionary = {}
-var active: bool = false
-var frozen: bool = false
-var praise_count: int = 0
-var last_choices: int = 2  # options the child had for the last answer (guess chance)
-var _idle: float = 0.0
-var _prompt_end_ms: int = 0
-var _answered_once: bool = false
+var active: bool = false  # the child may act now
+var _seq: int = 0  # bumped by every new action; older awaits then stop
 
 
 func activity_id() -> String:
 	return ""
 
 
-## Scored activities share the engine's hint ladder (fading per skill);
-## unscored ones (writing) keep their own.
-func scored() -> bool:
-	return true
+## The hub line that sends the child here.
+func hub_line() -> String:
+	return ""
 
 
 ## Camera pose for this station: target, distance, pitch, yaw.
@@ -43,89 +26,37 @@ func camera_pose() -> Dictionary:
 	return {}
 
 
-## A 5-10 s story reason before the first item (shown, voiced by Pip).
-## Gets the visit's first task so the story can name its sound or word.
-func story_intro(_first_task: Dictionary) -> void:
-	pass
-
-
-## A 3-5 s story payoff after the last item, before the zone restores.
-func story_payoff() -> void:
-	pass
-
-
-## The station runner hands every task through here; an activity may swap the
-## item (a fixed first-word order) or the format (a scaffold).
-func adjust_task(task: Dictionary) -> Dictionary:
-	return task
-
-
-func begin_visit() -> void:
-	praise_count = 0
+func begin() -> void:
 	Voice.reset_chime()
 
 
-func end_visit() -> void:
+## The whole station, start to finish.
+func run() -> void:
+	pass
+
+
+func end() -> void:
 	active = false
-
-
-func start_item(p_item: Dictionary, p_format: Dictionary, hint_start: int) -> void:
-	item = p_item
-	format = p_format
-	_answered_once = false
-	_idle = 0.0
-	hints.level = maxi(hints.level, hint_start)
-	hints.highest = maxi(hints.highest, hints.level)
-	active = true
+	main.hud.ghost.stop()
 
 
 func touch(_event: InputEvent) -> void:
 	pass
 
 
-func apply_hint(_level: int) -> void:
+## The speaker button: hear the sound the child is looking for again.
+func replay() -> void:
 	pass
 
 
-func reset_idle() -> void:
-	_idle = 0.0
-
-
-func mark_prompt_end(seconds_from_now: float) -> void:
-	_prompt_end_ms = Time.get_ticks_msec() + int(seconds_from_now * 1000.0)
-
-
-## Report one answer; only the first answer of an item is evidence.
-func report(skill_ids: Array[String], correct: bool, level: int) -> void:
-	report_with(skill_ids, correct, level, not _answered_once)
-	_answered_once = true
-
-
-## Report with an explicit first-attempt flag (activities with several slots).
-func report_with(skill_ids: Array[String], correct: bool, level: int, first: bool) -> void:
-	var names: Array[StringName] = []
-	for s: String in skill_ids:
-		names.append(StringName(s))
-	var latency: float = maxf(0.0, (Time.get_ticks_msec() - _prompt_end_ms) / 1000.0)
-	answered.emit(StringName(str(item.get("id", ""))), names, correct, level, first, latency)
-
-
-func _process(delta: float) -> void:
-	if not active or frozen or Voice.is_busy():
-		return
-	_idle += delta
-	if _idle >= LearnBalance.IDLE_HINT_SEC:
-		_idle = 0.0
-		var before: int = hints.level
-		var lv: int = hints.on_idle()
-		if lv != before:
-			apply_hint(lv)
-		else:
-			Voice.repeat_prompt()
-
-
-func freeze_for(sec: float) -> void:
-	frozen = true
+func wait(sec: float) -> void:
 	await get_tree().create_timer(sec).timeout
-	frozen = false
-	Voice.repeat_prompt()
+
+
+## Says `ids` and waits until the sequence is over (plus `extra` seconds).
+func say_wait(ids: Array, extra: float = 0.15) -> void:
+	await Voice.say_wait(ids, extra)
+
+
+func _mark(name: String) -> void:
+	step.emit(name)
