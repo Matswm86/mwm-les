@@ -25,3 +25,4 @@ android/build/
 *.swp
 store/promo/renders/
 recorded/
+__pycache__/

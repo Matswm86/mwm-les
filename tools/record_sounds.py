@@ -1,4 +1,4 @@
-"""Local page for recording the six letter sounds with this computer's microphone.
+"""Local page for recording the letter sounds, letter names and Pip's lines with this computer's microphone.
 
 Run:  python3 tools/record_sounds.py   then open http://localhost:8765 in Firefox.
 Each take is saved as recorded/<id>.<ext> (the browser's own format) and converted to
@@ -13,11 +13,12 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parents[1] / "recorded"
 PORT = 8765
 
+NAMES = {"a": "a", "s": "ess", "i": "i", "l": "ell", "o": "o", "m": "em"}
 TAKES = [
-    {"id": f"lyd_{k}{suffix}", "letter": k, "held": held}
+    {"id": f"lyd_{k}{suffix}", "letter": k, "held": held, "name": False}
     for held, suffix in ((False, ""), (True, "_held"))
     for k in "asilom"
-]
+] + [{"id": f"navn_{k}", "letter": k, "held": False, "name": True} for k in "asilom"]
 GUIDE = {
     "a": ("a som i ape", "Munnen åpen. Bare lyden, ikke et ord."),
     "s": ("s som i sol", "Hvesing som en slange. Ikke «ess»."),
@@ -26,6 +27,49 @@ GUIDE = {
     "o": ("o som i ost (lyden u)", "Runde lepper. Lyden er u, som i ost."),
     "m": ("m som i mus", "Leppene lukket, nynn. Ikke «em»."),
 }
+
+# Pip's lines. Draft wording; the owner edits the text on the page, edits go to recorded/script.json.
+LINES = [
+    ("Start", "op_1", "Hei! Jeg heter Pip."),
+    ("Start", "op_2", "Ser du lammet på den lille øya der borte? Det er bestevennen min."),
+    ("Start", "op_3", "Lammet kan ikke svømme. Derfor vil jeg bygge en bro."),
+    ("Start", "op_4", "Broa skal vi lage av bokstaver."),
+    ("Start", "op_5", "Vil du hjelpe meg? Trykk på meg!"),
+    ("Øya", "hub_find", "Først må vi finne bokstavene. Bli med!"),
+    ("Øya", "hub_write", "Nå skal vi skrive bokstavene i sanden."),
+    ("Øya", "hub_bridge", "Nå kan vi bygge broa. Kom!"),
+    ("Øya", "hub_back", "Hei igjen! Lammet venter på oss."),
+    ("Øya", "hub_idle", "Trykk der det lyser."),
+    ("Ny bokstav", "intro_a", "Denne bokstaven heter a. Den sier aaa."),
+    ("Ny bokstav", "intro_s", "Denne bokstaven heter ess. Den sier sss."),
+    ("Ny bokstav", "intro_i", "Denne bokstaven heter i. Den sier iii."),
+    ("Ny bokstav", "intro_l", "Denne bokstaven heter ell. Den sier lll."),
+    ("Ny bokstav", "intro_o", "Denne bokstaven heter o. Den sier uuu, som i ost."),
+    ("Ny bokstav", "intro_m", "Denne bokstaven heter em. Den sier mmm."),
+    ("Finn bokstaven", "find_in", "Her i sanden ligger det bokstaver. Hør godt etter!"),
+    ("Finn bokstaven", "find_ask", "Hvilken bokstav sier dette?"),
+    ("Finn bokstaven", "find_right", "Ja! Den fant du."),
+    ("Finn bokstaven", "find_wrong", "Den sier noe annet. Hør en gang til."),
+    ("Finn bokstaven", "find_done", "Nå har vi funnet nok bokstaver. Bra jobba!"),
+    ("Skriv i sanden", "write_in", "Nå skal du skrive i sanden. Se på meg først."),
+    ("Skriv i sanden", "write_turn", "Nå er det din tur. Skriv med fingeren."),
+    ("Skriv i sanden", "write_retry", "Nesten! Prøv en gang til."),
+    ("Skriv i sanden", "write_right", "Så fint! Den blir en stein til broa."),
+    ("Skriv i sanden", "write_done", "Nå har vi nok steiner. Vi tar dem med til broa."),
+    ("Broa", "bridge_in", "Nå bygger vi broa. Hver stein er en bokstav."),
+    ("Broa", "bridge_word_lam", "Vi skal skrive lam. Hør: lll, aaa, mmm. Lam!"),
+    ("Broa", "bridge_ask", "Hvilken bokstav mangler?"),
+    ("Broa", "bridge_right", "Ja! Der passet den."),
+    ("Broa", "bridge_done", "Broa er ferdig! Der står det lam."),
+    ("Broa", "bridge_walk", "Se, lammet kommer over broa! Takk for hjelpen!"),
+    ("Slutt", "end_bye", "Nå er jeg trøtt. Takk for i dag, ha det!"),
+]
+SCRIPT = OUT / "script.json"
+
+
+def script_text() -> dict:
+    edits = json.loads(SCRIPT.read_text()) if SCRIPT.exists() else {}
+    return {lid: edits.get(lid, text) for _, lid, text in LINES}
 
 
 def process(raw: Path, wav: Path) -> dict:
@@ -74,11 +118,16 @@ class Handler(BaseHTTPRequestHandler):
             takes = [
                 {
                     **t,
-                    "word": GUIDE[t["letter"]][0],
-                    "tip": GUIDE[t["letter"]][1],
+                    "word": f"Bokstavnavnet «{NAMES[t['letter']]}»" if t["name"] else GUIDE[t["letter"]][0],
+                    "tip": "Si navnet på bokstaven, tydelig, en gang." if t["name"] else GUIDE[t["letter"]][1],
                     "saved": (OUT / f"{t['id']}.wav").exists(),
                 }
                 for t in TAKES
+            ]
+            texts = script_text()
+            takes += [
+                {"id": lid, "scene": scene, "line": texts[lid], "saved": (OUT / f"{lid}.wav").exists()}
+                for scene, lid, _ in LINES
             ]
             self._send(
                 200,
@@ -96,7 +145,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         tid = Path(self.path).name
-        if tid not in {t["id"] for t in TAKES}:
+        if self.path.startswith("/text/") and tid in {lid for _, lid, _ in LINES}:
+            OUT.mkdir(exist_ok=True)
+            edits = json.loads(SCRIPT.read_text()) if SCRIPT.exists() else {}
+            edits[tid] = self.rfile.read(int(self.headers["Content-Length"])).decode().strip()
+            SCRIPT.write_text(json.dumps(edits, ensure_ascii=False, indent=1))
+            self._send(200, b"ok", "text/plain")
+            return
+        if tid not in {t["id"] for t in TAKES} | {lid for _, lid, _ in LINES}:
             self._send(400, b"unknown id", "text/plain")
             return
         data = self.rfile.read(int(self.headers["Content-Length"]))
@@ -135,6 +191,8 @@ button.on{background:var(--rec);border-color:var(--rec)}
 .state{grid-column:2/4;font-size:.9rem;color:var(--muted)}
 .meter{grid-column:1/4;height:10px;background:var(--line);border-radius:5px;overflow:hidden}
 .meter i{display:block;height:100%;width:0;background:var(--accent)}
+.scene{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+textarea{width:100%;box-sizing:border-box;font:17px/1.4 system-ui;border:1px solid var(--line);border-radius:6px;padding:6px 8px;resize:vertical}
 </style></head><body><main>
 <h1>MWM Les: lydopptak</h1>
 <p>Seks lyder, hver to ganger: kort (cirka et halvt sekund) og lang (hold lyden jevnt i cirka to sekunder).
@@ -142,13 +200,18 @@ Si bare lyden, aldri bokstavnavnet. Trykk Ta opp, si lyden, trykk Stopp. Hør p�
 <p>Stille rom, 20 til 30 cm fra mikrofonen.</p>
 <section><h2>Korte lyder</h2></section><div id="short" style="display:grid;gap:10px"></div>
 <section><h2>Lange lyder (hold i cirka 2 sekunder)</h2></section><div id="held" style="display:grid;gap:10px"></div>
+<section><h2>Bokstavnavn (a, ess, i, ell, o, em)</h2></section><div id="names" style="display:grid;gap:10px"></div>
+<section><h2>Pips replikker</h2><p>Les med vanlig, varm stemme, som til et barn på fem. Endre teksten fritt hvis den ikke er naturlig norsk; endringen lagres når du klikker utenfor feltet.</p></section><div id="lines" style="display:grid;gap:10px"></div>
 </main><script>
 const TAKES=__TAKES__;let rec=null,chunks=[],active=null;
 function row(t){
  const d=document.createElement("div");d.className="take"+(t.saved?" saved":"");
- d.innerHTML=`<span class="big">${t.letter}</span><span class="info"><b>${t.word}${t.held?" (lang)":" (kort)"}</b>${t.tip}</span>
+ d.innerHTML=t.line!==undefined?`<span class="big">P</span><span class="info"><span class="scene">${t.scene}</span><textarea rows="2"></textarea></span>`
+  :`<span class="big">${t.letter}</span><span class="info"><b>${t.word}${t.name?"":t.held?" (lang)":" (kort)"}</b>${t.tip}</span>`;
+ d.innerHTML+=`
  <span class="btns"><button class="rec">Ta opp</button><button class="play">Hør</button></span><span class="state">${t.saved?"Lagret":"Ikke tatt opp ennå"}</span>`;
  const b=d.querySelector(".rec"),p=d.querySelector(".play"),s=d.querySelector(".state");
+ const ta=d.querySelector("textarea");if(ta){ta.value=t.line;ta.onchange=()=>fetch("/text/"+t.id,{method:"POST",body:ta.value}).then(r=>s.textContent=r.ok?"Tekst lagret":"Kunne ikke lagre teksten")}
  p.onclick=()=>{const a=new Audio("/wav/"+t.id+"?"+Date.now());s.textContent="Spiller av ...";
   a.onended=()=>s.textContent="Ferdig avspilt";a.onerror=()=>s.textContent="Fant ikke opptaket. Ta opp på nytt.";
   a.play().catch(e=>s.textContent="Kunne ikke spille av: "+e.message)};
@@ -172,7 +235,7 @@ function row(t){
    const j=await r.json();d.classList.add("saved");s.textContent=`Lagret, ${j.seconds} s etter trimming. Trykk Hør for å sjekke.`+(j.seconds<0.15?" (for kort, ta på nytt)":"")};
   rec.start()};
  return d}
-for(const t of TAKES)document.getElementById(t.held?"held":"short").append(row(t));
+for(const t of TAKES)document.getElementById(t.line!==undefined?"lines":t.name?"names":t.held?"held":"short").append(row(t));
 </script></body></html>"""
 
 if __name__ == "__main__":
