@@ -8,6 +8,8 @@ signal home_pressed
 signal parent_pressed
 signal story_pressed
 
+const SHELL_HOME_SQUARE: float = 232.0
+
 var replay_btn: RoundButton
 var home_btn: RoundButton
 var parent_btn: RoundButton
@@ -23,10 +25,14 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	var m: float = GameTune.SAFE_MARGIN_PX
+	# Inside the MWM Play app (Engine meta "mwm_play_shell") the app's home
+	# disc owns the top-left 232 px square, so the replay and parent buttons
+	# start right of it.
+	var dx: float = SHELL_HOME_SQUARE if Engine.has_meta(&"mwm_play_shell") else 0.0
 	replay_btn = RoundButton.new().setup(
 		GameTune.BTN_SECONDARY_PX, GameTune.SEA_BTN, RoundButton.Icon.SPEAKER
 	)
-	replay_btn.position = Vector2(m, m * 0.6)
+	replay_btn.position = Vector2(m + dx, m * 0.6)
 	replay_btn.pressed.connect(func() -> void: replay_pressed.emit())
 	root.add_child(replay_btn)
 	home_btn = RoundButton.new().setup(
@@ -39,7 +45,7 @@ func _ready() -> void:
 		GameTune.BTN_MIN_PX, Color(1, 1, 1, 0.35), RoundButton.Icon.PARENT
 	)
 	parent_btn.icon_color = Color(GameTune.INK, 0.55)
-	parent_btn.position = Vector2(m * 0.5, m * 0.5)
+	parent_btn.position = Vector2(m * 0.5 + dx, m * 0.5)
 	parent_btn.modulate = Color(1, 1, 1, 0.6)
 	parent_btn.pressed.connect(func() -> void: parent_pressed.emit())
 	root.add_child(parent_btn)
