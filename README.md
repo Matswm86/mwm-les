@@ -1,24 +1,19 @@
 # MWM Les
 
-A 3D reading adventure for Norwegian children aged 4 to 7. The child sails to a grey
-island with Pip, a small narwhal, learns the sounds of the letters, and brings colour
-and life back to the island one sound at a time. Every instruction is spoken in
-Norwegian (bokmål), so a child who cannot read yet can play alone.
+A 3D reading adventure for Norwegian children aged 4 to 7. Pip, a small narwhal, wants
+to build a bridge of letters so that Pip's best friend, a lamb on a little islet, can
+cross the water. The child helps: finds letters by their sound, writes them in the sand
+and lays them as six short words (sol, sel, les, mat, båt, lam). Every instruction is
+spoken in Norwegian (bokmål), so a child who cannot read yet can play alone.
 **No ads, no in-app purchases, no timers, no tracking, no internet permission.**
 
-The teaching is built on reading research, with the sources checked one by one in
-[docs/RESEARCH.md](docs/RESEARCH.md): letter sounds in a fixed order, sounds held and
-blended together (/sssooolll/ → *sol*), letters written from memory instead of traced,
-and a grown-up who listens to the child read at the end of every session.
-
 <p align="center">
-  <img src="screenshots/01.jpg" alt="The island restored to full colour, with Pip the narwhal in the sea" width="400"/>
-  <img src="screenshots/02.jpg" alt="Pip says a sound and the child taps the matching gold letter" width="400"/>
+  <img src="screenshots/01.jpg" alt="The island with Pip the narwhal in the sea, gold diamonds marking the stations and the start of the bridge to the little islet" width="260"/>
+  <img src="screenshots/02.jpg" alt="Pip says a sound and the child taps the matching gold letter" width="260"/>
+  <img src="screenshots/03.jpg" alt="Letters on round tiles on the beach, with the start of the bridge behind" width="260"/>
 </p>
-<p align="center">
-  <img src="screenshots/03.jpg" alt="Letter stones to build a word bridge" width="400"/>
-  <img src="screenshots/04.jpg" alt="The grey island at the start of a session" width="400"/>
-</p>
+<p align="center"><em>The island with Pip, finding a letter by its sound, and letter tiles on the beach.
+These captures are from an earlier build.</em></p>
 
 ## Download
 
@@ -36,46 +31,54 @@ one-off key: uninstall that version once before installing a newer one.
 
 ## How to play
 
-Pip the narwhal's best friend, a lamb, stands on a little islet across the water and
-cannot swim. Pip wants to build a bridge of letters, and the child helps. On the first
-launch Pip tells this in a short opening; the child taps Pip to start. Pip then swims
-to one lit station at a time.
+Pip's best friend, a lamb, stands on a little islet across the water and cannot swim.
+Pip wants to build a bridge of letters, and the child helps. On the first launch Pip
+tells this in a short opening; the child taps Pip to start. One play is six word levels,
+in this order: **sol, sel, les, mat, båt, lam**. In every level Pip swims to one lit
+station at a time, three in all, and the level's word is the task at each of them.
 
 | Activity | What the child does | Based on |
 |---|---|---|
-| Hør og finn (listen and find) | Pip asks which letter says a sound, then plays the sound. The child taps the letter on the sand tiles; a tapped letter says its own sound. A new letter is introduced by name and sound while its tile glows. Press and hold a letter to hear its name and sound. | Systematic letter-sound teaching |
-| Sandskriving (sand writing) | Pip writes the letter in the sand while its sound plays, then the child writes it with a finger. An accepted letter lifts out as a stone and rolls off to the bridge. | Handwriting from memory, not tracing |
-| Ordbroa (the word bridge) | Pip says `lam` and sounds it out while the planks light up, then asks which letter is missing. The child drags the right stone into the gap. When the bridge is done the letters sink into the planks and the lamb walks over. | Moveable alphabet, connected blending |
+| Hør og finn (listen and find) | Pip asks which letter says a sound, then plays the sound. The child taps the letter on the sand tiles; a tapped letter says its own sound. Each letter of the word is asked twice (once in a review play). A new letter is introduced by name and sound while its tile glows. Press and hold a letter to hear its name and sound. | Systematic letter-sound teaching |
+| Sandskriving (sand writing) | A new letter: Pip writes it in the sand twice while its sound plays, the child follows the striped letter with a finger, then writes it alone. A letter from an earlier level is written once, alone. An accepted letter lifts out as a stone and rolls off to the bridge. | Watch, then write from memory |
+| Ordbroa (the word bridge) | Pip says the word and sounds it out while the planks light up, then asks which letter is missing, plank by plank. The child drags the right stone into the gap. When the word is laid, its planks sink into the bridge, which grows toward the islet. | Moveable alphabet, connected blending |
 
-Then Pip says goodnight. A tap starts a new day. Wrong answers never end anything: the
-letter says its own sound and the child hears the right sound again.
-
-## Status
-
-Early test build: the first island with the first six sounds (a, s, i, l, o, m).
-The design for the full game, six worlds from listening games to reading a whole
-story, is in [docs/GDD.md](docs/GDD.md).
+Each level brings in the letters of its word that the child has not met yet. After `lam`
+the bridge reaches the islet and the lamb walks over. Then Pip says goodnight, and a tap
+starts a new play from `sol` as a review. Progress is saved after every level. Wrong
+answers never end anything: the letter says its own sound and the child hears the right
+sound again.
 
 ## How it works
 
-- `scripts/learn_core/` is a learning engine with no reading knowledge in it. It keeps
-  a mastery estimate per skill, picks tasks the child gets right about 70-85% of the
-  time, and runs the hint ladder. A content pack drives it; the reading pack is
-  `content/nb_reading/` (`skills.json` holds the sound order, `items.json` the tasks),
-  so a maths pack can reuse the same engine.
-- The cel-shaded look comes from a toon light shader (`shaders/toon.gdshader`) with a
-  two-tone shadow, an outline shell on things the child can touch, and unshaded gold
-  letters with a halo.
-- Every spoken line is a real person's recording (`assets/audio/rec/`, one file per
-  line id in `docs/SCRIPT.md`), so the app never needs the internet and uses no
-  synthetic voice. The `Voice` autoload is the only sound source: one player, so two
-  clips never overlap, and it refuses any file that is not one of these recordings or
-  a short sound effect. A letter sound always comes last in a sequence.
+MWM Les is a Godot 4.6 project in GDScript with the mobile renderer, built into an
+Android APK by GitHub Actions. The 3D island is drawn with a cel-shaded look: a toon
+light shader with a two-tone shadow, an outline shell on things the child can touch, and
+unshaded gold letters with a halo. Every spoken line is a real person's recording (one
+file per line, listed in [docs/SCRIPT.md](docs/SCRIPT.md)), so the app never needs the
+internet and uses no synthetic voice; one audio player plays one clip at a time, and a
+letter sound always comes last in a sequence. The six levels are a fixed list in the
+game code, and the letter shapes the writing check compares against come from a content
+pack in `content/nb_reading/`. A separate learning engine (`scripts/learn_core/`: a
+mastery estimate per skill, a 70-85% target success rate, a hint ladder) is kept, with
+its own tests, but does not choose the tasks in this build. The teaching follows reading
+research, checked source by source in [docs/RESEARCH.md](docs/RESEARCH.md): letter sounds
+in a fixed order, sounds held and blended together (/sssooolll/ → *sol*), and letters
+written from memory after Pip has shown them.
+
+## Status
+
+Early test build, version 0.1.0: one island, six word levels, nine letters (a, s, o, l,
+e, m, t, b, å). Not built yet: the other five worlds of the design draft in
+[docs/GDD.md](docs/GDD.md) (written before the lamb's bridge story and partly
+superseded by it), the read-to-a-grown-up card and the parent page (the code is in
+`scripts/ui/` but is not connected to the game).
 
 ## Credits
 
-- Hero: [KayKit Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0)
-  by Kay Lousberg (CC0). Full asset list and licences: [docs/ASSETS.md](docs/ASSETS.md).
+- Character model: [KayKit Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0)
+  by Kay Lousberg (CC0), kept in `assets/characters/` but not used in the current build.
+  Full asset list and licences: [docs/ASSETS.md](docs/ASSETS.md).
 - Font: [Andika](https://software.sil.org/andika/) by SIL, designed for beginning
   readers (SIL Open Font License, see `assets/fonts/OFL.txt`).
 
