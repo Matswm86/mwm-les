@@ -8,12 +8,12 @@ spoken in Norwegian (bokmål), so a child who cannot read yet can play alone.
 **No ads, no in-app purchases, no timers, no tracking, no internet permission.**
 
 <p align="center">
-  <img src="screenshots/01.jpg" alt="The island with Pip the narwhal in the sea, gold diamonds marking the stations and the start of the bridge to the little islet" width="260"/>
-  <img src="screenshots/02.jpg" alt="Pip says a sound and the child taps the matching gold letter" width="260"/>
-  <img src="screenshots/03.jpg" alt="Letters on round tiles on the beach, with the start of the bridge behind" width="260"/>
+  <img src="screenshots/01.jpg" alt="The island with Pip the narwhal at the shore, a gold diamond lighting the next station, the seal picture of the level's word and the lamb on its little islet" width="260"/>
+  <img src="screenshots/02.jpg" alt="Letters o, s and l on round sand tiles; Pip asks for a sound and a pointing hand shows where to tap" width="260"/>
+  <img src="screenshots/03.jpg" alt="The word bridge: s is laid, the stones e and l wait on round tiles and a dotted gap shows where the next letter goes, with the lamb on the islet behind" width="260"/>
 </p>
-<p align="center"><em>The island with Pip, finding a letter by its sound, and letter tiles on the beach.
-These captures are from an earlier build.</em></p>
+<p align="center"><em>The island with a station lit, finding a letter by its sound, and laying the word
+sel on the bridge.</em></p>
 
 ## Download
 
